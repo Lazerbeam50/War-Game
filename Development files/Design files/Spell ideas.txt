@@ -1,0 +1,26 @@
+- Direct Damage
+- Re-roll charge rolls
+- Boost melee phase priority
+- Boost stats (Str, Fort, AttSpe, Will)
+- Remove invul saves
+- Direct Damage (if fort is beaten)
+- Give Invul save
+- Reduce melee phase priority
+- Reduce enemy to-hit (For one enemy unit or against one ally unit)
+- Give enemy bonus to flee
+- Stop movement
+- Teleport
+- Reduce will
+- Direct Damage (if will is beaten)
+- Remove advancing penalties (for weapons and charging)
+- Block overwatch
+- Auto-pass moral checks
+- +1 Damage on a single CHARACTER
+- Remove cover bonus
+- Give re-roll to-hit
+- Give re-roll to-wound
+- Direct Damage based on unit size
+- Healing
+- Increase advance speed
+- Steal buff
+- Grant spell immunity

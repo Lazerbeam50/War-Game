@@ -1,0 +1,47 @@
+0) Space Marines = Paladin Brotherhood
+	- Balanced, Sparse, Jack-of-all-trades
+
+1) Space Wolves = Orcs
+	- Melee-Oriented, Sparse, Lots of cavalry
+		- Like Paladins but with better melee weapons and 3 range skill on several units
+
+2) Grey Knights = Sorcerers
+	- Balanced, Sparse, Lots of mages
+		- Rely on invul saves instead of armour saves, light on vehicles
+
+3) Imperial Guard = Earthlings
+	- Range-Oriented, Swarm, Strong vehicles and artilery
+		- Suited to long range. Foot soldiers are highly disposable. No mages whatsoever.
+
+4) Adepta Sororitas + SoS = Amazons
+	- Range-Oriented, Standard numbers, Countering army
+		- Fragile soldiers. Anti-mage, anti-monster, anti-vehicle, anti-demon and anti-undead 
+		options
+
+5) Adeptus Custodes + Imperial Knights + Fortifications = Titans
+	- Balanced, Very sparse, very powerful units
+		- Hero cap of 4. More buildings available than other factions.
+
+6) Drukhari = Free Elven Republic
+	- Range-Oriented, Standard numbers, Lots of monsters
+		- Fragile army, uses poisons, monsters and fast units. Best weapons for elves are
+		heavy bows. Weapons have higher AP than most armies.
+
+7) Necrons = Undead
+	- Range-Oriented, Standard numbers, regen-mechanic
+		- Tanky and slow army, can regen if a NECROMANCER is in range.
+
+8) Orks = Hobgoblins
+	- Melee-Oriented, Swarm, Terrible shooting
+		- Very swarm and melee reliant. Cheap units. Lots of vehicles and assault weapons.
+		- Leaders have will auras which prevent fleeing entirely.
+
+9) Tyranids = The Kraaw
+	- Balanced, Swarm, Monster-heavy
+		- Can spawn new units, able to pierce armour easily with acid weapons. Good variety.
+		- Gains abilities per turn.
+		- Erratic speeds.
+
+10) Chaos Daemons = Demonic Legion
+	- Melee-Oriented, Swarm, Weak units gain power from each kill
+		- More mages than most, fast army, fragile ground troops and enduring leaders/elites

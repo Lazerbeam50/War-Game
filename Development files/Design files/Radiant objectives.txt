@@ -1,0 +1,121 @@
+================
+11-16 objectives
+================
+
+11 - Death from afar
+	- 1 VP if an enemy unit wholly within their deployment zone at the start of the turn was 
+	destroyed by a unit wholly within your own deployment zone this turn.
+
+12 - Death from Above
+	- 1 VP if an enemy unit was slain by one of your units with the FLY keyword.
+
+13 - Lightning Strike
+	- 1 VP if you completely destroy an enemy unit that began the turn within their 
+	Deployment Zone.
+
+14 - To Battle!
+	- 1 VP if you make at least 2 successful charges.
+
+15 - Let none survive
+	- 1 VP for destroying a unit without any of its models fleeing. Only appliciable for units
+	that start the game with more than one model.
+
+16 - Challenge accepted
+	- 2 VP if you slay an enemy character with one of your characters.
+
+================
+21-26 objectives
+================
+
+Capture control point (1-6)
+	- Earn VP for controlling this objective after one turn. You cannot receive this mission for 
+	objectives you already control. Upon completion, the player earns 2 VP if the objective was 
+	contested or controlled by the opposing player, or 1 VP if it was neutralised.
+
+================
+31-36 objectives
+================
+
+Defend control point (1-6)
+	- 1 VP if you control this objective after two turns. You cannot receive this mission
+	for objectives you do not already control.
+
+================
+41-46 objectives
+================
+
+41 - Demolisher
+	- 1 VP if an enemy fortification was destroyed during your turn
+
+42 - Behind enemy lines
+	- 1 VP if you have one of your units completely in the enemy deployment zone. 2 VP if you
+	have three units in their zone.
+
+43 - Hold the line
+	- 1 VP if you have at least three units completely in your deployment zone and none of your
+	enemy's units. This mission is only available from turn 3 onwards.
+
+44 - Critical Mission Objective
+	- 1 VP for acheiving one of your current objective-based missions. Randomly selects an
+	appropriate control point objective from your deck, adds a 1 VP bonus to it, and draws it to
+	be combined with this objective. If an appropriate objective cannot be found, then this 
+	objective cannot be used right now.
+
+45 - Supremacy
+	- Score 2 VP if you hold at least two control points and twice as many as your opponent.
+
+46 - Domination
+	- Score 5 VP if you control every control point.
+
+================
+51-56 objectives
+================
+
+51 - Shock and Awe
+	- Score 1 VP if an enemy unit was destroyed during the shooting phase. Score 2 VP if three
+	or more enemy units were destroyed.
+
+52 - Blood and Guts
+	- Score 1 VP if an enemy unit was destroyed during the melee phase. Score 2 VP if three
+	or more enemy units were destroyed. 
+
+53 - Slayer
+	- Score VP for destroying enemy units:
+		- 1 VP for 1-2 enemy units
+		- 2 VP for 3-4 enemy units
+		- 3 VP for 5 enemy units
+		- 5 VP for 6 or more enemy units
+
+54 - Giant killer
+	- 1 VP for slaying an enemy MONSTER or VEHICLE
+
+55 - Psychological warfare
+	- 1 VP if your opponent fails a morale check. 2 VP if they fail 3+ checks.
+
+56 - Magic in the air
+	- 1 VP for casting or dispelling a magic spell. 2 VP for 3+ spells.
+
+================
+61-66 objectives
+================
+
+61 - Decapitation Strike
+	- 2 VP for slaying your opponent's Boss. Counts even if the Boss was slain in a
+	previous turn.
+
+62 - Antimage
+	- 1 VP for slaying an enemy MAGE.
+
+63 - They came from behind
+	- 1 VP for slaying an enemy with the FLY keyword.
+
+64 - Assassinate
+	- Score 1 VP for slaying an enemy CHARACTER or 2 VP for slaying 3+ enemy CHARACTERS.
+
+65 - The bigger they are...
+	- Score 1 VP for slaying an enemy with 10+ Max HP or 2 VP for slaying an enemy with 20+
+	max HP.
+
+66 - Priority order
+	- This objective is paired with another radiant objective. If your boss achieves this 
+	objective, you earn 3 VP on top of the objective's reward.

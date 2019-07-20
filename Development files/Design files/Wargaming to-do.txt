@@ -1,0 +1,18 @@
+- Draw field (Need all terrain tiles + control points) X
+	- Drop tile size to 32x32 X
+- Prep units X
+	- Set up IDs X
+- Set up UI X
+- Basic controls X
+- Deployment (Need Invoker, Storm Caller, Initiate, Knight, Worg) X
+- Movement phase (Pyro-Heavy Chopper, Duster) X
+- Magic phase X
+- Shooting phase X
+- Charge phase X
+- Melee phase X
+- Morale phase X
+- Falling back X
+- Shooting in Melee range X
+- Point scoring
+- End game display
+- Early losses (Conceding and losing all units)

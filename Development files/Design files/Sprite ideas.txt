@@ -1,0 +1,35 @@
+Captain - No helmet + Large golden shield
+Invoker - Hood and Staff
+Paladin Veteran - 
+Veteran Sergeant - Helmet + Large blue shield
+Medicant - Holding a potion
+Initiate - Helmet + Small round shield
+Knight - 
+Scout - Smaller helmet + holding rifle
+Scout Leader - 
+Striker - Spiked helmet + Sword and Shield
+Striker Leader - 
+Biker - 
+Bike Squad Leader - 
+Pyro-Tech Gun - 
+Pyro-Tech Gunner - 
+Brotherhood Tank - 
+Brotherhood APC - 
+Pyro-Heavy Chopper - 
+Pyro-Heavy Interceptor - 
+Great Lord Auldoon - 
+
+=======
+Worg Lord - 
+Storm Caller - Hooded w/ Staff
+Doom Orcs - Large + Axe w/o helm
+Brawler Squad - Helm + Axe + shield
+Gunner Squad - Helm + Rifle
+Worg Cavalry - 
+Worg Pack - 
+Demolitions Squad - Helm + Rocket launcher
+Turbo-Tank - 
+Speedwagon - 
+Duster - 
+Big-Bomber - 
+Fortified Guard Tower - 

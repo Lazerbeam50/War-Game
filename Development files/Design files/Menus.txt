@@ -1,0 +1,23 @@
+Game Setup
+==========
+
+- Point Cap (Enter)
+- Turn duration (Enter - Dependent on time limit flag)
+- Turn time limit? (On/Off)
+
+To-do
+=====
+- Army builder button to link to army setup screen
+- Deployment screen to be replaced by army selecter ("Armies")
+- Rename "Next" to "Start game"
+- Start game to require:
+	- Selected battlefield
+	- Armies selected
+	- Point limit set
+	- Armies to be at or below point limit
+- "Next"/"Start Game" no longer takes the player to the army set-up screen
+- Remove all "Deployment" elements
+
+Battlefields
+	- Add deployment map feature
+	- Add objective markers

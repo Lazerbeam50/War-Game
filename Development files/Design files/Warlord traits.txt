@@ -1,0 +1,23 @@
+Brawler
+	- +1 attack speed and strength
+
+Inspire the troops
+	- +2 will for friendly units within 6 squares
+
+Tanky
+	- +6 Max HP
+
+War-hardened
+	- +1 Fortitude per turn
+
+Regeneration
+	- Recover 2 HP per turn
+
+Tailwind
+	- +2 movement. Also, advancing now adds +4 to movement
+
+Damage Aura
+	- +1 to-wound for friendly units within 4 squares. Only works in the firing phase.
+
+Marksman
+	- +1 Damage on all ranged attacks

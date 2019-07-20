@@ -1,0 +1,20 @@
+GIMP Palette
+#Palette Name: Chromatic16
+#Description: Created by <a target="_blank" href="https://twitter.com/DragonDePlatino">DragonDePlatino</a> for a custom NetHack tileset. Optimised for sprites against a black background.
+#Colors: 16
+0	0	0	#000000
+144	176	176	#90B0B0
+255	255	255	#FFFFFF
+128	0	24	#800018
+255	0	0	#FF0000
+160	80	0	#A05000
+255	128	0	#FF8000
+255	192	128	#FFC080
+255	255	0	#FFFF00
+32	172	0	#20AC00
+64	255	0	#40FF00
+0	48	112	#003070
+48	112	176	#3070B0
+0	208	255	#00D0FF
+160	0	224	#A000E0
+255	96	255	#FF60FF

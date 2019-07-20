@@ -1,0 +1,9 @@
+Infantry/Beasts = 1x1
+Bikers/Cavalry = 2x2
+Monsters = 3x3
+Artilery = 2x2
+Small tank/Vehicle = 4x4
+Large tank/Vehicle = 5x5
+Small aircraft/Helicopter = 6x6
+Large aircraft = 7x7
+Gargantuan creature = 5x5

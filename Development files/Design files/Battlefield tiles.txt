@@ -1,0 +1,10 @@
+Dense forest
+------------
+
+*) standard ground [B]
+r) rock
+t) small thicket (+1 cover)
+T) large thicket (+2 cover)
+m) large mossy rock (blocks LOS, unwalkable)
+w) water [B] (unwalkable)
+

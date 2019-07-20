@@ -1,0 +1,108 @@
+Paladins
+========
+Captain
+Librarian
+
+Company Vetrans
+Apothecary
+
+Crusader Squad
+Scout Squad
+
+Assault Squad
+Bike Squad
+
+Thunderfire Cannon
+Predator
+
+Rhino
+
+Stormtalon Gunship
+Stormhawk Interceptor
+
+Roboute Guilliman
+
+Orcs
+====
+Worg Lord - HQ - Wolf-mounted Melee Assassin
+Storm Caller - HQ - Infantry Mage
+
+Special Ops Squad - Elites - Infantry squad (3-8), 4 RS, good at range with snipers or shotguns,
+				cannot be targeted as if it has the CHARACTER keyword. 7 movement.
+Doom Orcs - Elites - Infantry squad (1-3), 5 MS, 4 RS, 2 invul, tanky, access to strong melee weapons,
+			5 STR, 5 Fort
+
+Brawler Squad - Troops - Infantry squad (5-10), 3 RS, 4 MS, 2 AS. Sergeant has access to strong melee
+				weapons.
+Gunner Squad - Troops - Infantry squad (5-10), 4 RS, 4 MS, 1 AS. Little melee weapon access.
+
+Worg Cavalry - Fast Attack - Cavalry (4-8), 3 RS, 4 MS. Good in melee and can take assault weapons.
+				10 movement.
+Worg Pack - Fast Attack - Beasts (10-20), 4 MS, 0 RS. 10 movement. 2 attack speed, 4 STR, 3 FORT,
+				4 Will. 1 AP on their "bite" weapon.
+
+Demolitions Squad - Heavy Support - Infantry squad (5-10), 3 RS, 4 MS. Equipped with RPGs. Can take
+					other high-strength/AP heavy weapons.
+Turbo-Tank - Heavy Support - Vehicle - 14 HP, 8 Fort tank. 1 MS, 4 RS, 8 Movement.
+
+Speedwagon - Transport - Vehicle - 10 HP, 14 Move, 7 Fort
+
+Duster - Air - Vehicle - Cheap unit, 20-50 Move, 6 STR, 6 Fort, 8 HP, armed with low-strength,
+				low ap, high shot count weapons. Hard-to-hit.
+Big-Bomber - Air - Vehicle - 15-40 Move, 6 STR, 7 Fort, 14 HP. 0 MS. Can only target ground units
+
+Fortified Tower - Structure - 2 RS, 8 Fort, 20 HP, 4 Armour. Immobile. High str, high ap, high shots
+				and anti-fly weapons available. 
+
+Sorcerers
+=========
+
+Shield generator
+
+Earthlings
+==========
+
+Field Commander (Infantry character)
+Tank Commander (Heavy tank)
+
+Engineer Squad (repairs vehicles, 6-10 models)
+Medic Squad (prevents damage in a similar manner to Necromancers, 6-10 models)
+
+Infantry squad (6-10 models)
+Anti-Tank squad (6-10 models)
+
+xxx
+xxx
+
+Tank (Light tank)
+Mech Gun (Artillery with 2 operators)
+
+APC (Transport - Large capacity)
+Transport Helicopter (Air transport)
+
+Gunship
+Fighter Jet (Very strong fighter plane, can rival Paladin interceptors)
+
+Hobgoblins
+==========
+Warboss
+Weirdboy
+
+Nobz
+Tankbustas
+
+Boyz
+Gretchin
+
+Deffkoptas
+Warbikers
+
+Big Gunz
+Deff Dreads
+
+Dakkajet
+Burna-Bommer
+
+Trukk
+
+Stompa

@@ -1,0 +1,49 @@
+bossTrait INT
+
+faction INT
+
+name STRING
+
+totalSP INT
+
+totalPoints INT
+
+detachments LIST
+
+	- name STRING
+	- type INT
+	- points INT
+	
+	units LIST
+
+		- data TUPLE
+		- dispelLevel INT
+		- dispelRate FLOAT
+		- keywords LIST of STRINGS
+		- options LIST of TUPLES
+		- sharedKeywords BOOL
+		- spells LIST of TUPLES
+		- currentMana INT
+		- maxMana INT
+		- modelPoints INT
+		- totalPoints INT
+		- wargearPoints INT
+	
+	models LIST
+
+		- armour INT
+		- attackSpeed INT
+		- currentHP INT
+		- data TUPLE
+		- fort INT
+		- invul INT
+		- keywords LIST OF STRINGS
+		- mSkill INT
+		- maxHP INT
+		- maxMove INT
+		- minMove INT
+		- rSkill INT
+		- strength INT
+		- wargear LIST OF INTS
+		- wargearPoints INT
+		- will INT

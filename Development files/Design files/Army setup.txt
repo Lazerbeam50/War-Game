@@ -1,0 +1,105 @@
+Screen 1 - Army Main
+====================
+Create Army (-> Screen 2)
+Load Army (-> Screen 8)
+
+Screen 2 - Army Display
+=======================
+- Army name (Enter)
+- Army faction (Drop down)
+- Warlord (Displayed, can't edit)
+- Warlord Trait (Drop down)
+- Total CP (Displayed, can't edit)
+- Total Points (Displayed, can't edit)
+
+- Save Army
+- Delete Army (Confirmation pop-up)
+- Back (<- Screen 1)
+
+- Create Detatchment (-> Screen 3)
+
+[Detatchment List (Name, Type, CPs, Points) (Max 20)] (-> Screen 4)
+
+Screen 3 - Detachment Creation
+==============================
+
+- Patrol
+- Battalion
+- Brigade
+- Vanguard
+- Spearhead
+- Outrider
+- Supreme Command
+- Super-Heavy
+- Air-Wing
+- Super-Heavy Aux
+- Fortification Network
+- Aux Support
+
+- Confirm (-> Screen 4)
+- Back (<- Screen 2)
+
+Screen 4 - Detachment Display
+==============================
+
+- Detachment name (Enter)
+- Detachment type (Displayed, can't edit)
+- Command Points (Displayed, can't edit)
+- Points (Displayed, can't edit)
+- Detatchment quotas (Displayed, can't edit)
+
+- Delete Detachment
+- Back (<- Screen 2)
+
+- Create Unit (-> Screen 5)
+
+[Unit List (Title, Role, No. of Models, Models Points, Wargear Points)] (-> Screen 6)
+
+Screen 5 - Unit Creation
+========================
+
+- List of available units
+
+- Confirm (-> Screen 6)
+- Back (<- Screen 4)
+
+Screen 6 - Unit Display
+=======================
+
+- Unit title (Display, can't edit)
+- Battlefield role (Display, can't edit)
+- Number of models (Display, can't edit)
+- Points from models (Display, can't edit)
+- Points from wargear (Display, can't edit)
+- Total points (Display, can't edit)
+
+- Characteristics - Including quantity (Display, can't edit)
+- Current Weapon list - Including quantity (Display, can't edit)
+- Abilities (Display, can't edit)
+- Keywords (Display, can't edit)
+
+- Confirm (<- Screen 4)
+- Make boss
+- Reset options
+- Back (<- Screen 4)
+
+- Add models (+/-)
+- Add/Replace wargear (-> Screen 7)
+
+Screen 7 - Wargear List
+=======================
+
+- Wargear being replaced - Including quantity (Display, can't edit)
+
+- Confirm (<- Screen 6)
+- Reset options
+- Back (<- Screen 6)
+
+[Available wargear from list - Including quantity] (+/-)
+
+Screen 8 - Load Army
+====================
+
+- Back (<- Screen 1)
+
+[All saved armies (-> Screen 2)]

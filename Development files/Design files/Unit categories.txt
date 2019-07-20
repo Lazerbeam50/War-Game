@@ -1,0 +1,76 @@
+Leaders
+=======
+- Melee assassins
+- Range assassins
+- Mixed assassins
+- Defenders
+- Supporters
+
+Elites
+======
+- Specialists
+- Stronger versions of other units
+
+Troops
+======
+- Melee infantry
+- Range infantry
+- Mixed infantry
+- Scout infantry
+- Beasts
+
+Fast Attackers
+==============
+- Bikes
+- Jet bikes
+- Fast infantry
+- Jet pack infantry
+- Cavalry
+- Chariot
+- Fast beasts
+- Fast air units (Monsters, vehicles)
+
+Heavy Support
+=============
+- Light tanks
+- Heavy tanks
+- Super-heavy tanks
+- Artillery
+- Anti-Air vehicles
+- Heavy Anti-Air vehicles
+- Monsters
+- Heavy Monsters
+- Anti-tank infantry
+- Heavy infantry
+- Walkers
+
+Flyers
+======
+- Attack helicopters
+- Heavy attack helicopters
+- Fighter planes
+- Bombers
+- Interceptors
+- Flying Monsters
+- Flying Heavy Monsters
+
+Transports
+==========
+- APCs
+- Buggies/Light transports
+- Transport helicopters
+
+Structures
+==========
+- Guard towers
+- Support buildings
+- Anti-Ground towers
+- Anti-Air towers
+
+Ultras
+======
+- Melee assassins
+- Range assassins
+- Mixed assassins
+- Defenders
+- Supporters
