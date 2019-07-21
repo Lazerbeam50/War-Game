@@ -1561,6 +1561,7 @@ class Model:
         self.attackTargets = []
         self.cover = 0
         self.currentNodes = []
+        self.fled = False
         self.dead = False
         self.grenadesUsed = False
         self.meleeUsed = False

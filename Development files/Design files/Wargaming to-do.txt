@@ -13,6 +13,6 @@
 - Morale phase X
 - Falling back X
 - Shooting in Melee range X
-- Point scoring
+- Point scoring X
 - End game display
 - Early losses (Conceding and losing all units)
