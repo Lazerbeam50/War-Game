@@ -128,6 +128,10 @@ class Battle:
         self.leftPressed = False
         self.rightPressed = False
         
+        self.ctrlPressed = False
+        self.altPressed = False
+        self.cPressed = False
+        
         #These variables are used for out of bounds testing
         self.lowestX = 9999
         self.highestX = 0
@@ -483,6 +487,15 @@ class Battle:
                             if event.key == ord(button.code):
                                 self.handle_button(values, button)
                                 break
+                            
+                        if event.key == ord('c'):
+                            self.cPressed = False
+                            
+                    elif event.key == K_LCTRL:
+                        self.ctrlPressed = False
+                        
+                    elif event.key == K_LALT:
+                        self.altPressed = False
                     
                 elif event.type == KEYDOWN:
                     
@@ -501,6 +514,15 @@ class Battle:
                     elif event.key == K_RIGHT:
                         self.rightPressed = True
                         self.leftPressed = False
+                        
+                    elif event.key == ord('c'):
+                        self.cPressed = True
+                        
+                    elif event.key == K_LCTRL:
+                        self.ctrlPressed = True
+                        
+                    elif event.key == K_LALT:
+                        self.altPressed = True
                         
                 elif event.type == MOUSEBUTTONUP:
                     if event.button == 1:
@@ -566,11 +588,28 @@ class Battle:
                                 else:
                                     direction = 1
                                 self.update_event_log(values, scroll=True, direction=direction)
+                                
+            elif self.ctrlPressed and self.altPressed and self.cPressed and self.state not in [54, 55, 56]:
+                self.state = 56
+                self.awaitingEvent = False
                            
             else:
                 self.scroll(values, 32) 
         
         else:
+            
+            #Check if a player has been wiped
+            for player in self.players:
+                alive = False
+                for unit in player.units:
+                    if not self.units[unit].destroyed:
+                        alive = True
+                        break
+                
+                if not alive:
+                    player.armyWiped = True
+                    self.state = 55
+            
             #Deployment - select a unit to deploy
             if self.state in [0, 3, 5]:
                 self.handle_deployment(values)
@@ -592,6 +631,9 @@ class Battle:
                 
             elif self.state in [52, 53]:
                 self.handle_morale(values)
+                
+            elif self.state in [54, 55, 56]:
+                self.handle_endgame(values)
                 
     def apply_damage(self, values, attacks, targetCodex, spell=None, melee=False):
         
@@ -724,7 +766,6 @@ class Battle:
                 text4 = ""
             else:
                 text4 = unit.name + " has been destroyed!"
-                unit.destroyed = True
                 for p in self.unitsForMelee:
                     if unit.ID in p:
                         p.remove(unit.ID)
@@ -758,7 +799,6 @@ class Battle:
                 text4 = ""
             else:
                 text4 = unit.name + " has been destroyed!"
-                unit.destroyed = True
                 for p in self.unitsForMelee:
                     if unit.ID in p:
                         p.remove(unit.ID)
@@ -1090,7 +1130,7 @@ class Battle:
                             text = item + " (" + keys[i] + ")"
                             action = 70
                     elif self.state in [2, 5, 8, 9, 10, 11, 14, 16, 18, 19, 20, 21, 23, 25, 27, 28, 29, 30, 32,
-                                        34, 35, 36, 37, 40, 42, 43, 47, 48, 49, 50, 51, 52, 53]:
+                                        34, 35, 36, 37, 40, 42, 43, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]:
                         storage = None
                         text = item + " (" + keys[i] + ")"
                         action = actionList[i]
@@ -2448,8 +2488,8 @@ class Battle:
             #Advance turn order
             #If not final turn, swap players
             if self.turn == [5, 5]:
-                self.check_engame_points(values)
-                print("GAME OVER!")
+                self.state = 54
+                self.awaitingEvent = False
             else:
                 if self.turn[0] == self.turn[1]:
                     turn = self.turn[0]
@@ -2481,6 +2521,10 @@ class Battle:
                 #Set state to 7
                 self.state = 7
                 self.awaitingEvent = False
+                
+        #End game, proceed to score screen
+        elif button.use == 73:
+            values.state = 0
             
     def handle_charge(self, values):
         
@@ -2733,8 +2777,10 @@ class Battle:
                     if player1 and player2:
                         if self.currentTurn == self.players[0]:
                             self.currentTurn = self.players[1]
+                            self.otherTurn = self.players[0]
                         else:
                             self.currentTurn = self.players[0]
+                            self.otherTurn = self.players[1]
                     #Else, mark one player as having finished deployment and set current turn to the other
                     else:
                         if not self.announcedFirstToFinish:
@@ -2744,9 +2790,11 @@ class Battle:
                         if player1:
                             self.players[1].finishedDeployment = True
                             self.currentTurn = self.players[0]
+                            self.otherTurn = self.players[1]
                         else:
                             self.players[0].finishedDeployment = True
                             self.currentTurn = self.players[1]
+                            self.otherTurn = self.players[0]
                     if self.highlighting:
                         self.toggle_highlighting()
                     self.currentUnit = None                 
@@ -2763,8 +2811,10 @@ class Battle:
             #Set player who deployed first as current turn
             if self.players[0].finishedDeployment:
                 self.currentTurn = self.players[0]
+                self.otherTurn = self.players[1]
             else:
                 self.currentTurn = self.players[1]
+                self.otherTurn = self.players[0]
             #Create buttons for first turn or second turn
             values.buttons = []
             self.commandListGroup.empty()
@@ -2781,6 +2831,93 @@ class Battle:
             self.state = 6
             
         self.commandListGroup.add(spr)
+        
+    def handle_endgame(self, values):
+        
+        #End game due to final round complete
+        if self.state == 54:
+            
+            values.buttons = []
+            self.commandListGroup.empty()
+            self.commandListMaxed = False
+            
+            #Inform player
+            self.update_main_message(values, "Game over!")
+            self.get_command_list(values, ["Score screen"], actionList=[73])
+            
+            self.check_engame_points(values)
+            
+            #Compare scores
+            draw = False
+            if self.players[0].vp > self.players[1].vp:
+                winner = self.players[0]
+                loser = self.players[1]
+            elif self.players[0].vp < self.players[1].vp:
+                winner = self.players[1]
+                loser = self.players[0]
+            else:
+                self.update_event_log(values, "Game over! The game ends in a draw!")
+                draw = True
+                
+            #Assign minor or major victory
+            if not draw:
+                if winner.vp >= (loser.vp * 2):
+                    victory = " major "
+                else:
+                    victory = " minor "
+                    
+                text = "Game over! " + winner.name + " wins a" + victory + "victory over " + loser.name + "!"
+                self.update_event_log(values, text)
+                
+            self.awaitingEvent = True
+            
+        #End game due to an army wipe out
+        elif self.state == 55:
+            
+            values.buttons = []
+            self.commandListGroup.empty()
+            self.commandListMaxed = False
+            
+            #Inform player
+            self.update_main_message(values, "Game over!")
+            self.get_command_list(values, ["Score screen"], actionList=[73])
+            
+            if self.players[0].armyWiped and self.players[1].armyWiped:
+                text = "Game over! The game ends in a draw as both armies have been wiped out!"
+                self.update_event_log(values, text)
+            else:
+                if self.players[0].armyWiped:
+                    winner = self.players[1]
+                    loser = self.players[0]
+                else:
+                    winner = self.players[0]
+                    loser = self.players[1]
+                    
+                text = loser.name + "'s entire army has been wiped out!"
+                self.update_event_log(values, text)
+                text = "Game over! " + winner.name + " wins a major victory over " + loser.name + "!" 
+                self.update_event_log(values, text)
+                
+            self.awaitingEvent = True
+            
+        #End game due to a concession
+        elif self.state == 56:
+            
+            values.buttons = []
+            self.commandListGroup.empty()
+            self.commandListMaxed = False
+            
+            #Inform player
+            self.update_main_message(values, "Game over!")
+            self.get_command_list(values, ["Score screen"], actionList=[73])
+            
+            text = self.currentTurn.name + " has conceded defeat!"
+            self.update_event_log(values, text)
+            text = ("Game over! " + self.otherTurn.name + " wins a major victory over " + self.currentTurn.name 
+                    + "!")
+            self.update_event_log(values, text)
+        
+            self.awaitingEvent = True
         
     def handle_magic(self, values):
         
@@ -4830,6 +4967,7 @@ class Battle:
             
        
         if not alive:
+            unit.destroyed = True
             self.check_kill_points(values, unit)
             
         #If unit has been wiped, return true
@@ -5162,6 +5300,7 @@ class Objective:
         
 class Player:
     def __init__(self, name, playerArmy, colour):
+        self.armyWiped = False
         self.colour = colour
         self.currentObjectives = []
         self.deploymentZone = None
