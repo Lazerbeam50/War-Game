@@ -70,6 +70,7 @@ class Battle:
         self.eventLogImage = resources.load_primary_background("battle_ui_bottom_panel.png")
         self.eventLogSurface = pygame.Surface((420, 200))
         self.eventLogText = []
+        self.firstBloodAwarded = False
         self.flagsGroup = pygame.sprite.Group()
         self.headerGroup = pygame.sprite.Group()
         self.headerImage = resources.load_primary_background("battle_ui_header.png")
@@ -693,7 +694,7 @@ class Battle:
                             deaths[data] += 1
                             
                         #Pass details to is unit still alive
-                        unitAlive = self.is_unit_still_alive(unit)
+                        unitAlive = self.is_unit_still_alive(values, unit)
                 
         #Report deaths
         self.update_control_point_status(values)
@@ -844,6 +845,80 @@ class Battle:
         self.yOffset = min(self.yOffset, self.yOffsetMax)
         
         self.camera = self.surface.subsurface(self.xOffset, self.yOffset, 1280, 720)
+        
+    def check_engame_points(self, values):
+        
+        #Check for Conquest
+        player1 = 0
+        player2 = 0
+        #Loop through control points
+        for status in self.controlPointStatus:
+            #Sum points per player
+            if status == 1:
+                player1 += 1
+            elif status == 2:
+                player2 += 1
+        #Assign points#
+        if player1 > 0:
+            self.players[0].vp += (player1 * 3)
+            self.players[0].objectivesAcheived.append(Objective("Conquest", (0, 2)))
+            text = self.players[0].name + " scores " + str(player1 * 3) + " points for achieving Conquest!"
+            self.update_event_log(values, text)
+        if player2 > 0:
+            self.players[1].vp += (player2 * 3)
+            self.players[1].objectivesAcheived.append(Objective("Conquest", (0, 2)))
+            text = self.players[1].name + " scores " + str(player2 * 3) + " points for achieving Conquest!"
+            self.update_event_log(values, text)
+            
+        #Check for Full Distance
+        
+        #loop through players
+        for player in self.players:
+            #loop through deployment nodes
+            if player == self.players[0]:
+                otherPlayer = self.players[1]
+            else:
+                otherPlayer = self.players[0]
+            for node in player.deploymentZoneNodes:
+                #if node is taken by enemy model, award Full Distance and break out of loop
+                if self.nodes[node].takenBy in otherPlayer.models:
+                    if "AIRBORNE" not in self.models[self.nodes[node].takenBy].keywords:
+                        otherPlayer.vp += 1
+                        otherPlayer.objectivesAcheived.append(Objective("Full Distance", (0, 3)))
+                        text = otherPlayer.name + " scores 1 point for achieving Full Distance!"
+                        self.update_event_log(values, text)
+                        break
+            
+        self.set_up_header_display(values)
+        
+    def check_kill_points(self, values, unit):
+        
+        #If this is the first unit to die, award First Blood
+        if not self.firstBloodAwarded:
+            self.firstBloodAwarded = True
+            if unit.ID in self.players[0].units:
+                scoringPlayer = self.players[1]
+            else:
+                scoringPlayer = self.players[0]
+            
+            scoringPlayer.vp += 1
+            scoringPlayer.objectivesAcheived.append(Objective("First Blood", (0, 0)))
+            text = scoringPlayer.name + " scores 1 point for achieving First Blood!"
+            self.update_event_log(values, text)
+            self.set_up_header_display(values)
+        
+        #If this unit is the boss, award Kingslayer
+        if unit.isBoss:
+            if unit.ID in self.players[0].units:
+                scoringPlayer = self.players[1]
+            else:
+                scoringPlayer = self.players[0]
+                
+            scoringPlayer.vp += 2
+            scoringPlayer.objectivesAcheived.append(Objective("Kingslayer", (0, 1)))
+            text = scoringPlayer.name + " scores 2 points for achieving Kingslayer!"
+            self.update_event_log(values, text)
+            self.set_up_header_display(values)
         
     def check_unit_coherency(self, unit):
         #If unit contains just one model, return true by default
@@ -1895,7 +1970,8 @@ class Battle:
                         self.delete_unit_from_field(self.units[unit])
                         #Report destroyed units
                         text = self.units[unit].name + " crashed and burned!"
-                        self.update_event_log(values, text)                  
+                        self.update_event_log(values, text)
+                        self.check_kill_points(values, self.units[unit])              
                 
             self.phase = 2
             
@@ -2372,6 +2448,7 @@ class Battle:
             #Advance turn order
             #If not final turn, swap players
             if self.turn == [5, 5]:
+                self.check_engame_points(values)
                 print("GAME OVER!")
             else:
                 if self.turn[0] == self.turn[1]:
@@ -3227,6 +3304,7 @@ class Battle:
                                     while (removed < deserters) and (len(currentModels) > 0):
                                         breakLoop = False
                                         currentModels[0].dead = True
+                                        currentModels[0].fled = True
                                         #Kill sprite and wipe nodes
                                         currentModels[0].sprite.kill()
                                         for n in currentModels[0].nodes[:]:
@@ -3248,7 +3326,7 @@ class Battle:
                                         currentModels.pop(0)
                             
                                         #Pass details to is unit still alive
-                                        unitAlive = self.is_unit_still_alive(self.units[unit])
+                                        unitAlive = self.is_unit_still_alive(values, self.units[unit])
                                         
                                         #Reduce deserters
                                         removed += 1
@@ -3865,7 +3943,7 @@ class Battle:
                 target = targets.pop(0)
                 #create an attack object for each shot
                 #If rapid fire weapon used and primary target is at half range, double shots
-                if self.currentWeapon.gearType == 3 and distance <= self.currentWeapon.attackRange:
+                if self.currentWeapon.gearType == 3 and distance <= (self.currentWeapon.attackRange/2):
                     shots = self.currentWeapon.shots * 2
                 else:
                     shots = self.currentWeapon.shots
@@ -4742,13 +4820,18 @@ class Battle:
             
         return success
     
-    def is_unit_still_alive(self, unit):
+    def is_unit_still_alive(self, values, unit):
         alive = False
         #Check if a model can be found alive
         for model in unit.models:
             if not model.dead:
                 alive = True
                 break
+            
+       
+        if not alive:
+            self.check_kill_points(values, unit)
+            
         #If unit has been wiped, return true
         #otherwise, return false
         return alive
@@ -5073,9 +5156,9 @@ class Node:
         self.y = None
         
 class Objective:
-    def __init__(self):
-        self.name = None
-        self.ID = None
+    def __init__(self, name, ID):
+        self.name = name
+        self.ID = ID
         
 class Player:
     def __init__(self, name, playerArmy, colour):
