@@ -273,6 +273,10 @@ class ScreenManager:
         spr = sprites.GameSprite(image, (x, 50, image.get_width(), image.get_height()))
         self.group.add(spr)
         
+        image = values.font20.render(values.version, True, values.colours["Black"])
+        spr = sprites.GameSprite(image, (1190, 700, image.get_width(), image.get_height()))
+        self.group.add(spr)
+        
         image = resources.load_secondary_sprite("button01.png")
         image = pygame.transform.scale(image, (400, 100))
         x = sprites.centre_x(400, values.settings.width, 0)
@@ -297,6 +301,10 @@ class ScreenManager:
         image = values.font90.render("Wargame", True, values.colours["Black"])
         x = sprites.centre_x(image.get_width(), values.settings.width, 0)
         spr = sprites.GameSprite(image, (x, 50, image.get_width(), image.get_height()))
+        self.group.add(spr)
+        
+        image = values.font20.render(values.version, True, values.colours["Black"])
+        spr = sprites.GameSprite(image, (1190, 700, image.get_width(), image.get_height()))
         self.group.add(spr)
         
         image = resources.load_secondary_sprite("button01.png")

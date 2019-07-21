@@ -14,5 +14,5 @@
 - Falling back X
 - Shooting in Melee range X
 - Point scoring X
-- End game display
-- Early losses (Conceding and losing all units)
+- Report winner X
+- Early losses (Conceding and losing all units) X
