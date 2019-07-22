@@ -1985,7 +1985,8 @@ class Battle:
                     self.currentUnit = None
                     self.state = 45
                 else:
-                    pass
+                    self.currentModel = None
+                    self.state = 11
             self.awaitingEvent = False
             
         #End phase button during movement phase
@@ -3191,13 +3192,7 @@ class Battle:
             
             #Inform players who's turn it is
             text = self.currentTurn.name + ", select a unit to attack with"
-            """
-            if self.currentTurn == self.currentTurnSaved:
-                otherPlayer = False
-            else:
-                otherPlayer = True
-            self.update_main_message(values, text, otherPlayer)
-            """
+
             self.update_main_message(values, text)
             #Create a list of the units the player can use
             units = []
