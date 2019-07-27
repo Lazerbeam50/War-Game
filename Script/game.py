@@ -35,8 +35,8 @@ class Game:
         pygame.display.set_caption('Wargame')
         
         #Set up fonts
-        self.values.font20 = pygame.font.SysFont("Time New Roman", 20)
-        self.values.font30 = pygame.font.SysFont("Time New Roman", 30)
+        self.values.font20 = pygame.font.Font("Resources/Fonts/NotoSans-Regular.ttf", 10)
+        self.values.font30 = pygame.font.Font("Resources/Fonts/NotoSans-Regular.ttf", 20)
         self.values.font60 = pygame.font.Font("Resources\Fonts\Plakette-Serial-Bold.ttf", 60)
         self.values.font90 = pygame.font.Font("Resources\Fonts\Plakette-Serial-Bold.ttf", 90)
         

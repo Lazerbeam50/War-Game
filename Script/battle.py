@@ -5024,11 +5024,11 @@ class Battle:
         #Display players scores and SP
         text = self.players[0].name + " - Points: " + str(self.players[0].vp) + " - SP: " + str(self.players[0].sp)
         image = values.font30.render(text, True, self.players[0].colour)
-        self.headerGroup.add(sprites.GameSprite(image, (0, 10, image.get_width(), image.get_height())))
+        self.headerGroup.add(sprites.GameSprite(image, (0, 0, image.get_width(), image.get_height())))
         
         text = self.players[1].name + " - Points: " + str(self.players[1].vp) + " - SP: " + str(self.players[1].sp)
         image = values.font30.render(text, True, self.players[1].colour)
-        self.headerGroup.add(sprites.GameSprite(image, (1000, 10, image.get_width(), image.get_height())))
+        self.headerGroup.add(sprites.GameSprite(image, (1000, 0, image.get_width(), image.get_height())))
         
         #Display current turn and phase
         if self.phase == 0:
@@ -5048,7 +5048,7 @@ class Battle:
         text = "Turn " + str(self.turn[0]) + "/" + str(self.turn[1]) + " - " + phase
         x = sprites.centre_x(image.get_width(), 1280, 0)
         image = values.font30.render(text, True, values.colours["Lime"])
-        self.headerGroup.add(sprites.GameSprite(image, (x, 10, image.get_width(), image.get_height())))
+        self.headerGroup.add(sprites.GameSprite(image, (x, 0, image.get_width(), image.get_height())))
         
     def scroll(self, values, speed):
         
@@ -5147,7 +5147,7 @@ class Battle:
     def update_event_log(self, values, text=None, scroll=False, direction=0):
         
         redraw = True
-        maxStrings = 13
+        maxStrings = 14
         
         if scroll:
             newCounter = self.eventLogCounter + direction
@@ -5155,7 +5155,7 @@ class Battle:
         
         else:
             #Cut text down
-            newText = misc.cut_down_string(text, 64)
+            newText = misc.cut_down_string(text, 85) #64 originally
             #Load text into list of strings
             for t in newText:
                 self.eventLogText.append(t)
