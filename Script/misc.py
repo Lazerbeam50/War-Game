@@ -30,7 +30,7 @@ class ValueHolder:
         self.screenManager = None
         self.settings = None
         self.state = 0 #0 = In menu screens, #1 = Army setup screens, #2 = battle
-        self.version = "Version 0.1.0"
+        self.version = "Version 0.1.1"
         
 def cut_down_string(string, maxLength):
     #while string is above sum of strings
