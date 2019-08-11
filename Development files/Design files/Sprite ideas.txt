@@ -20,12 +20,12 @@ Pyro-Heavy Interceptor -
 Great Lord Auldoon - 
 
 =======
-Worg Lord - 
+Worg Lord - Spiked helm
 Storm Caller - Hooded w/ Staff
 Doom Orcs - Large + Axe w/o helm
 Brawler Squad - Helm + Axe + shield
 Gunner Squad - Helm + Rifle
-Worg Cavalry - 
+Worg Cavalry - Round helm
 Worg Pack - 
 Demolitions Squad - Helm + Rocket launcher
 Turbo-Tank - 
