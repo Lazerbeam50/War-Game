@@ -119,7 +119,9 @@ class Game:
                 self.values.battle.backgroundGroup.draw(self.values.battle.surface)
                 self.values.battle.terrainGroup.draw(self.values.battle.surface)
                 self.values.battle.highlightGroup.draw(self.values.battle.surface)
-                self.values.battle.squaresGroup.draw(self.values.battle.surface)
+                if (not self.values.battle.leftPressed and not self.values.battle.rightPressed and
+                    not self.values.battle.upPressed and not self.values.battle.downPressed):
+                    self.values.battle.squaresGroup.draw(self.values.battle.surface)
                 self.values.battle.controlPointGroup.draw(self.values.battle.surface)
                 self.values.battle.modelsGroup.draw(self.values.battle.surface)
                 self.values.battle.flagsGroup.draw(self.values.battle.surface)
