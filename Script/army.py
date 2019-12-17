@@ -29,6 +29,7 @@ class Army:
         
 class ArmyManager:
     def __init__(self):
+        self.armies = [] #Used to store armies during the load screen
         self.availableUnits = []
         self.bgColour = None
         self.bgImage = None
@@ -66,6 +67,11 @@ class ArmyManager:
                                     self.playerArmy = Army()
                                     
                                     self.state = 1
+                                    self.screenSetUp = False
+                                    
+                                #Load army button
+                                elif button.code == 1:
+                                    self.state = 7
                                     self.screenSetUp = False
                                     
                                 #Quit army main screen
@@ -574,6 +580,10 @@ class ArmyManager:
                                         self.currentUnit.spells.append(button.storage.ID)
                                         #Refresh screen
                                         self.screenSetUp = False
+                                        
+                                #Army selected from load menu
+                                elif button.code == 31:
+                                    print("Army selected")
                                     
                 elif event.type == KEYDOWN:
                     if event.key == K_UP:
@@ -639,6 +649,9 @@ class ArmyManager:
                 
             elif self.state == 6:
                 self.set_up_unit_display_screen(values)
+            
+            elif self.state == 7:
+                self.set_up_army_load_screen(values)
                 
             self.screenSetUp = True
         
@@ -818,6 +831,37 @@ class ArmyManager:
         self.group.add(spriteList)
         
         for button in values.buttons:
+            self.group.add(button.sprites)
+            
+    def set_up_army_load_screen(self, values):
+        
+        self.bgColour = values.colours["Beige"]
+        
+        longPanelImage = resources.load_secondary_sprite("long_panel01.png")
+        panel01Image = pygame.transform.scale(longPanelImage, (270, 595))
+        self.group.add(sprites.GameSprite(panel01Image, (50, 75, 270, 595)))
+        
+        image = values.font90.render("Select an army to load", True, values.colours["Black"])
+        x = sprites.centre_x(image.get_width(), values.settings.width, 0)
+        spr = sprites.GameSprite(image, (x, 50, image.get_width(), image.get_height()))
+        self.group.add(spr)
+        
+        widePanelImage = resources.load_secondary_sprite("wide_panel01.png")
+        buttonImage = pygame.transform.scale(widePanelImage, (255, 25))
+        x = sprites.centre_x(255, 270, 50)
+        y = 85
+        
+        db = sqlite3.connect('Save Data/save data') #connect to database
+        cursor = db.cursor()
+        
+        cursor.execute('''SELECT name, bossTrait, faction, totalSP, totalPoints, detachments FROM armies''')
+        data = cursor.fetchall()
+        self.armies = get_army_lists(data)
+        
+        #Set up buttons for list
+        for a in self.armies:
+            button = sprites.Button(31, 1, buttonImage, (x, y, 255, 25), a.name, values.font20, values, storage=a)
+            y += 25
             self.group.add(button.sprites)
             
     def set_up_detachment_creation_screen(self, values):

@@ -736,7 +736,7 @@ class Battle:
                             deaths[data] += 1
                             
                         #Pass details to is unit still alive
-                        unitAlive = self.is_unit_still_alive(values, unit)
+                        unitAlive = self.is_unit_still_alive(values, unit, targetCodex=targetCodex)
                 
         #Report deaths
         self.update_control_point_status(values)
@@ -4952,14 +4952,42 @@ class Battle:
             
         return success
     
-    def is_unit_still_alive(self, values, unit):
+    def is_unit_still_alive(self, values, unit, targetCodex=None):
         alive = False
-        #Check if a model can be found alive
+        artillery = False
+        #Check if a model can be found alive and has the artillery ability
         for model in unit.models:
             if not model.dead:
                 alive = True
-                break
+            if targetCodex != None:
+                data = targetCodex.models[model.data]
+                if 'Artillery' in data.abilities:
+                    artillery = True
             
+        #If a model has the artillery ability and the unit is alive
+        if alive and artillery:
+            #Loop through to see if any living models have the ARTILLERY GUNNER keyword
+            gunner = False
+            for model in unit.models:
+                if "ARTILLERY GUNNER" in model.keywords and not model.dead:
+                    gunner = True
+                    break
+            #If not, kill all living models
+            if not gunner:
+                alive = False
+                for model in unit.models:
+                    if not model.dead:
+                        model.dead = True
+                        #Kill sprite and wipe nodes
+                        model.sprite.kill()
+                        for n in model.nodes[:]:
+                            self.nodes[n].takenBy = None
+                            model.nodes.remove(n)
+                            
+                        model.topLeftNode = None
+                        
+                text = "With no artillery gunners left, " + unit.name + " is completely destroyed!"
+                self.update_event_log(values, text)
        
         if not alive:
             unit.destroyed = True

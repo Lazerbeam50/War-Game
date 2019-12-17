@@ -1,0 +1,11 @@
+Load screen
+===========
+List of armies for editing
+	- Display faction, points, boss, total SP and No of detachments
+	- Confirm button for loading
+	- Back button
+	- Confirming an army sets them up and takes player to army display screen
+
+Saving over army
+================
+Save as standard

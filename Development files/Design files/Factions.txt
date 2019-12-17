@@ -12,6 +12,7 @@
 3) Imperial Guard = Earthlings
 	- Range-Oriented, Swarm, Strong vehicles and artilery
 		- Suited to long range. Foot soldiers are highly disposable. No mages whatsoever.
+			Infantry Heroes give strong buffs but are very fragile.
 
 4) Adepta Sororitas + SoS = Amazons
 	- Range-Oriented, Standard numbers, Countering army
