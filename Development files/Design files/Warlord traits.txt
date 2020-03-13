@@ -1,7 +1,7 @@
-Brawler
+Scrapper
 	- +1 attack speed and strength
 
-Inspire the troops
+Inspiring Leader
 	- +2 will for friendly units within 6 squares
 
 Tanky

@@ -1,6 +1,5 @@
 '''
 Created on 28 Mar 2019
-
 @author: Femi
 '''
 
@@ -643,6 +642,8 @@ class Battle:
         unitAlive = True
         unit = self.units[attacks[0].primaryTarget.unitID]
         
+        print("======")
+        
         #Loop through attacks
         for attack in attacks:
             #If main target is dead
@@ -674,9 +675,11 @@ class Battle:
                 #check strength      
                 if success and attack.strength < 99:
                     
+                    print("Strength:", attack.strength)
+                    
                     if attack.strength > attack.primaryTarget.fort:
                         
-                        if attack.strength > (attack.primaryTarget.fort * 2):
+                        if attack.strength >= (attack.primaryTarget.fort * 2):
                             dc = 5
                             
                         else:
@@ -684,7 +687,7 @@ class Battle:
                             
                     elif attack.strength < attack.primaryTarget.fort:
                         
-                        if attack.strength < (attack.primaryTarget.fort/2):
+                        if attack.strength <= (attack.primaryTarget.fort/2):
                             dc = 1
                             
                         else:
@@ -2032,6 +2035,10 @@ class Battle:
         elif button.use == 20:
             if button.storage.use1 == 0:
                 #User must select a target
+                self.selectedModels = []
+                for model in self.currentUnit.models:
+                    self.selectedModels.append(model)
+                self.get_closest_visible_unit()
                 self.currentSpell = button.storage
                 self.state = 18
                 self.awaitingEvent = False
@@ -4080,7 +4087,12 @@ class Battle:
                 else:
                     shots = self.currentWeapon.shots
                 if self.phase == 3:
-                    rSkill = model.rSkill
+                    if self.currentWeapon.gearType == 2 and self.units[model.unitID].moved:
+                        rSkill = max(model.rSkill - 1, 1)
+                    elif self.currentWeapon.gearType == 1 and self.units[model.unitID].advanced:
+                        rSkill = max(model.rSkill - 1, 1)
+                    else:
+                        rSkill = model.rSkill
                 elif self.phase == 4:
                     rSkill = 1
                 for i in range(0, shots):
@@ -4581,7 +4593,12 @@ class Battle:
                         enemy = self.players[1]
                     else:
                         enemy = self.players[0]
-                    if self.currentNode.takenBy in enemy.models:
+                    #If target is CHARACTER and has <10 HP, ignore unless they are closest visible enemy
+                    ignore = False
+                    if 'CHARACTER' in self.models[self.currentNode.takenBy].keywords and self.models[self.currentNode.takenBy].maxHP < 10:
+                        if not self.models[self.currentNode.takenBy].unitID in self.currentUnit.closestVisible:
+                            ignore = True
+                    if self.currentNode.takenBy in enemy.models and not ignore:
                         for model in self.currentUnit.models:
                             if not model.dead:
                                 #Get list of in range nodes
@@ -5183,7 +5200,7 @@ class Battle:
         
         else:
             #Cut text down
-            newText = misc.cut_down_string(text, 85) #64 originally
+            newText = misc.cut_down_string(text, 80) #64 originally
             #Load text into list of strings
             for t in newText:
                 self.eventLogText.append(t)
@@ -5339,4 +5356,3 @@ class Player:
         self.spellsUsed = []
         self.units = [] 
         self.vp = 0
-        

@@ -1,7 +1,7 @@
 0) Space Marines = Paladin Brotherhood
-	- Balanced, Sparse, Jack-of-all-trades
+	- Balanced, Sparse, Jack-of-all-trades. Fairly strong mages.
 
-1) Space Wolves = Orcs
+1) Space Wolves + Blood Angels = Orcs
 	- Melee-Oriented, Sparse, Lots of cavalry
 		- Like Paladins but with better melee weapons and 3 range skill on several units
 
@@ -14,16 +14,16 @@
 		- Suited to long range. Foot soldiers are highly disposable. No mages whatsoever.
 			Infantry Heroes give strong buffs but are very fragile.
 
-4) Adepta Sororitas + SoS = Amazons
+4) Adepta Sororitas + SoS = Amazons/Valkyries 
 	- Range-Oriented, Standard numbers, Countering army
 		- Fragile soldiers. Anti-mage, anti-monster, anti-vehicle, anti-demon and anti-undead 
 		options
 
 5) Adeptus Custodes + Imperial Knights + Fortifications = Titans
 	- Balanced, Very sparse, very powerful units
-		- Hero cap of 4. More buildings available than other factions.
+		- Hero cap of 4. Strong mages. More buildings available than other factions.
 
-6) Drukhari = Free Elven Republic
+6) Drukhari + Craftworlds = Free Elven Republic
 	- Range-Oriented, Standard numbers, Lots of monsters
 		- Fragile army, uses poisons, monsters and fast units. Best weapons for elves are
 		heavy bows. Weapons have higher AP than most armies.
@@ -42,7 +42,9 @@
 		- Can spawn new units, able to pierce armour easily with acid weapons. Good variety.
 		- Gains abilities per turn.
 		- Erratic speeds.
+		- More mages than most.
 
 10) Chaos Daemons = Demonic Legion
 	- Melee-Oriented, Swarm, Weak units gain power from each kill
 		- More mages than most, fast army, fragile ground troops and enduring leaders/elites
+		- Strong mages

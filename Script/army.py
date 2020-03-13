@@ -1,6 +1,5 @@
 '''
 Created on 3 Sep 2018
-
 @author: Femi
 '''
 
@@ -34,9 +33,12 @@ class ArmyManager:
         self.bgColour = None
         self.bgImage = None
         self.currentDetachment = None
+        self.currentModel = None
+        self.currentOption = None
         self.currentUnit = None
+        self.currentWargear = None
         self.downPressed = False
-        self.group = pygame.sprite.Group()
+        self.group = pygame.sprite.LayeredUpdates()
         self.playerArmy = None
         self.screenSetUp = False
         self.state = 0
@@ -488,6 +490,7 @@ class ArmyManager:
                                     
                                 #Make unit the boss
                                 elif button.code == 24:
+                                    self.playerArmy.boss.isBoss = False
                                     self.playerArmy.boss = self.currentUnit
                                     self.playerArmy.boss.isBoss = True
                                 
@@ -539,39 +542,52 @@ class ArmyManager:
                                         if o == button.storage.ID:
                                             count += 1
                                     if count < button.storage.maximum or button.storage.maximum == 0:
-                                        #if wargear doesn't come from a list, count the number of receiving models in the current unit
-                                        if button.storage.optionType == 1:
-                                            #if there is only one receiving model in the unit
-                                            rm = 0
-                                            for m in self.currentUnit.models:
-                                                approved = True
-                                                for wargear in button.storage.requires:
-                                                    if wargear not in m.wargear:
-                                                        approved = False
-                                                for wargear in button.storage.replacing:
-                                                    if wargear not in m.wargear:
-                                                        approved = False
-                                                if approved and m.data[1] == button.storage.receivingModel:
-                                                    rm += 1
-                                                    model = m
-                                            if rm == 1:
-                                                #Replace the old wargear, if needed
-                                                for wargear in button.storage.replacing:
-                                                    if wargear in model.wargear:
-                                                        model.wargear.remove(wargear)
-                                                #Add the new wargear
-                                                for wargear in button.storage.gaining:
-                                                    model.wargear.append(wargear)
-                                                model.reset_points(self.playerArmy.codex)
-                                                self.currentUnit.reset_points(self.playerArmy.codex)
-                                                self.currentDetachment.calculate_points()
-                                                #Add option code to unit's options
-                                                self.currentUnit.options.append(button.storage.ID)
-                                                #Refresh screen
-                                                self.screenSetUp = False
-                                                
-                                            elif rm > 1:
-                                                print("Need the next screen!")
+                                        #count the number of receiving models in the current unit
+                                        rm = 0
+                                        for m in self.currentUnit.models:
+                                            approved = True
+                                            for wargear in button.storage.requires:
+                                                if wargear not in m.wargear:
+                                                    approved = False
+                                            for wargear in button.storage.replacing:
+                                                if wargear not in m.wargear:
+                                                    approved = False
+                                            if approved and m.data[1] == button.storage.receivingModel:
+                                                rm += 1
+                                                model = m
+                                        #if there is only one receiving model in the unit and only one type of wargear is being given
+                                        if rm == 1 and button.storage.optionType == 1:
+                                            #Replace the old wargear, if needed
+                                            for wargear in button.storage.replacing:
+                                                if wargear in model.wargear:
+                                                    model.wargear.remove(wargear)
+                                            #Add the new wargear
+                                            for wargear in button.storage.gaining:
+                                                model.wargear.append(wargear)
+                                            #Update mage profile if necessary
+                                            if 'MAGE' in self.currentUnit.keywords:
+                                                for mp in values.mageProfiles:
+                                                    if (mp.ID == self.currentUnit.data and 
+                                                        mp.itemNeeded == (self.playerArmy.codex.ID, button.storage.gaining[0])):
+                                                        print("Received!")
+                                                        self.currentUnit.dispelLevel = mp.dispelLevel
+                                                        self.currentUnit.dispelRate = mp.dispelCost
+                                                        self.currentUnit.currentMana = self.currentUnit.maxMana = mp.mana
+                                                        break
+                                            model.reset_points(self.playerArmy.codex)
+                                            self.currentUnit.reset_points(self.playerArmy.codex)
+                                            self.currentDetachment.calculate_points()
+                                            #Add option code to unit's options
+                                            self.currentUnit.options.append(button.storage.ID)
+                                            #Refresh screen
+                                            self.screenSetUp = False
+                                            
+                                        #If multiple models can receive wargear or the target is a list, move to next screen
+                                        elif rm > 1 or (button.storage.optionType == 2 and rm > 0):
+                                            self.currentOption = button.storage
+                                            self.state = 8
+                                            self.screenSetUp = False
+                                            
                                         
                                 #Add a spell to a unit
                                 elif button.code == 30:
@@ -583,8 +599,78 @@ class ArmyManager:
                                         
                                 #Army selected from load menu
                                 elif button.code == 31:
-                                    print("Army selected")
+                                    self.playerArmy = button.storage
+                                    self.state = 2
+                                    self.screenSetUp = False
                                     
+                                #Confirm button on wargear selection screen
+                                elif button.code == 32:
+                                    
+                                    if self.currentModel != None and self.currentWargear != None:
+                                    
+                                         #Replace the old wargear, if needed
+                                        for wargear in self.currentOption.replacing:
+                                            if wargear in self.currentModel.storage[0].wargear:
+                                                self.currentModel.storage[0].wargear.remove(wargear)
+                                        #Add the new wargear
+                                        self.currentModel.storage[0].wargear.append(self.currentWargear.storage[0])
+                                        self.currentModel.storage[0].reset_points(self.playerArmy.codex)
+                                        self.currentUnit.reset_points(self.playerArmy.codex)
+                                        self.currentDetachment.calculate_points()
+                                        #Add option code to unit's options
+                                        self.currentUnit.options.append(self.currentOption.ID)
+                                        
+                                        #Clean up variables
+                                        self.currentOption = None
+                                        self.currentModel = None
+                                        self.currentWargear = None
+                                        
+                                        #Refresh screen
+                                        self.state = 6
+                                        self.screenSetUp = False
+                                    
+                                #Back button on wargear selection screen
+                                elif button.code == 33:
+                                    
+                                    #Clean up variables
+                                    self.currentOption = None
+                                    self.currentModel = None
+                                    self.currentWargear = None
+                                    
+                                    #Refresh screen
+                                    self.state = 6
+                                    self.screenSetUp = False
+                                    
+                                #Select model to receive wargear
+                                elif button.code == 34:
+                                    #If selected button is not the current model
+                                    if self.currentModel != button:
+                                        if self.currentModel != None:
+                                            image = values.font20.render(self.currentModel.storage[1], True, values.colours["White"])
+                                            self.currentModel.sprites[1].image = image
+                                            
+                                        #Set button as current model
+                                        self.currentModel = button
+                                        image = values.font20.render(self.currentModel.storage[1], True, values.colours["Lime"])
+                                        self.currentModel.sprites[1].image = image
+                                        
+                                        self.get_wargear_screen_info(values)
+                                        
+                                #Select wargear to give to model
+                                elif button.code == 35:
+                                    #If selected button is not the current wargear
+                                    if self.currentWargear != button:
+                                        if self.currentWargear != None:
+                                            image = values.font20.render(self.currentWargear.storage[1], True, values.colours["White"])
+                                            self.currentWargear.sprites[1].image = image
+                                            
+                                        #Set button as current wargear
+                                        self.currentWargear = button
+                                        image = values.font20.render(self.currentWargear.storage[1], True, values.colours["Lime"])
+                                        self.currentWargear.sprites[1].image = image
+                                        
+                                        self.get_wargear_screen_info(values)
+                                                                    
                 elif event.type == KEYDOWN:
                     if event.key == K_UP:
                         self.downPressed = False
@@ -653,6 +739,9 @@ class ArmyManager:
             elif self.state == 7:
                 self.set_up_army_load_screen(values)
                 
+            elif self.state == 8:
+                self.set_up_wargear_screen(values)
+                
             self.screenSetUp = True
         
         if self.typing:
@@ -701,6 +790,25 @@ class ArmyManager:
         
         for button in values.buttons:
             self.group.add(button.sprites)
+            
+        if values.mageProfiles == None:
+            db = sqlite3.connect('Game Data/game database') #connect to database
+            cursor = db.cursor()
+            
+            cursor.execute('''SELECT id, itemNeeded, tier, mana, dispelLevel, 
+            dispelCost FROM mage_profiles''')
+            data = cursor.fetchall()
+            values.mageProfiles = []
+            for entry in data:
+                obj = codex.MageProfile()
+                obj.ID = misc.string_to_list(entry[0], True, True)
+                obj.itemNeeded = misc.string_to_list(entry[1], True, True)
+                obj.tier = entry[2]
+                obj.mana = entry[3]
+                obj.dispelLevel = entry[4]
+                obj.dispelCost = entry[5]
+                
+                values.mageProfiles.append(obj)
             
     def set_up_army_faction_screen(self, values):
         
@@ -1498,6 +1606,181 @@ class ArmyManager:
             
         self.group.add(spriteList)
         
+    def set_up_wargear_screen(self, values):
+        
+        self.bgColour = values.colours["Beige"]
+        
+        spriteList = []
+        
+        longPanelImage = resources.load_secondary_sprite("long_panel01.png")
+        longPanelImage01 = pygame.transform.scale(longPanelImage, (300, 700))
+        
+        widePanelImage = resources.load_secondary_sprite("wide_panel02.png")
+        widePanelImage01 = pygame.transform.scale(widePanelImage, (600, 300))
+        
+        spriteList.append(sprites.GameSprite(longPanelImage01, (10, 10, 300, 700)))
+        spriteList.append(sprites.GameSprite(longPanelImage01, (320, 10, 300, 700)))
+        spriteList.append(sprites.GameSprite(widePanelImage01, (650, 100, 600, 300)))
+        spriteList.append(sprites.GameSprite(widePanelImage01, (650, 410, 600, 300)))
+        
+        buttonImage = resources.load_secondary_sprite("button01.png")
+        buttonImage01 = pygame.transform.scale(buttonImage, (150, 50))
+        buttonImage02 = pygame.transform.scale(buttonImage, (280, 20))
+        
+        #Set up models in first list
+
+        y = 20
+        i = 0
+
+        for model in self.currentUnit.models:
+            
+            approved = True
+            for wargear in self.currentOption.requires:
+                if wargear not in model.wargear:
+                    approved = False
+            for wargear in self.currentOption.replacing:
+                if wargear not in model.wargear:
+                    approved = False
+                    
+            if model.data[1] != self.currentOption.receivingModel:
+                approved = False
+            
+            if approved:
+            
+                name = self.playerArmy.codex.models[model.data].name + " #" + str(i)
+                
+                button = sprites.Button(34, 0, buttonImage02, (20, y, buttonImage02.get_width(), buttonImage02.get_height()), 
+                                        name, values.font20, values, storage=[model, name])
+                
+                y += buttonImage02.get_height()
+                i += 1
+                
+        #If only one model is eligible, make this the current model
+        if i == 1:
+            self.currentModel = button
+            image = values.font20.render(name, True, values.colours["Lime"])
+            self.currentModel.sprites[1].image = image
+                
+        #Set up wargear in second list
+                
+        wargearList = []
+        
+        if self.currentOption.optionType == 1:
+            for wargear in self.currentOption.gaining:
+                wargearList.append(wargear)
+        elif self.currentOption.optionType == 2:
+            for wargear in self.playerArmy.codex.wargearLists[self.playerArmy.faction, self.currentOption.gaining[0]].wargear:
+                wargearList.append(wargear)
+                
+        y = 20
+        i = 0
+        for wargear in wargearList:
+            
+            name = self.playerArmy.codex.wargear[self.playerArmy.faction, wargear].name
+            
+            button = sprites.Button(35, 0, buttonImage02, (330, y, buttonImage02.get_width(), buttonImage02.get_height()), 
+                                        name, values.font20, values, storage=[wargear, name])
+                
+            y += buttonImage02.get_height()
+            i += 1
+            
+        #If only one wargear is in the list, make this the current wargear
+        if i == 1:
+            self.currentWargear = button
+            image = values.font20.render(name, True, values.colours["Lime"])
+            self.currentWargear.sprites[1].image = image
+        
+        button = sprites.Button(32, 1, buttonImage01, (900, 0, 150, 50), "Confirm", values.font20, values)
+        button = sprites.Button(33, 1, buttonImage01, (1070, 0, 150, 50), "Back", values.font20, values)
+        
+        for button in values.buttons:
+            self.group.add(button.sprites)
+            
+        self.group.add(spriteList)
+        
+        self.get_wargear_screen_info(values)
+        
+    def get_wargear_screen_info(self, values):
+        
+        self.textGroup.empty()
+        
+        if self.currentWargear != None:
+            
+            #Set up text for wargear first
+            
+            image = values.font30.render(self.currentWargear.storage[1], True, values.colours["White"])
+            self.textGroup.add(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 600, 650), 
+                                                          130, image.get_width(), image.get_height())))
+            
+            text = ["Type", "Range", "Shots", "Strength", "AP", "Damage", "Points"]
+            x = [680, 760, 840, 920, 1040, 1120, 1200]
+            for i in range(0, 7):
+                image = values.font20.render(text[i], True, values.colours["White"])
+                self.textGroup.add(sprites.GameSprite(image, (x[i], 160, image.get_width(), image.get_height())))
+                
+            weaponData = self.playerArmy.codex.wargear[(self.playerArmy.faction, self.currentWargear.storage[0])]
+            if weaponData.gearType == 0:
+                attackRange = "Melee"
+                weaponType = "Melee"
+                shots = "N/A"
+                if weaponData.userStrength:
+                    if weaponData.strengthPlus != 0:
+                        strength = "User STR + " + str(weaponData.strengthPlus)
+                    elif weaponData.strengthMultiplier != 0:
+                        strength = "User STR x " + str(weaponData.strengthMultiplier)
+                    else:
+                        strength = "User STR"
+                else:
+                    strength = str(weaponData.strength)
+                
+            else:
+                attackRange = str(weaponData.attackRange)
+                shots = str(weaponData.shots)
+                strength = str(weaponData.strength)
+                if weaponData.gearType == 1:
+                    weaponType = "Assault"
+                elif weaponData.gearType == 2:
+                    weaponType = "Heavy"
+                elif weaponData.gearType == 3:
+                    weaponType = "Rapid Fire"
+                elif weaponData.gearType == 4:
+                    weaponType = "Grenade"
+                elif weaponData.gearType == 5:
+                    weaponType = "Pistol"
+                else:
+                    weaponType = "Other"
+                    attackRange = "N/A"
+                    shots = "N/A"
+                    strength = "N/A"
+            
+            text = [weaponType, attackRange, shots, strength, str(weaponData.ap), str(weaponData.damage), str(weaponData.points)]
+            x = [680, 760, 840, 920, 1040, 1120, 1200]
+            for i in range(0, 7):
+                image = values.font20.render(text[i], True, values.colours["White"])
+                self.textGroup.add(sprites.GameSprite(image, (x[i], 180, image.get_width(), image.get_height())))
+                
+            y = 260
+            for ability in weaponData.abilities:
+                image = values.font20.render(ability, True, values.colours["White"])
+                self.textGroup.add(sprites.GameSprite(image, (680, y, image.get_width(), image.get_height())))
+                
+                y += 20
+                
+        if self.currentModel != None:
+            
+            image = values.font30.render(self.currentModel.storage[1], True, values.colours["White"])
+            self.textGroup.add(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 600, 650), 
+                                                          440, image.get_width(), image.get_height())))
+            
+            y = 480
+            for wargear in self.currentModel.storage[0].wargear:
+                weaponData = self.playerArmy.codex.wargear[(self.playerArmy.faction, wargear)]
+                image = values.font20.render(weaponData.name, True, values.colours["White"])
+                self.textGroup.add(sprites.GameSprite(image, (680, y, image.get_width(), image.get_height())))
+                
+                y += 20
+            
+            
     def get_role_counts(self, unique=False):
     
         counts = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
@@ -2195,4 +2478,3 @@ def save_army(playerArmy, detachments, cursor):
     totalPoints, detachments) VALUES(?,?,?,?,?,?)''', 
     (playerArmy.name, bossTrait, playerArmy.faction, 
      playerArmy.totalSP, playerArmy.totalPoints, detachments))
-    

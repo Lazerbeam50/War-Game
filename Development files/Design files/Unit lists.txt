@@ -83,6 +83,11 @@ Transport Helicopter (Air transport)
 Gunship
 Fighter Jet (Very strong fighter plane, can rival Paladin interceptors)
 
+Valkyries
+=========
+Renita the Duelist - Leaders - Melee assassin. Very high melee damage and receives a bonus against 
+				CHARACTERS
+
 Hobgoblins
 ==========
 Warboss

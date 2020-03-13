@@ -1,6 +1,5 @@
 '''
 Created on 15 Aug 2018
-
 @author: Femi
 '''
 
@@ -491,5 +490,3 @@ class ScreenManager:
             image = values.font30.render(text, True, values.colours["White"])
             spr.append(sprites.GameSprite(image, (x, y, image.get_width(), image.get_height())))
             y += 20
-        
-        

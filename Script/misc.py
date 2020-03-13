@@ -1,6 +1,5 @@
 '''
 Created on 13 Aug 2018
-
 @author: Femi
 '''
 
@@ -22,6 +21,7 @@ class ValueHolder:
                         "Slate Grey": (112, 128, 144), "White": (255, 255, 255), "Yellow": (255, 255, 0)}
         self.factions = []
         self.font20 = None
+        self.font24 = None
         self.font30 = None
         self.font60 = None
         self.font90 = None

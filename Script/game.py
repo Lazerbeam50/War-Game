@@ -1,6 +1,5 @@
 '''
 Created on 13 Aug 2018
-
 @author: Femi
 '''
 import pygame
@@ -36,6 +35,7 @@ class Game:
         
         #Set up fonts
         self.values.font20 = pygame.font.Font("Resources/Fonts/NotoSans-Regular.ttf", 10)
+        self.values.font24 = pygame.font.Font("Resources/Fonts/NotoSans-Regular.ttf", 14)
         self.values.font30 = pygame.font.Font("Resources/Fonts/NotoSans-Regular.ttf", 20)
         self.values.font60 = pygame.font.Font("Resources\Fonts\Plakette-Serial-Bold.ttf", 60)
         self.values.font90 = pygame.font.Font("Resources\Fonts\Plakette-Serial-Bold.ttf", 90)
