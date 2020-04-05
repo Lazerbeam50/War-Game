@@ -141,8 +141,6 @@ class ArmyManager:
                                 #save current army
                                 elif button.code == 7:
                                     
-                                    print("What's here?")
-                                    
                                     #create or connect to database
                                     db = sqlite3.connect('Save Data/save data')
                                     cursor = db.cursor()
@@ -490,7 +488,9 @@ class ArmyManager:
                                     
                                 #Make unit the boss
                                 elif button.code == 24:
-                                    self.playerArmy.boss.isBoss = False
+                                    #If player has already picked a unit to be the boss, set their boss flag to false
+                                    if self.playerArmy.boss != None:
+                                        self.playerArmy.boss.isBoss = False
                                     self.playerArmy.boss = self.currentUnit
                                     self.playerArmy.boss.isBoss = True
                                 
@@ -561,6 +561,23 @@ class ArmyManager:
                                             for wargear in button.storage.replacing:
                                                 if wargear in model.wargear:
                                                     model.wargear.remove(wargear)
+                                            #If new wargear is a invul shield, check to see if model has a shield already
+                                            isShield = False
+                                            if self.playerArmy.codex.wargear[self.playerArmy.codex.ID, button.storage.gaining[0]].gearType == 7:
+                                                isShield = True
+                                                hasShield = False
+                                                for wargear in model.wargear:
+                                                    if self.playerArmy.codex.wargear[self.playerArmy.codex.ID, wargear].gearType == 7:
+                                                        hasShield = True
+                                                        shield = self.playerArmy.codex.wargear[self.playerArmy.codex.ID, wargear]
+                                                        break
+                                                #If so, remove shield from inventory and set invul save to default
+                                                if hasShield:
+                                                    model.wargear.remove(shield.ID[1])
+                                                    model.invul = self.playerArmy.codex.models[model.data].invul
+                                            #Apply bonus from new shield
+                                            if isShield:
+                                                model.invul = self.playerArmy.codex.wargear[self.playerArmy.codex.ID, button.storage.gaining[0]].strength
                                             #Add the new wargear
                                             for wargear in button.storage.gaining:
                                                 model.wargear.append(wargear)
@@ -607,8 +624,27 @@ class ArmyManager:
                                 elif button.code == 32:
                                     
                                     if self.currentModel != None and self.currentWargear != None:
+                                        
+                                        #If new wargear is a invul shield, check to see if model has a shield already
+                                        isShield = False
+                                        if self.playerArmy.codex.wargear[self.playerArmy.codex.ID, self.currentWargear.storage[0]].gearType == 7:
+                                            isShield = True
+                                            hasShield = False
+                                            for wargear in self.currentModel.storage[0].wargear:
+                                                if self.playerArmy.codex.wargear[self.playerArmy.codex.ID, wargear].gearType == 7:
+                                                    hasShield = True
+                                                    shield = self.playerArmy.codex.wargear[self.playerArmy.codex.ID, wargear]
+                                                    break
+                                            #If so, remove shield from inventory and set invul save to default
+                                            if hasShield:
+                                                self.currentModel.storage[0].wargear.remove(shield.ID[1])
+                                                self.currentModel.storage[0].invul = self.playerArmy.codex.models[self.currentModel.storage[0].data].invul
+                                        #Apply bonus from new shield
+                                        if isShield:
+                                            self.currentModel.storage[0].invul = self.playerArmy.codex.wargear[self.playerArmy.codex.ID, 
+                                                                                                    self.currentWargear.storage[0]].strength
                                     
-                                         #Replace the old wargear, if needed
+                                        #Replace the old wargear, if needed
                                         for wargear in self.currentOption.replacing:
                                             if wargear in self.currentModel.storage[0].wargear:
                                                 self.currentModel.storage[0].wargear.remove(wargear)

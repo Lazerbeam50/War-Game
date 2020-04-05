@@ -10,6 +10,7 @@ import copy
 import math
 import operator
 import random
+import time
 
 import misc # @UnresolvedImport
 import resources # @UnresolvedImport
@@ -2944,6 +2945,7 @@ class Battle:
                     self.units[unit].endPhase = False
                     
             #Move camera to player's deployment zone
+            """
             if self.deploymentMap == 0:
                 if self.currentTurn.deploymentZone == 1:
                     self.xOffset = 0
@@ -2951,6 +2953,7 @@ class Battle:
                     self.xOffset = self.xOffsetMax
                 self.yOffset = int(self.yOffsetMax/2)
             self.camera = self.surface.subsurface(self.xOffset, self.yOffset, 1280, 720)
+            """
                     
             #Set state to 16
             self.state = 16
@@ -3359,8 +3362,20 @@ class Battle:
                     strength = strength * self.currentWeapon.strengthMultiplier
                 if self.currentWeapon.strengthPlus > 0:
                     strength = strength + self.currentWeapon.strengthPlus
+                #Check to see if model has a second melee weapon
+                attackSpeed = model.attackSpeed
+                #Loop through their wargear
+                wargearList = copy.copy(model.wargear)
+                wargearList.remove(self.currentWeapon.ID[1])
+                for w in wargearList:
+                    #If wargear is a melee weapon and isn't the current weapon, add +1 to attack speed
+                    wargear = self.currentTurn.playerArmy.codex.wargear[self.currentTurn.playerArmy.faction, w]
+                    if wargear.gearType == 0:
+                        attackSpeed += 1
+                        break
+                    
                 #create an attack object for each point of attack speed
-                for i in range(0, model.attackSpeed):
+                for i in range(0, attackSpeed):
                     attacks.append(Attack(model.mSkill, strength, self.currentWeapon.damage, 
                                           self.currentWeapon.ap, target, targets))
                     
@@ -3929,8 +3944,8 @@ class Battle:
                         if wargear in wargearList:
                             ignore = True
                         if not ignore:
-                            #If wargear is melee or other
-                            if wargear.gearType == 0 or wargear.gearType == 6:
+                            #If wargear is melee, other or a shield
+                            if wargear.gearType == 0 or wargear.gearType == 6 or wargear.gearType == 7:
                                 ignore = True
                             #If wargear is at odds with pistol, grenade or other flag
                             elif wargear.gearType in range(1, 4):
@@ -4396,6 +4411,7 @@ class Battle:
                                 allowTaken = False
                             passClose = True
                             maxMove = 3
+                        t1 = time.clock()
                         moveRange = self.get_movement_range(model.topLeftNode, model.minMove, maxMove, size, 
                                                             checkWalkable=checkWalkable, allowTaken=allowTaken, 
                                                             passClose=passClose, standClose=standClose,
@@ -4403,6 +4419,9 @@ class Battle:
                                                             standCloseSpecific=standCloseSpecific,
                                                             mustBeClose=mustBeClose,
                                                             modelID=model.ID, enemyModels=self.otherTurn.models)
+                        t2 = time.clock()
+                        timediff = t2 - t1
+                        print(f"It took {timediff} seconds to calculate that movement range")
                         #If movement range is empty, do nothing
                         if len(moveRange) == 0:
                             print("No moverange!")

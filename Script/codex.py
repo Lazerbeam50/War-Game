@@ -103,7 +103,13 @@ class Wargear:
         self.ap = None
         self.attackRange = None
         self.damage = None
-        self.gearType = None #0 = Melee, 1 = Assault, 2 = Heavy, 3 = Rapid Fire, 4 = Grenade, 5 = Pistol, 6 = Other
+        """
+        Geartype codes
+        --------------
+        0 = Melee, 1 = Assault, 2 = Heavy, 3 = Rapid Fire, 4 = Grenade, 5 = Pistol, 6 = Other, 
+        7 = Gives invul save (strength attribute determines the save given)
+        """
+        self.gearType = None 
         self.ID = None
         self.name = None
         self.points = None

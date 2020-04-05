@@ -142,7 +142,8 @@ wargear = [
     ("(0, 34)", "Golden Ray", "()", 2, 24, 3, 1, 0, 1, 7, 0, 0, 0, 0),
     ("(0, 35)", "Great Lord's Hammer", "()", 4, 0, 4, 0, 0, 0, 0, 0, 2, 0, 1),
     ("(0, 36)", "Adept's Amulet", "()", 0, 0, 0, 6, 10, 0, 0, 0, 0, 0, 0),
-    ("(0, 37)", "Master's Spellbook", "()", 0, 0, 0, 6, 10, 0, 0, 0, 0, 0, 0)
+    ("(0, 37)", "Master's Spellbook", "()", 0, 0, 0, 6, 10, 0, 0, 0, 0, 0, 0),
+    ("(0, 38)", "Flame Shield", "()", 0, 0, 0, 7, 5, 0, 4, 0, 0, 0, 0)
     ]
 
 wargearTotal += len(wargear)
@@ -188,7 +189,8 @@ wargear = [
     ("(1, 27)", "Zap Tapper", "()", 1, 36, 2, 3, 20, 1, 6, 0, 0, 0, 0),
     ("(1, 28)", "Shock Bombs", "()", 0, 6, 1, 1, 38, 8, 5, 0, 0, 0, 0),
     ("(1, 29)", "Volt Strike", "()", 0, 6, 5, 1, 30, 1, 9, 0, 0, 0, 0),
-    ("(1, 30)", "Skyguard", "('Air only')", 2, 36, 3, 2, 42, 4, 7, 0, 0, 0, 0)
+    ("(1, 30)", "Skyguard", "('Air only')", 2, 36, 3, 2, 42, 4, 7, 0, 0, 0, 0),
+    ("(1, 31)", "Thunder Shield", "()", 0, 0, 0, 7, 5, 0, 4, 0, 0, 0, 0)
     ]
 
 wargearTotal += len(wargear)
@@ -314,10 +316,10 @@ models = [
      3, 4, 4, 0, "('CHARACTER', 'INFANTRY', 'MAGE', 'STORM CALLER')", 9, 0, 6, 4, 85, 1, "portrait_sprite.png", 
      3, "(1, 1)", "orc_storm_caller_sprite.png", 1, "(32, 32)", 4, 4, "(0, 1, 2)"),
     ("(1, 2)", "Spec Ops Orc", "('Orcish Pride', 'Undercover')", 2, 4, 1, 0, "('INFANTRY', 'SPEC OPS SQUAD')",
-     8, 0, 7, 4, 13, 1, "portrait_sprite.png", 4, "(1, 1)", "placeholder_sprite.png", 1, "(32, 32)", 4, 4, 
+     8, 0, 7, 4, 13, 1, "portrait_sprite.png", 4, "(1, 1)", "orc_spec_ops_orc_sprite.png", 1, "(32, 32)", 4, 4, 
      "(5, 1, 2)"),
     ("(1, 3)", "Spec Ops Leader", "('Orcish Pride', 'Undercover')", 3, 4, 1, 0, "('INFANTRY', 'SPEC OPS SQUAD')",
-     9, 0, 7, 4, 13, 1, "portrait_sprite.png", 4, "(1, 1)", "placeholder_sprite.png", 1, "(32, 32)", 4, 4,
+     9, 0, 7, 4, 13, 1, "portrait_sprite.png", 4, "(1, 1)", "orc_spec_ops_leader_sprite.png", 1, "(32, 32)", 4, 4,
       "(5, 1, 2)"),
     ("(1, 4)", "Doom Orc", "('Orcish Pride')", 4, 4, 4, 2, "('INFANTRY', 'DOOM ORC')", 9, 0, 6, 5, 65, 1,
      "portrait_sprite.png", 3, "(2, 2)", "placeholder_sprite.png", 1, "(32, 32)", 5, 5, "(0, 1, 2)"),
@@ -430,7 +432,10 @@ options = [
     ("(0, 57)", "(25)", 1, 1, 16, "()", "()", 0),
     ("(0, 58)", "(18)", 2, 1, 17, "(16)", "()", 0),
     ("(0, 59)", "(36)", 1, 1, 1, "()", "()", 0),
-    ("(0, 60)", "(37)", 1, 1, 1, "()", "(36)", 0)
+    ("(0, 60)", "(37)", 1, 1, 1, "()", "(36)", 0),
+    ("(0, 61)", "(38)", 1, 1, 0, "()", "()", 0),
+    ("(0, 62)", "(38)", 0, 1, 2, "()", "()", 0),
+    ("(0, 63)", "(38)", 0, 1, 3, "()", "()", 0)
     ]
 
 cursor.executemany('''INSERT INTO paladins_options(id, gaining, maximum, type, receivingModel, 
@@ -497,7 +502,9 @@ options = [
     ("(1, 52)", "(30)", 1, 1, 18, "()", "()", 0),
     ("(1, 53)", "(23)", 1, 1, 18, "()", "()", 0),
     ("(1, 54)", "(13)", 1, 1, 1, "()", "()", 0),
-    ("(1, 55)", "(14)", 1, 1, 1, "()", "(13)", 0)
+    ("(1, 55)", "(14)", 1, 1, 1, "()", "(13)", 0),
+    ("(1, 56)", "(31)", 1, 1, 0, "()", "()", 0),
+    ("(1, 57)", "(31)", 0, 1, 4, "()", "()", 0)
     ]
 
 cursor.executemany('''INSERT INTO orcs_options(id, gaining, maximum, type, receivingModel, 
@@ -510,9 +517,9 @@ cursor.execute('''CREATE TABLE paladins_units(id TEXT PRIMARY KEY, title TEXT, r
 models TEXT, options TEXT, sharedKeywords INTEGER)''')
 
 units = [
-    ("(0, 0)", "Captain", 0, "(0)", "(0, 1, 2)", 1),
+    ("(0, 0)", "Captain", 0, "(0)", "(0, 1, 2, 61)", 1),
     ("(0, 1)", "Invoker", 0, "(1)", "(3, 4, 5, 6, 59, 60)", 1),
-    ("(0, 2)", "Veteran Squad", 2, "(3, 2)", "(7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)", 1),
+    ("(0, 2)", "Veteran Squad", 2, "(3, 2)", "(7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 62, 63)", 1),
     ("(0, 3)", "Medicant", 2, "(4)", "()", 1),
     ("(0, 4)", "Ground Squad", 1, "(5, 5, 5, 5, 5)", "(19, 20, 21, 22, 23, 24, 25, 26, 27, 28)", 1),
     ("(0, 5)", "Scout Squad", 1, "(8, 7, 7, 7, 7)", "(30, 31, 32, 33, 34, 35, 36, 37, 38, 39)", 1),
@@ -536,10 +543,10 @@ cursor.execute('''CREATE TABLE orcs_units(id TEXT PRIMARY KEY, title TEXT, role 
 models TEXT, options TEXT, sharedKeywords INTEGER)''')
 
 units = [
-    ("(1, 0)", "Worg Lord", 0, "(0)", "(0, 1, 2, 3)", 1),
+    ("(1, 0)", "Worg Lord", 0, "(0)", "(0, 1, 2, 3, 56)", 1),
     ("(1, 1)", "Storm Caller", 0, "(1)", "(4, 5, 6, 7, 54, 55)", 1),
     ("(1, 2)", "Special Ops Squad", 2, "(3, 2, 2)", "(8, 9, 10, 11, 12, 13, 14)", 1),
-    ("(1, 3)", "Doom Orcs", 2, "(4)", "(15, 16, 17)", 1),
+    ("(1, 3)", "Doom Orcs", 2, "(4)", "(15, 16, 17, 57)", 1),
     ("(1, 4)", "Brawler Squad", 1, "(6, 5, 5, 5, 5)", "(18, 19, 20, 21)", 1),
     ("(1, 5)", "Gunner Squad", 1, "(8, 7, 7, 7, 7)", "(22, 23, 24, 25, 26, 27)", 1),
     ("(1, 6)", "Worg Cavalry", 3, "(10, 9, 9, 9)", "(28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38)", 1),
