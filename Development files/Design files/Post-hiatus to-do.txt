@@ -1,0 +1,23 @@
+- Read through documentation and Warhammer 40k 8th ed rules
+- Commit and push uncommited changes to repo
+- Roll-back code to the state it was in the previous commit
+- Set up repo in Pycharm with virtual environment
+- Convert documentation to markdown
+- Run some test games while reading through the code
+- Tidy up branches
+
+- Start making amends to code, starting with efficiency changes
+	- Battlefields as SQL tables
+	- Other loaded data as CSV files to be loaded into the SQL DB
+	- Update coherency function to increase efficiency
+		- Add models to a "checked" list once they have already been compared to all models 
+		in the notFound list
+		- Verify coherency by checking if the notFound list is empty
+	- Update pathfinding for models that are larger than 1x1
+	- Use functions, methods and dictionaries to prevent indenting too far
+
+- Consider some design changes
+	- Blast ranges for grenades?
+		- "Blast" may have to be an ability rather than a weapon type, else weapons like
+		light grenades would be OP.
+- Consider adding rules for melee/range skills of 6-10

@@ -51,6 +51,7 @@ class Battle:
         self.chatLogImage = resources.load_primary_background("battle_ui_bottom_panel.png")
         self.chatLogSurface = pygame.Surface((420, 200))
         self.chatLogText = []
+        self.checkingExplosions = False
         self.controlPointGroup = pygame.sprite.Group()
         self.controlPoints = [] #List of control point co-ordinates. Replace with tuple.
         #marks the status of an objective marker (0 = neutral, 1 = player1, 2 = player2, 3 = contested)
@@ -58,11 +59,13 @@ class Battle:
         self.currentModel = None
         self.currentNode = None #Used to track clicking
         self.currentSpell = None
+        self.currentTransport = None
         self.currentTurn = None
         self.currentTurnSaved = None #Used to keep track of who's turn it actually is during melee
         self.currentUnit = None
         self.currentWeapon = None
         self.deploymentMap = battlefield.deploymentMap
+        self.disembarkNodes = [] #Used when disembarking from a transport
         #determines the first string shown in the event log. Is increased or decreased by scrolling
         self.eventLogCounter = 0
         #420 x 200, at location 430, 520
@@ -78,7 +81,8 @@ class Battle:
         self.hideUI = False
         self.highlightGroup = pygame.sprite.Group()
         self.highlighting = False
-        self.infoType = 0 #0 = units, 1 = terrain, 2 = models
+        #Determines the type of information displayed on the side panels
+        self.infoType = 0 #0 = units, 1 = terrain, 2 = models, 3 = transport passengers
         #150 x 450, at location 0, 60
         self.leftPanelGroup = pygame.sprite.Group()
         self.leftPanelImage = resources.load_primary_background("battle_ui_side_panel.png")
@@ -94,8 +98,8 @@ class Battle:
         self.otherTurn = None
         self.otherTurnSaved = None #Used to keep track of who's turn it actually is during melee
         self.otherUnit = None
-        #0 = deploy, 1 = move, 2 = magic, 3 shoot, 4 = charge, 5 = melee, 6 = morale
         self.pileIn = True #Used to differentiate between a pile in an a consolidate
+        #0 = deploy, 1 = move, 2 = magic, 3 shoot, 4 = charge, 5 = melee, 6 = morale
         self.phase = 0
         #150 x 450, at location 1130, 60
         self.randomNumbers = []
@@ -112,10 +116,10 @@ class Battle:
         self.turn = [0, 0] #first int is player 1 turn, 2nd is player 2
         self.terrainGroup = pygame.sprite.Group()
         self.surface = None
-        #list of tuples. Contains Ids of units still in need of deployment
         self.unitCount = 0
         self.units = {}
         self.unitsForMelee = [[], [], [], [], [], []]
+        #list of tuples. Contains Ids of units still in need of deployment
         self.unitsToDeploy = []
         self.xOffset = 0 #Minimum of 0
         self.xOffsetMax = 0
@@ -409,7 +413,7 @@ class Battle:
         
     def update(self, values, event=None):
         
-        if self.awaitingEvent:
+        if self.awaitingEvent and not self.checkingExplosions:
             if event != None:
                 if event.type == KEYUP:
                     
@@ -467,6 +471,11 @@ class Battle:
                     elif event.key == ord('m'):
                         if self.showInfo:
                             self.infoType = 2
+                            self.get_panel_info(values)
+                            
+                    elif event.key == ord('n'):
+                        if self.showInfo:
+                            self.infoType = 3
                             self.get_panel_info(values)
                             
                     elif event.key == ord('p'):
@@ -596,6 +605,9 @@ class Battle:
             else:
                 self.scroll(values, 32) 
         
+        elif self.checkingExplosions:
+            print("Checking explosions!")
+        
         else:
             
             #Check if a player has been wiped
@@ -614,7 +626,7 @@ class Battle:
             if self.state in [0, 3, 5]:
                 self.handle_deployment(values)
                 
-            elif self.state in [6, 7, 8, 9, 10, 11, 13, 14]:
+            elif self.state in [6, 7, 8, 9, 10, 11, 13, 14, 58, 59, 60, 61]:
                 self.handle_movement(values)
                 
             elif self.state in [15, 16, 17, 18, 19, 20, 21, 22, 23]:
@@ -634,7 +646,7 @@ class Battle:
                 
             elif self.state in [54, 55, 56]:
                 self.handle_endgame(values)
-                
+
     def apply_damage(self, values, attacks, targetCodex, spell=None, melee=False):
         
         damage = 0
@@ -738,6 +750,8 @@ class Battle:
                             deaths[data] = 1
                         else:
                             deaths[data] += 1
+                            
+                        self.checkingExplosions = True
                             
                         #Pass details to is unit still alive
                         unitAlive = self.is_unit_still_alive(values, unit, targetCodex=targetCodex)
@@ -935,6 +949,18 @@ class Battle:
             
         self.set_up_header_display(values)
         
+    def check_explosions(self, values):
+        newExplosions = False
+        for m in self.models:
+            if self.models[m].dead and not self.models[m].exploded and 'Explodes' in self.models[m].keywords:
+                newExplosions = True
+                self.models[m].exploded = True
+                #Calculate range around model
+                for x in range(self.models[m]):
+                    pass
+                #Loop through nodes in range
+                #
+        
     def check_kill_points(self, values, unit):
         
         #If this is the first unit to die, award First Blood
@@ -1009,6 +1035,11 @@ class Battle:
         else:
             return False
         
+    def clear_buttons(self, values):
+        values.buttons = []
+        self.commandListGroup.empty()
+        self.commandListMaxed = False
+        
     def delete_unit_from_field(self, unit):
         for model in unit.models:
             if model.sprite != None:
@@ -1020,6 +1051,167 @@ class Battle:
                 model.nodes.remove(n)
                 
             model.topLeftNode = None
+            
+    def deploy_unit(self, values, selectedNode, nodeList, unit, playerCodex, deployment):
+        """
+        selectedNode - Node Object where the deployment is to take place
+        nodeList - tuple of all deployable Node coordinates
+        unit - Unit Object being deployed
+        playerCodex - Codex Object for the player's unit
+        deployment - bool, True = deployment phase, False = unit disembarking from transport
+        """
+        
+        #Check to see if selected Node is on a friendly transport. If so, change state to ask player if 
+        #they would like to deploy within the transport
+        #Make sure current unit is infantry before offering to deploy
+        
+        infantry = True
+        for model in unit.models:
+            if "INFANTRY" not in model.keywords:
+                infantry = False
+                break
+        
+        if deployment and infantry and selectedNode.takenBy != None:
+            if ("TRANSPORT" in self.models[selectedNode.takenBy].keywords and
+                selectedNode.takenBy in self.currentTurn.models):
+                self.currentTransport = self.units[self.models[selectedNode.takenBy].unitID]
+                text = "Would you like to deploy " + unit.name + " inside of " + self.currentTransport.name + "?"
+                self.update_main_message(values, text)
+                self.state = 57
+                return None
+        
+        #Check if node is in players deployment zone
+        if selectedNode.coordinates in nodeList:
+            #If so, look at the viability of placing models as closely to the click as possible
+            successes = 0 #Count of models successfully allocated
+            
+            nodes = []
+            for node in nodeList:
+                self.nodes[node].H = (abs(self.nodes[node].x - selectedNode.x) + 
+                                      abs(self.nodes[node].y - selectedNode.y))
+                nodes.append(self.nodes[node])
+            nodes.sort(key=operator.attrgetter("H"))
+            
+            images = {}
+            
+            for model in unit.models:
+                #Loop through size and check that nodes are available
+                size = playerCodex.models[model.data].size
+                running2 = True
+                if "FLY" in model.keywords:
+                    checkWalkable = False
+                else:
+                    checkWalkable = True
+                while len(nodes) > 0 and running2:
+                    node = nodes.pop(0)
+                    running = True
+                    while running:
+                        running, taken = self.get_standable_nodes(node, size, checkWalkable, deploymentOnly=deployment)
+                        
+                        if running:
+                            #If enough space can be found assign nodes to model
+                            cover = 3
+                            for n in taken:
+                                self.nodes[n].takenBy = model.ID
+                                cover = min(cover, self.nodes[n].cover)
+                                model.nodes.append(n)
+                                
+                                #Set top left node
+                                if model.topLeftNode == None:
+                                    model.topLeftNode = n
+                                else:
+                                    if n[0] <= model.topLeftNode[0] and n[1] <= model.topLeftNode[1]:
+                                        model.topLeftNode = n
+                             
+                            #set cover   
+                            model.cover = cover
+                            
+                            #Set up sprites
+                            imageName = playerCodex.models[model.data].spriteName
+                            imagePrimary = playerCodex.models[model.data].spritePrimary
+                            imageRect = playerCodex.models[model.data].spriteRect
+                            imageRect = (node.backSprite.rect.x, node.backSprite.rect.y, imageRect[0], 
+                                         imageRect[1])
+                            
+                            if imageName not in images:
+                                if imagePrimary:
+                                    images[imageName] = resources.load_primary_sprite(imageName)
+                                else:
+                                    images[imageName] = resources.load_secondary_sprite(imageName)
+                            image = images[imageName]
+                            model.sprite = sprites.GameSprite(image, imageRect)
+                            self.modelsGroup.add(model.sprite)
+                            running = False
+                            running2 = False
+                            successes += 1
+            
+            
+            
+            #Clean up failures
+            if successes < len(unit.models):
+                print("ULTIMATE FAILURE")
+                #kill models sprites
+                self.delete_unit_from_field(unit)
+                
+            #If successful and disembarking
+            elif not deployment:
+                if self.check_unit_coherency(unit):
+                    text = "{0} has disembarked.".format(self.currentUnit.name)
+                    self.update_event_log(values, text)
+                    self.update_control_point_status(values)
+                    #Flag unit as having disembarked
+                    self.currentUnit.disembarked = True
+                    
+                    #Remove unit from onboard
+                    self.currentTransport.onboard.remove(self.currentUnit.ID)
+                    
+                    #Set transport up as current unit again
+                    self.currentUnit = self.currentTransport
+                    self.currentTransport = None
+                    
+                    
+                    self.squaresGroup.empty()
+                    self.state = 9
+                    self.awaitingEvent = False
+                else:
+                    text = "Unable to deploy - units cannot be deployed in coherency"
+                    self.update_main_message(values, text)
+                    self.delete_unit_from_field(unit)
+            
+            else:
+                #Add purple squares to units
+                self.get_purple_squares()
+                #Update message
+                text = self.currentTurn.name + " can move individual models or confirm the unit's position"
+                self.update_main_message(values, text)
+                self.state = 3
+                
+    def embark_on_transport(self, values):
+        
+        if self.phase == 1:
+            self.update_control_point_status(values)
+            self.update_melee_status(values)
+            self.squaresGroup.empty()
+            #Clear old nodes and mark unit as having finished the phase
+            self.currentUnit.endPhase = True
+            for model in self.currentUnit.models:
+                model.oldNodes = []
+                
+            if self.highlighting:
+                self.toggle_highlighting()
+            if self.phase == 1:
+                self.state = 8
+                
+            self.delete_unit_from_field(self.currentUnit)
+        
+        self.currentTransport.onboard.append(self.currentUnit.ID)
+        if self.phase == 0:
+            text = self.currentTurn.name + " deploys " + self.currentUnit.name + " inside of " + self.currentTransport.name
+        else:
+            text = self.currentUnit.name + " embarks upon " + self.currentTransport.name
+        self.currentTransport = None
+        
+        return text
             
     def get_closest_visible_unit(self):
         #Get closest visible unit
@@ -1069,6 +1261,11 @@ class Battle:
                 self.currentUnit.closestVisible.append(unit)
         
     def get_command_list(self, values, itemList, actionList=None):
+        
+        """
+        NOTE - THE COMMANDLISTCOUNTER SHOULD BE RESET TO 0 AFTER SELECTING AN OPTION, PROVIDING THE OPTION LIST IS LARGER THAN 11 ITEMS
+                THIS MAY CAUSE AN ISSUE WITH LARGE MELEE FIGHTS
+        """
         
         widePanelImage = resources.load_secondary_sprite("wide_panel01.png")
         buttonImage = pygame.transform.scale(widePanelImage, (210, 25))
@@ -1133,8 +1330,18 @@ class Battle:
                             storage = None
                             text = item + " (" + keys[i] + ")"
                             action = 70
+                    elif self.state == 60:
+                        if item != "Cancel":
+                            storage = self.units[item]
+                            text = storage.name + " (" + keys[i] + ")"
+                            action = 79
+                        else:
+                            storage = None
+                            text = item + " (" + keys[i] + ")"
+                            action = 80 
                     elif self.state in [2, 5, 8, 9, 10, 11, 14, 16, 18, 19, 20, 21, 23, 25, 27, 28, 29, 30, 32,
-                                        34, 35, 36, 37, 40, 42, 43, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]:
+                                        34, 35, 36, 37, 40, 42, 43, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 58,
+                                        59, 61]:
                         storage = None
                         text = item + " (" + keys[i] + ")"
                         action = actionList[i]
@@ -1165,6 +1372,53 @@ class Battle:
                 self.commandListGroup.add(button.sprites)
                 createButton = False
                 break
+    
+    def get_disembark_nodes(self, transport, playerCodex, emergency):
+        
+        #Get enemy model IDs
+        if transport.ID in self.players[0].units:
+            enemy = self.players[1]
+        else:
+            enemy = self.players[0]
+            
+        #Get top left and bottom right vectors
+        x_min = transport.models[0].topLeftNode[0]
+        y_min = transport.models[0].topLeftNode[1]
+        size = playerCodex.models[transport.models[0].data].size
+        x_max = transport.models[0].topLeftNode[0] + size[0]
+        y_max = transport.models[0].topLeftNode[1] + size[1]
+        
+        #Set up list for available nodes
+        availableNodes = []
+        
+        #Loop through x and y nodes
+        for x in range(x_min - 3, x_max + 3):
+            for y in range(y_min - 3, y_max + 3):
+                #Are x and y in the node list? If not, ignore
+                if (x, y) in self.nodes:
+                    #Are x and y in the transport's nodes? If so, ignore
+                    ignore = False
+                    if (x, y) in transport.models[0].nodes and not emergency:
+                        ignore = True
+                    #Check node's neighbours
+                    if not ignore:
+                        close = False
+                        for x2 in range(x - 1, x + 2):
+                            if not close:
+                                for y2 in range(y - 1, y + 2):
+                                    if (x, y) == (x2, y2):
+                                        pass
+                                    else:
+                                        #If neighbour is in node list and is taken by enemy, then ignore the node
+                                        if self.nodes[(x2, y2)].takenBy in enemy.models:
+                                            close = True
+                                            break
+                        
+                        #If all checks are passed, add node to available
+                        if not close:
+                            availableNodes.append((x, y))
+                            
+        return availableNodes
             
     def get_distance_between_nodes(self, node1, node2):
         #Get absolute differences
@@ -1366,7 +1620,7 @@ class Battle:
         
         if self.currentNode != None and not controlPoints:
         
-            
+            #Unit display
             if self.infoType == 0 and self.currentNode.takenBy != None:
                 y = 190
                 unit = self.units[self.models[self.currentNode.takenBy].unitID]
@@ -1379,12 +1633,15 @@ class Battle:
                     image = values.font20.render("BOSS", True, values.colours["Red"])
                     spr.append(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 160, 0), 20, 
                                                       image.get_width(), image.get_height())))
+                
+                #Portrait
                 if unit.ID in self.players[0].units:
                     i = 0
                 else:
                     i = 1
-                text = self.players[i].playerArmy.codex.models[unit.models[0].data].portraitSprite
-                #Portrait
+                    
+                
+                text = self.players[i].playerArmy.codex.models[unit.models[0].data].portraitSprite 
                 image = resources.load_primary_sprite(text)
                 spr.append(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 160, 0), 40, 
                                                       image.get_width(), image.get_height())))
@@ -1573,7 +1830,75 @@ class Battle:
                     self.rightPanelGroup.empty()
                 else:
                     self.leftPanelGroup.empty()
+                   
+            #Transport view 
+            elif self.infoType == 3 and self.currentNode.takenBy != None:
+                if "TRANSPORT" in self.models[self.currentNode.takenBy].keywords:
+                    y = 190
+                    unit = self.units[self.models[self.currentNode.takenBy].unitID]
+                    #Display name
+                    image = values.font20.render(unit.name, True, values.colours["Black"])
+                    spr.append(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 160, 0), 0, 
+                                                          image.get_width(), image.get_height())))
                     
+                    #Portrait
+                    if unit.ID in self.players[0].units:
+                        i = 0
+                    else:
+                        i = 1
+                    text = self.players[i].playerArmy.codex.models[unit.models[0].data].portraitSprite
+                    image = resources.load_primary_sprite(text)
+                    spr.append(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 160, 0), 40, 
+                                                          image.get_width(), image.get_height())))
+                    
+                    if unit.ID in self.players[1].units:
+                        rightPanel = True
+                        self.rightPanelGroup.empty()
+                    else:
+                        self.leftPanelGroup.empty()
+                        
+                    y += 20
+                    
+                    #Set up subtitle reading "On board:"
+                    image = values.font20.render("On board:", True, values.colours["Black"])
+                    spr.append(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 160, 0), y, 
+                                                          image.get_width(), image.get_height())))
+                    y += 10
+                    #Loop through units in transport
+                    for u in unit.onboard:
+                        y += 10
+                        #Unit names
+                        text = self.units[u].name + "("
+                        #Loop through models and count variations
+                        modelDict = {}
+                        for model in self.units[u].models:
+                            if model.ID in self.players[0].models:
+                                i = 0
+                            else:
+                                i = 1
+                            modelName = self.players[i].playerArmy.codex.models[model.data].name
+                            if modelName in modelDict:
+                                modelDict[modelName] += 1
+                            else:
+                                modelDict[modelName] = 1
+                            
+                        #combine to form one string per unit
+                        first = True
+                        for model in modelDict:
+                            if first:
+                                text += model + "x" + str(modelDict[model])
+                                first = False
+                            else:
+                                text += ", " + model + "x" + str(modelDict[model])
+                        
+                        text += ")"
+                        textList = misc.cut_down_string(text, 30)
+                        for t in textList:
+                            image = values.font20.render(t, True, values.colours["Black"])
+                            spr.append(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 160, 0), y, 
+                                                                  image.get_width(), image.get_height())))
+                            y += 10
+                            
         elif controlPoints:
             
             self.leftPanelGroup.empty()
@@ -1793,6 +2118,31 @@ class Battle:
         elif button.use == 2:
             if self.state == 3:
                 self.awaitingEvent = False
+            elif self.state == 57:
+                #Make sure the transport has capacity to store the current unit
+                #Loop through living models in the current unit and sum the total
+                newModels = 0
+                for model in self.currentUnit.models:
+                    if not model.dead:
+                        newModels += 1
+                #Loop through living models and units in the current transport
+                onboardModels = 0
+                for unit in self.currentTransport.onboard:
+                    for model in self.units[unit].models:
+                        if not model.dead:
+                            onboardModels += 1
+                            
+                if ((self.currentTransport.models[0].maxHP - onboardModels) - newModels) >= 0:
+                    #If so, set state to 3 to progress the phase
+                    self.state = 3
+                    self.awaitingEvent = False
+                #Else, warn the player and set state back to 2
+                else:
+                    text = "Cannot confirm: transport does not have capacity to carry this many models"
+                    self.update_main_message(values, text)
+                    #Set current transport back to none
+                    self.currentTransport = None
+                    self.state = 2
             
         #Cancel from deploying a unit
         elif button.use == 3:
@@ -1973,6 +2323,10 @@ class Battle:
             
             #Set state
             if self.phase == 1:
+                #Reset movement flags
+                self.currentUnit.moved = False
+                self.currentUnit.advanced = False
+                self.currentUnit.fellBack = False
                 self.currentModel = None
                 self.currentUnit = None
                 self.state = 8
@@ -2016,7 +2370,8 @@ class Battle:
                         #Report destroyed units
                         text = self.units[unit].name + " crashed and burned!"
                         self.update_event_log(values, text)
-                        self.check_kill_points(values, self.units[unit])              
+                        self.check_kill_points(values, self.units[unit])  
+                        self.checkingExplosions = True            
                 
             self.phase = 2
             
@@ -2535,6 +2890,72 @@ class Battle:
         elif button.use == 73:
             values.state = 0
             
+        #Embark button
+        elif button.use == 74:
+            #Advance the current state
+            self.state = 58
+            self.awaitingEvent = False
+            
+        #Back button when choose a transport to embark onto
+        elif button.use == 75:
+            #Loop through models and see if any have already moved.
+            alreadyMoved = False
+            for model in self.currentUnit.models:
+                if len(model.oldNodes) != 0:
+                    alreadyMoved = True
+                    break
+            #If they have, back into state 11
+            if alreadyMoved:
+                self.state = 11
+            #Else, back into state 9
+            else:
+                self.state = 9
+            self.awaitingEvent = False
+            
+        #Confirm button when embarking on a transport in the movement phase
+        elif button.use == 76:
+            text = self.embark_on_transport(values)
+            self.update_event_log(values, text)
+            self.state = 8
+            self.awaitingEvent = False
+            
+        #Back button when confirming whether or not to embark on a transport
+        elif button.use == 77:
+            self.currentTransport = None
+            self.state = 58
+            self.awaitingEvent = False
+            
+        #Disembark button
+        elif button.use == 78:
+            self.state = 60
+            self.awaitingEvent = False
+            
+        #Select unit for disembarking
+        elif button.use == 79:
+            self.commandListCounter = 0
+            self.currentTransport = self.currentUnit
+            self.currentUnit = button.storage
+            self.state = 61
+            self.awaitingEvent = False
+            
+        #Backing out of disembarking
+        elif button.use == 80:
+            self.commandListCounter = 0
+            
+            alreadyMoved = False
+            for model in self.currentUnit.models:
+                if len(model.oldNodes) != 0:
+                    alreadyMoved = True
+                    break
+            #If they have, back into state 11
+            if alreadyMoved:
+                self.state = 11
+            #Else, back into state 9
+            else:
+                self.state = 9
+                
+            self.awaitingEvent = False
+            
     def handle_charge(self, values):
         
         #Set up
@@ -2757,10 +3178,24 @@ class Battle:
             
         if self.state == 3:
             #Check that the current unit for coherency
-            coherent = self.check_unit_coherency(self.currentUnit)
+            #If player is deploying a unit in a transport, ignore the coherency check
+            if self.currentTransport == None:
+                coherent = self.check_unit_coherency(self.currentUnit)
+            else:
+                coherent = True
             #If it passes, remove unit ID from deploy list
             if coherent:
-                text = self.currentTurn.name + " deploys " + self.currentUnit.name
+                #If deployment is in a transport, announce this approprately
+                #Set current transport back to none
+                if self.currentTransport == None:
+                    text = self.currentTurn.name + " deploys " + self.currentUnit.name
+                else:
+                    """
+                    self.currentTransport.onboard.append(self.currentUnit.ID)
+                    text = self.currentTurn.name + " deploys " + self.currentUnit.name + " inside of " + self.currentTransport.name
+                    self.currentTransport = None
+                    """
+                    text = self.embark_on_transport(values)
                 self.update_event_log(values, text)
                 self.unitsToDeploy.remove(self.currentUnit.ID)
                 self.squaresGroup.empty()
@@ -3529,6 +3964,7 @@ class Battle:
                 self.units[unit].moved = False
                 self.units[unit].advanced = False
                 self.units[unit].fellBack = False
+                self.units[unit].disembarked = False
                 self.units[unit].chargedUnit = None
                 
                 if unit in self.currentTurn.units:
@@ -3577,11 +4013,26 @@ class Battle:
             if self.currentUnit.inMelee:
                 commands.append("Fall Back")
                 actionList.append(8)
+                
             else:
                 commands.append("Move")
                 commands.append("Advance")
                 actionList.append(6)
                 actionList.append(7)
+            
+            #Embark on transport option for infantry
+            infantry = False
+            if self.phase == 1:
+                infantry = self.is_unit_infantry(self.currentUnit)
+            if infantry:
+                commands.append("Embark")
+                actionList.append(74)
+                
+            #Add disembarking 
+            elif len(self.currentUnit.onboard) > 0 and self.phase == 1:
+                commands.append("Disembark")
+                actionList.append(78)
+                
             commands.append("Cancel")
             actionList.append(9)
             self.get_command_list(values, commands, actionList=actionList)
@@ -3640,8 +4091,18 @@ class Battle:
             self.commandListMaxed = False
             
             #Set up confirm and reset
-            commands = ["Confirm", "Reset", "Cancel"]
-            self.get_command_list(values, commands, actionList=[14, 15, 16])
+            infantry = False
+            if self.phase == 1:
+                infantry = self.is_unit_infantry(self.currentUnit)
+            if infantry:
+                commands = ["Confirm", "Reset", "Embark", "Cancel"]
+                self.get_command_list(values, commands, actionList=[14, 15, 74, 16])
+            elif len(self.currentUnit.onboard) > 0 and self.phase == 1:
+                commands = ["Confirm", "Reset", "Disembark", "Cancel"]
+                self.get_command_list(values, commands, actionList=[14, 15, 78, 16])
+            else:
+                commands = ["Confirm", "Reset", "Cancel"]
+                self.get_command_list(values, commands, actionList=[14, 15, 16])
             
             if self.phase == 6:
                 otherPlayer = False
@@ -3670,7 +4131,7 @@ class Battle:
             
         #Confirm coherency after moving a unit
         elif self.state == 13:
-            #Check that the current unit for coherency
+            #Check the current unit for coherency
             coherent = self.check_unit_coherency(self.currentUnit)
             if (self.phase == 1 and not self.currentUnit.fellBack) or self.phase == 6:
                 inRange = True
@@ -3805,15 +4266,66 @@ class Battle:
         #After pressing the endphase button
         elif self.state == 14:
             #Clear buttons
-            values.buttons = []
-            self.commandListGroup.empty()
-            self.commandListMaxed = False
+            self.clear_buttons(values)
             
             #Set up confirmation buttons
             commands = ["Yes", "No"]
             self.get_command_list(values, commands, actionList=[18, 19])
             
             self.update_main_message(values, "Are you sure you want to end the phase?")
+            self.awaitingEvent = True
+            
+        #After pressing the embark button
+        elif self.state == 58:
+            #Clear buttons
+            self.clear_buttons(values)
+            #Ask player to select a transport
+            self.update_main_message(values, "Select a friendly transport to embark onto")
+            #Set up back button
+            commands = ["Back"]
+            self.get_command_list(values, commands, actionList=[75])
+            self.awaitingEvent = True
+            
+        #Selecting a viable transport to embark onto
+        elif self.state == 59:
+            self.clear_buttons(values)
+            
+            #Set up confirmation buttons
+            commands = ["Yes", "No"]
+            self.get_command_list(values, commands, actionList=[76, 77])
+            
+            text = "Are you sure you want to embark onto " + self.currentUnit.name + "?"
+            self.update_main_message(values, text)
+            self.awaitingEvent = True
+            
+        #Selecting to disembark
+        elif self.state == 60:
+            self.clear_buttons(values)
+            units = copy.copy(self.currentUnit.onboard)
+            units.append("Cancel")
+            self.get_command_list(values, units)
+            self.update_main_message(values, "Select a unit for disembarking")
+            self.awaitingEvent = True
+            
+        #Selecting where to disembark
+        elif self.state == 61:
+            self.clear_buttons(values)
+            self.get_command_list(values, ["Cancel"], actionList=[81])
+            
+            #Create list of nodes for disembarking
+            self.disembarkNodes = self.get_disembark_nodes(self.currentTransport, self.currentTurn.playerArmy.codex, False)
+            
+            #Highlight list like a movement range
+            image = resources.load_primary_sprite("highlight_lime_green.png")
+            image = sprites.get_translucent_sprite(image)
+            for node in self.disembarkNodes:
+                x = self.nodes[node].backSprite.rect.x
+                y = self.nodes[node].backSprite.rect.y
+                self.squaresGroup.add(sprites.GameSprite(image, (x, y, 32, 32)))
+            
+            text = "Choose where to deploy " + self.currentUnit.name + " from " + self.currentTransport.name
+            self.update_main_message(values, text)
+            
             self.awaitingEvent = True
             
     def handle_shooting(self, values):
@@ -4102,8 +4614,10 @@ class Battle:
                 else:
                     shots = self.currentWeapon.shots
                 if self.phase == 3:
-                    if self.currentWeapon.gearType == 2 and self.units[model.unitID].moved:
+                    #Heavy weapon penalties
+                    if self.currentWeapon.gearType == 2 and (self.units[model.unitID].moved or self.units[model.unitID].disembarked):
                         rSkill = max(model.rSkill - 1, 1)
+                    #Assault weapon penalties
                     elif self.currentWeapon.gearType == 1 and self.units[model.unitID].advanced:
                         rSkill = max(model.rSkill - 1, 1)
                     else:
@@ -4157,6 +4671,9 @@ class Battle:
     def handle_field_click(self, values):
         #If selecting a node to deploy to
         if self.state == 2:
+            self.deploy_unit(values, self.currentNode, self.currentTurn.deploymentZoneNodes, self.currentUnit, 
+                             self.currentTurn.playerArmy.codex, True)
+            """
             #Check if node is in players deployment zone
             if self.currentNode.coordinates in self.currentTurn.deploymentZoneNodes:
                 #If so, look at the viability of placing models as closely to the click as possible
@@ -4237,6 +4754,7 @@ class Battle:
                     text = self.currentTurn.name + " can move individual models or confirm the unit's position"
                     self.update_main_message(values, text)
                     self.state = 3
+            """
         
         #Click on model to move during deployment     
         elif self.state == 3:
@@ -4939,7 +5457,83 @@ class Battle:
                         self.currentUnit.targetUnit = targetUnit
                         self.state = 50
                         self.awaitingEvent = False
+                
+        #Selecting a transport to embark onto        
+        elif self.state == 58:
+            #Does the clicked node contain a model?
+            if self.currentNode.takenBy != None:
+                transport = self.models[self.currentNode.takenBy]
+                #Is the model in the current players models?
+                if transport.ID in self.currentTurn.models:
+                    friendly = True
+                else:
+                    friendly = False
+                #Does it have the transport keyword?
+                if friendly and 'TRANSPORT' in transport.keywords:
+                    isTransport = True
+                else:
+                    isTransport = False
+                    
+                #Does it have capacity to carry the current unit?
+                if friendly and isTransport:
+                    newModels = 0
+                    for model in self.currentUnit.models:
+                        if not model.dead:
+                            newModels += 1
+                    #Loop through living models and units in the current transport
+                    onboardModels = 0
+                    for unit in self.units[transport.unitID].onboard:
+                        for model in self.units[unit].models:
+                            if not model.dead:
+                                onboardModels += 1
+                    if ((transport.maxHP - onboardModels) - newModels) >= 0:
+                        hasCapacity = True
+                    else:
+                        hasCapacity = False
                         
+                    if hasCapacity:
+                        unitInRange = True
+                        #Is every model in the current unit within 3 squares of the transport?
+                        #Loop through models
+                        for model in self.currentUnit.models:
+                            #Loop through model's nodes
+                            modelInRange = False
+                            for node1 in model.nodes:
+                                #Loop through transport's nodes
+                                for node2 in transport.nodes:
+                                    #Compare distance
+                                    distance = self.get_distance_between_nodes(node1, node2)
+                                    
+                                    #If any distance is less than 4 squares, break out of the node loops and check the next model
+                                    if distance < 4:
+                                        modelInRange = True
+                                        break
+                                    
+                                if modelInRange:
+                                    break
+                            #If all distances are further than 3 nodes, break out of all loops and flag that the transport is too far
+                            if not modelInRange:
+                                unitInRange = False
+                                break
+                            
+                        if unitInRange:
+                            self.currentTransport = self.units[transport.unitID]
+                            self.state = 59
+                            self.awaitingEvent = False
+                        else:
+                            text = "Cannot confirm: some models are too far away from the selected transport"
+                            self.update_main_message(values, text)
+                    
+                    else:
+                        text = "Cannot confirm: transport does not have capacity to carry this many models"
+                        self.update_main_message(values, text)
+            
+            #If all checks are passed, advance state
+            
+        #Selecting where to disembark a unit
+        elif self.state == 61:
+            #attempt to deploy
+            self.deploy_unit(values, self.currentNode, self.disembarkNodes, self.currentUnit, self.currentTurn.playerArmy.codex, False)
                         
     def is_node_in_line_of_sight(self, startNode, targetNode, enemy):
         #Create a current node and set success to true
@@ -4987,6 +5581,15 @@ class Battle:
                 currentNode = (currentNode[0] + x, currentNode[1] + y)
             
         return success
+    
+    def is_unit_infantry(self, unit):
+        infantry = True
+        for model in unit.models:
+            if "INFANTRY" not in model.keywords:
+                infantry = False
+                break
+            
+        return infantry
     
     def is_unit_still_alive(self, values, unit, targetCodex=None):
         alive = False

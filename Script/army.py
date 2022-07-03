@@ -1924,6 +1924,7 @@ class Model:
         self.attackTargets = []
         self.cover = 0
         self.currentNodes = []
+        self.exploded = False
         self.fled = False
         self.dead = False
         self.grenadesUsed = False
@@ -1998,6 +1999,7 @@ class Unit:
         self.chargedUnit = None
         self.chargeRange = 0
         self.destroyed = False
+        self.disembarked = False #Set to true when a unit leaves a transport during the movement phase
         self.endPhase = False
         self.fellBack = False
         self.flags = []
@@ -2007,6 +2009,7 @@ class Unit:
         self.thrownGrenade = False
         
         self.closestVisible = []
+        self.onboard = [] #Used by transports to store unit IDs
         self.spellTargets = []
         self.targetUnit = None
         

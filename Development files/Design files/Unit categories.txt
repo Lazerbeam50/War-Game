@@ -24,6 +24,7 @@ Fast Attackers
 - Bikes
 - Jet bikes
 - Fast infantry
+- Jump pack infantry
 - Jet pack infantry
 - Cavalry
 - Chariot

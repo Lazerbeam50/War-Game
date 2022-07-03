@@ -56,25 +56,34 @@ Fortified Tower - Structure - 2 RS, 8 Fort, 20 HP, 4 Armour. Immobile. High str,
 
 Sorcerers
 =========
+Base invul save: 2
+Base armour save 2
 
-Shield generator
+Battlemage Squad - Troops - Melee infantry - 
+
+Wayfayrer Squad - Troops - Range infantry - 
+
+Shield generator - Structure - 5 Movement, Gives plus one invul save
 
 Earthlings
 ==========
 
 Field Commander (Infantry character)
-Tank Commander (Heavy tank)
+Tank Commander (Heavy tank) - 4 range skill
 
 Engineer Squad (repairs vehicles, 6-10 models)
 Medic Squad (prevents damage in a similar manner to Necromancers, 6-10 models)
+Heavy tank (Can be equipped with anti-air gun) - 3 range skill, good value
 
 Infantry squad (6-10 models)
 Anti-Tank squad (6-10 models)
 
-xxx
-xxx
+Armoured Strikers (3-5 models, Fast melee infantry, armed with swords, bonus to charge,
+			expensive for what they are)
+Scouting drones (3-10 models, Fast ranged infantry, armed with assault and heavy weapons,
+			has FLY keyword and 2 invul save, heavy weapon is good vs FLY units)
 
-Tank (Light tank)
+Tank (Light tank) - 3 range skill, good value
 Mech Gun (Artillery with 2 operators)
 
 APC (Transport - Large capacity)
@@ -82,6 +91,10 @@ Transport Helicopter (Air transport)
 
 Gunship
 Fighter Jet (Very strong fighter plane, can rival Paladin interceptors)
+
+Side-arms list
+Ranged-weapons list
+Tank guns list
 
 Valkyries
 =========
