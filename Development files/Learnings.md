@@ -1,0 +1,6 @@
+- Decide on a window size at the start and work in scalling.
+- Code pathfinding in C from the get-go.
+- Maybe try creating a function when you get three or more indents deep
+- Use virtual environments
+- Switch to pycharm maybe?
+- Set up databases as a csv and load that into SQLite instead of typing it directly into python.
