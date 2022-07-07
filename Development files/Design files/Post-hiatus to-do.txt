@@ -6,6 +6,8 @@
 - Run some test games while reading through the code
 - Tidy up branches
 
+- Update resolution and sprite scalling
+
 - Start making amends to code, starting with efficiency changes
 	- Battlefields as SQL tables
 	- Other loaded data as CSV files to be loaded into the SQL DB
