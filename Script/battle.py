@@ -607,6 +607,7 @@ class Battle:
         
         elif self.checkingExplosions:
             print("Checking explosions!")
+            self.checkingExplosions = False #Adding this to prevent the script from crashing
         
         else:
             
@@ -4929,7 +4930,7 @@ class Battle:
                                 allowTaken = False
                             passClose = True
                             maxMove = 3
-                        t1 = time.clock()
+                        t1 = time.process_time()
                         moveRange = self.get_movement_range(model.topLeftNode, model.minMove, maxMove, size, 
                                                             checkWalkable=checkWalkable, allowTaken=allowTaken, 
                                                             passClose=passClose, standClose=standClose,
@@ -4937,7 +4938,7 @@ class Battle:
                                                             standCloseSpecific=standCloseSpecific,
                                                             mustBeClose=mustBeClose,
                                                             modelID=model.ID, enemyModels=self.otherTurn.models)
-                        t2 = time.clock()
+                        t2 = time.process_time()
                         timediff = t2 - t1
                         print(f"It took {timediff} seconds to calculate that movement range")
                         #If movement range is empty, do nothing

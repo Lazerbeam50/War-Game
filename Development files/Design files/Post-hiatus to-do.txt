@@ -7,8 +7,11 @@
 - Tidy up branches
 
 - Update resolution and sprite scalling
+	- Consider a dictionary look up for placing UI elements and text
+	- Consider changing the sprite size (16x16? 24x24?)
 
 - Start making amends to code, starting with efficiency changes
+	- Don't import everything from Pygame.locals
 	- Battlefields as SQL tables
 	- Other loaded data as CSV files to be loaded into the SQL DB
 	- Update coherency function to increase efficiency
