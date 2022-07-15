@@ -4,7 +4,7 @@ Created on 28 Mar 2019
 '''
 
 import pygame
-from pygame.locals import *
+import pygame.locals as pyLocals
 
 import copy
 import math
@@ -415,24 +415,24 @@ class Battle:
         
         if self.awaitingEvent and not self.checkingExplosions:
             if event != None:
-                if event.type == KEYUP:
+                if event.type == pyLocals.KEYUP:
                     
-                    if event.key == K_LCTRL:
+                    if event.key == pyLocals.K_LCTRL:
                         if self.hideUI:
                             self.hideUI = False
                         else:
                             self.hideUI = True
                             
-                    elif event.key == K_UP:
+                    elif event.key == pyLocals.K_UP:
                         self.upPressed = False
-                    elif event.key == K_DOWN:
+                    elif event.key == pyLocals.K_DOWN:
                         self.downPressed = False
-                    elif event.key == K_LEFT:
+                    elif event.key == pyLocals.K_LEFT:
                         self.leftPressed = False
-                    elif event.key == K_RIGHT:
+                    elif event.key == pyLocals.K_RIGHT:
                         self.rightPressed = False
                         
-                    elif event.key == K_SPACE:
+                    elif event.key == pyLocals.K_SPACE:
                         #check if current unit is none
                         if self.currentUnit != None:
                             #If not, move camera to the first node of the first model
@@ -440,22 +440,22 @@ class Battle:
                                 point = self.currentUnit.models[0].nodes[0]
                                 self.centre_camera_on_point(values, point)
                         
-                    elif event.key == K_1 or event.key == K_KP1:
+                    elif event.key == pyLocals.K_1 or event.key == pyLocals.K_KP1:
                         self.centre_camera_on_point(values, self.controlPoints[0])
                         
-                    elif event.key == K_2 or event.key == K_KP2:
+                    elif event.key == pyLocals.K_2 or event.key == pyLocals.K_KP2:
                         self.centre_camera_on_point(values, self.controlPoints[1])
                         
-                    elif event.key == K_3 or event.key == K_KP3:
+                    elif event.key == pyLocals.K_3 or event.key == pyLocals.K_KP3:
                         self.centre_camera_on_point(values, self.controlPoints[2])
                         
-                    elif event.key == K_4 or event.key == K_KP4:
+                    elif event.key == pyLocals.K_4 or event.key == pyLocals.K_KP4:
                         self.centre_camera_on_point(values, self.controlPoints[3])
                         
-                    elif event.key == K_5 or event.key == K_KP5:
+                    elif event.key == pyLocals.K_5 or event.key == pyLocals.K_KP5:
                         self.centre_camera_on_point(values, self.controlPoints[4])
                         
-                    elif event.key == K_6 or event.key == K_KP6:
+                    elif event.key == pyLocals.K_6 or event.key == pyLocals.K_KP6:
                         self.centre_camera_on_point(values, self.controlPoints[5])
                         
                     elif event.key == ord('u'):
@@ -500,40 +500,40 @@ class Battle:
                         if event.key == ord('c'):
                             self.cPressed = False
                             
-                    elif event.key == K_LCTRL:
+                    elif event.key == pyLocals.K_LCTRL:
                         self.ctrlPressed = False
                         
-                    elif event.key == K_LALT:
+                    elif event.key == pyLocals.K_LALT:
                         self.altPressed = False
                     
-                elif event.type == KEYDOWN:
+                elif event.type == pyLocals.KEYDOWN:
                     
-                    if event.key == K_UP:
+                    if event.key == pyLocals.K_UP:
                         self.upPressed = True
                         self.downPressed = False
                         
-                    elif event.key == K_DOWN:
+                    elif event.key == pyLocals.K_DOWN:
                         self.downPressed = True
                         self.upPressed = False
                         
-                    elif event.key == K_LEFT:
+                    elif event.key == pyLocals.K_LEFT:
                         self.leftPressed = True
                         self.rightPressed = False
                         
-                    elif event.key == K_RIGHT:
+                    elif event.key == pyLocals.K_RIGHT:
                         self.rightPressed = True
                         self.leftPressed = False
                         
                     elif event.key == ord('c'):
                         self.cPressed = True
                         
-                    elif event.key == K_LCTRL:
+                    elif event.key == pyLocals.K_LCTRL:
                         self.ctrlPressed = True
                         
-                    elif event.key == K_LALT:
+                    elif event.key == pyLocals.K_LALT:
                         self.altPressed = True
                         
-                elif event.type == MOUSEBUTTONUP:
+                elif event.type == pyLocals.MOUSEBUTTONUP:
                     if event.button == 1:
                         pos = pygame.mouse.get_pos()
                         #Find out if click is on the UI
@@ -3151,10 +3151,7 @@ class Battle:
             self.camera = self.surface.subsurface(self.xOffset, self.yOffset, 1280, 720)
             
             #Create a list of the units the player has yet to deploy
-            units = []
-            for unit in self.unitsToDeploy:
-                if unit in self.currentTurn.units:
-                    units.append(unit)
+            units = [unit for unit in self.unitsToDeploy if unit in self.currentTurn.units]
             
             #Set up command buttons 
             self.get_command_list(values, units)

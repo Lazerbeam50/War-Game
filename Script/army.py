@@ -4,7 +4,7 @@ Created on 3 Sep 2018
 '''
 
 import pygame
-from pygame.locals import *
+import pygame.locals as pyLocals
 
 import copy
 import eztext # @UnresolvedImport
@@ -56,7 +56,7 @@ class ArmyManager:
         
         if self.screenSetUp:
             if event != None:            
-                if event.type == MOUSEBUTTONUP:
+                if event.type == pyLocals.MOUSEBUTTONUP:
                     if event.button == 1:
                         pos = pygame.mouse.get_pos()
                         pos = (pos[0], pos[1] + self.yOffset)
@@ -707,23 +707,23 @@ class ArmyManager:
                                         
                                         self.get_wargear_screen_info(values)
                                                                     
-                elif event.type == KEYDOWN:
-                    if event.key == K_UP:
+                elif event.type == pyLocals.KEYDOWN:
+                    if event.key == pyLocals.K_UP:
                         self.downPressed = False
                         self.upPressed = True
-                    elif event.key == K_DOWN:
+                    elif event.key == pyLocals.K_DOWN:
                         self.upPressed = False
                         self.downPressed = True
                     elif event.key == ord('y'):
                         print(self.yOffset)
                 
-                elif event.type == KEYUP:
-                    if event.key == K_UP:
+                elif event.type == pyLocals.KEYUP:
+                    if event.key == pyLocals.K_UP:
                         self.upPressed = False
-                    elif event.key == K_DOWN:
+                    elif event.key == pyLocals.K_DOWN:
                         self.downPressed = False
                         
-                elif event.type == MOUSEBUTTONDOWN:
+                elif event.type == pyLocals.MOUSEBUTTONDOWN:
                     if event.button == 4:
                         self.upPressed = True
                         self.scroll(values, 20)

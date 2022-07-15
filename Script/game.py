@@ -3,7 +3,7 @@ Created on 13 Aug 2018
 @author: Femi
 '''
 import pygame
-from pygame.locals import *
+import pygame.locals as pyLocals
 
 from twisted.internet import reactor #needed for shutting down the game
 
@@ -64,7 +64,7 @@ class Game:
             events = pygame.event.get()
             
             for event in events:
-                if event.type == QUIT:
+                if event.type == pyLocals.QUIT:
                     self.quit_game()
                     
                 elif self.values.state == 0:

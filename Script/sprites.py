@@ -4,7 +4,7 @@ Created on 13 Aug 2018
 @author: Femi
 '''
 import pygame
-from pygame.locals import *
+import pygame.locals as pyLocals
 
 class Button():
     def __init__(self, code, use, image, rect, text, font, values, layer=3, colour=(255, 255, 255), storage=None):
@@ -31,7 +31,7 @@ class GameSprite(pygame.sprite.Sprite):
     def __init__(self, image, rect, layer=1):
         pygame.sprite.Sprite.__init__(self)
         self.image = image
-        self.rect = Rect(rect)
+        self.rect = pyLocals.Rect(rect)
         self._layer = layer
         
 def centre_x(objectWidth, fitWidth, fitLeft):

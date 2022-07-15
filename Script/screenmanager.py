@@ -4,7 +4,7 @@ Created on 15 Aug 2018
 '''
 
 import pygame
-from pygame.locals import *
+import pygame.locals as pyLocals
 
 import sqlite3 #database script
 
@@ -46,7 +46,7 @@ class ScreenManager:
         
         if self.screenSetUp:
             if event != None:
-                if event.type == MOUSEBUTTONUP:
+                if event.type == pyLocals.MOUSEBUTTONUP:
                     if event.button == 1:
                         pos = pygame.mouse.get_pos()
                         clicked = False
