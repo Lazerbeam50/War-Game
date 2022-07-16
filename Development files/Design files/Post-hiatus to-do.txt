@@ -10,8 +10,14 @@
 	- Consider a dictionary look up for placing UI elements and text
 	- Consider changing the sprite size (16x16? 24x24?)
 
+- Consider reworking model sizes for models larger than 1x1, perhaps basing larger model sizes on 
+the relative model area ratio rather than largest dimension.
+	- E.g. Small infantry models typically have a base with an area of about 49.1 cm^2. If we 
+	give a similar model a size of 1x1 in our game, then for another model to be size 2x2, they
+	would need to have a base area of at least 196.4 cm^2 (4x the infantry base).
+
 - Start making amends to code, starting with efficiency changes
-	- Don't import everything from Pygame.locals
+	X Don't import everything from Pygame.locals
 	- Battlefields as SQL tables
 	- Other loaded data as CSV files to be loaded into the SQL DB
 	- Update coherency function to increase efficiency

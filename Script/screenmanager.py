@@ -45,202 +45,8 @@ class ScreenManager:
     def update(self, values, event=None):
         
         if self.screenSetUp:
-            if event != None:
-                if event.type == pyLocals.MOUSEBUTTONUP:
-                    if event.button == 1:
-                        pos = pygame.mouse.get_pos()
-                        clicked = False
-                        for button in values.buttons[:]:
-                            clicked = misc.is_point_inside_rect(pos[0], pos[1], button.rect)
-                            if clicked:
-                                if button.code == 0:
-                                    values.settings.mode = 0
-                                    self.state = 1
-                                    self.screenSetUp = False
-                                elif button.code == 5:
-                                    raise Exception
-                                
-                                #Create game
-                                elif button.code == 6:
-                                    self.state = 2
-                                    self.screenSetUp = False
-                                    
-                                #Army builder selected
-                                elif button.code == 7:
-                                    values.state = 1
-                                    self.screenSetUp = False
-                                    
-                                elif button.code == 9:
-                                    self.state = 0
-                                    self.screenSetUp = False
-                                elif button.code == 11:
-                                    self.tabGroup.empty()
-                                    self.textGroup.empty()
-                                    for button in values.buttons[:]:
-                                        if button.code >= 16:
-                                            values.buttons.remove(button)
-                                    self.set_up_battlefield_tab(values)
-                                    
-                                #Selecting Armies tab
-                                elif button.code == 12:
-                                    self.tabGroup.empty()
-                                    self.textGroup.empty()
-                                    for button in values.buttons[:]:
-                                        if button.code >= 16:
-                                            values.buttons.remove(button)
-                                    self.set_up_armies_tab(values)
-                                        
-                                #Start game button
-                                elif button.code == 14:
-                                    """
-                                    if (self.missionSettings.currentBattlefield != None and
-                                        self.missionSettings.currentDeployment != None):
-                                        values.state = 1
-                                        self.state = 1
-                                        self.tabGroup.empty()
-                                        self.textGroup.empty()
-                                        self.screenSetUp = False
-                                        self.gameSetup = False
-                                    else:
-                                        print("Selections to be made!")
-                                    """
-                                    if (self.missionSettings.currentBattlefield != None and 
-                                        self.missionSettings.player1Army != None and
-                                        self.missionSettings.player2Army != None and
-                                        self.missionSettings.pointCap != None):
-                                        if ((self.missionSettings.player1Army.totalPoints 
-                                             <= self.missionSettings.pointCap) and
-                                            (self.missionSettings.player2Army.totalPoints 
-                                             <= self.missionSettings.pointCap)):
-                                            print("READY TO PLAY")
-                                            #Reset game setup variables
-                                            values.state = 2
-                                            self.screenSetUp = False
-                                            self.state = 1
-                                            self.gameSetup = False
-                                            self.currentArmy = None
-                                            self.tabGroup.empty()
-                                            self.textGroup.empty()
-                                            
-                                            #Create battle
-                                            values.battle = battle.Battle(values, 
-                                                                           [self.missionSettings.player1Army,
-                                                                           self.missionSettings.player2Army],
-                                            self.missionSettings.currentBattlefield.storage)
-                                            
-                                            self.missionSettings.currentBattlefield = None
-                                            self.missionSettings.player1Army = None
-                                            self.missionSettings.player2Army = None   
-                                        else:
-                                            print("Armies above point cap")
-                                    else:
-                                        print("Selections to be made!")
-                                        
-                                #Back out of game setup
-                                elif button.code == 15:
-                                    self.state = 1
-                                    self.screenSetUp = False
-                                    self.gameSetup = False
-                                    self.currentArmy = None
-                                    self.missionSettings.currentBattlefield = None
-                                    self.missionSettings.player1Army = None
-                                    self.missionSettings.player2Army = None
-                                    self.tabGroup.empty()
-                                    self.textGroup.empty()
-                                    
-                                #Select battlefield
-                                elif button.code == 17:
-                                    #Change previous selected battlefield's colour to white
-                                    if self.missionSettings.currentBattlefield != None:
-                                        image = values.font20.render(self.missionSettings.currentBattlefield.storage.name,
-                                                                     True, values.colours["White"])
-                                        self.missionSettings.currentBattlefield.sprites[1].image = image
-                                    self.missionSettings.currentBattlefield = button
-                                    image = values.font20.render(self.missionSettings.currentBattlefield.storage.name,
-                                                                     True, values.colours["Lime"])
-                                    self.missionSettings.currentBattlefield.sprites[1].image = image
-                                    
-                                    #Show battlefield info
-                                    self.get_battlefield_tab_display(values)
-                                    
-                                #Select an army
-                                elif button.code == 18:
-                                    #Set army as current army
-                                    if self.currentArmy != None:
-                                        image = values.font20.render(self.currentArmy.storage.name, True, 
-                                                                     values.colours["White"])
-                                        self.currentArmy.sprites[1].image = image
-                                    self.currentArmy = button
-                                    image = values.font20.render(self.currentArmy.storage.name, True, 
-                                                                     values.colours["Lime"])
-                                    self.currentArmy.sprites[1].image = image
-                                    
-                                    #Assign army if there is a selected player
-                                    if self.selectedPlayer == 1:
-                                        self.missionSettings.player1Army = self.currentArmy.storage
-                                    elif self.selectedPlayer == 2:
-                                        self.missionSettings.player2Army = self.currentArmy.storage
-                                    self.selectedPlayer = None
-                                    for b in values.buttons:
-                                        if b.code == 19:
-                                            image = values.font20.render("Player 1", True, 
-                                                                         values.colours["White"])
-                                            b.sprites[1].image = image
-                                        elif b.code == 20:
-                                                image = values.font20.render("Player 2", True, 
-                                                                             values.colours["White"])
-                                                b.sprites[1].image = image
-                                    
-                                    #Display army info
-                                    self.get_armies_tab_display(values)
-                                    
-                                #Select player 1 button
-                                elif button.code == 19:
-                                    #If player is already selected
-                                    if self.selectedPlayer == 1:
-                                        #Deselect player
-                                        self.selectedPlayer = None
-                                        #Turn highlight to white
-                                        image = values.font20.render("Player 1", True, values.colours["White"])
-                                        button.sprites[1].image = image
-                                    #Else
-                                    else:
-                                        #Set selected player to 1
-                                        self.selectedPlayer = 1
-                                        #Highlight player text green
-                                        image = values.font20.render("Player 1", True, values.colours["Lime"])
-                                        button.sprites[1].image = image
-                                        #Turn player 2 button white
-                                        for b in values.buttons:
-                                            if b.code == 20:
-                                                image = values.font20.render("Player 2", True, 
-                                                                             values.colours["White"])
-                                                b.sprites[1].image = image
-                                        
-                                #Select player 2 button
-                                elif button.code == 20:
-                                    #If player is already selected
-                                    if self.selectedPlayer == 2:
-                                        #Deselect player
-                                        self.selectedPlayer = None
-                                        #Turn highlight to white
-                                        image = values.font20.render("Player 2", True, values.colours["White"])
-                                        button.sprites[1].image = image
-                                    #Else
-                                    else:
-                                        #Set selected player to 2
-                                        self.selectedPlayer = 2
-                                        #Highlight player text green
-                                        image = values.font20.render("Player 2", True, values.colours["Lime"])
-                                        button.sprites[1].image = image
-                                        #Turn player 2 button white
-                                        for b in values.buttons:
-                                            if b.code == 19:
-                                                image = values.font20.render("Player 1", True, 
-                                                                             values.colours["White"])
-                                                b.sprites[1].image = image
-                                    
-                                break          
+            if event is not None:
+                self.handle_events(values, event)
         
         else:
         
@@ -280,15 +86,15 @@ class ScreenManager:
         image = pygame.transform.scale(image, (400, 100))
         x = sprites.centre_x(400, values.settings.width, 0)
         
-        button = sprites.Button(0, 0, image, (x, 200, 400, 100), "Same PC Mode", values.font60, values)
-        button = sprites.Button(1, 0, image, (x, 325, 400, 100), "Server Mode", values.font60, values)
-        button = sprites.Button(2, 0, image, (x, 450, 400, 100), "Direct Link Mode", values.font60, values)
+        sprites.Button(0, 0, image, (x, 200, 400, 100), "Same PC Mode", values.font60, values)
+        sprites.Button(1, 0, image, (x, 325, 400, 100), "Server Mode", values.font60, values)
+        sprites.Button(2, 0, image, (x, 450, 400, 100), "Direct Link Mode", values.font60, values)
         
         image = resources.load_secondary_sprite("button01.png")
         image = pygame.transform.scale(image, (300, 50))
         x = sprites.centre_x(300, values.settings.width, 0)
         
-        button = sprites.Button(5, 0, image, (x, 600, 300, 50), "Quit Game", values.font30, values)
+        sprites.Button(5, 0, image, (x, 600, 300, 50), "Quit Game", values.font30, values)
         
         for button in values.buttons:
             self.group.add(button.sprites)
@@ -310,15 +116,15 @@ class ScreenManager:
         image = pygame.transform.scale(image, (400, 100))
         x = sprites.centre_x(400, values.settings.width, 0)
         
-        button = sprites.Button(6, 0, image, (x, 200, 400, 100), "Create Game", values.font60, values)
-        button = sprites.Button(7, 0, image, (x, 325, 400, 100), "Army Builder", values.font60, values)
-        button = sprites.Button(8, 0, image, (x, 450, 400, 100), "Unused Button", values.font60, values)
+        sprites.Button(6, 0, image, (x, 200, 400, 100), "Create Game", values.font60, values)
+        sprites.Button(7, 0, image, (x, 325, 400, 100), "Army Builder", values.font60, values)
+        sprites.Button(8, 0, image, (x, 450, 400, 100), "Unused Button", values.font60, values)
         
         image = resources.load_secondary_sprite("button01.png")
         image = pygame.transform.scale(image, (300, 50))
         x = sprites.centre_x(300, values.settings.width, 0)
         
-        button = sprites.Button(9, 0, image, (x, 600, 300, 50), "Back", values.font30, values)
+        sprites.Button(9, 0, image, (x, 600, 300, 50), "Back", values.font30, values)
         
         for button in values.buttons:
             self.group.add(button.sprites)
@@ -345,11 +151,11 @@ class ScreenManager:
         buttonImage = resources.load_secondary_sprite("button01.png")
         buttonImage01 = pygame.transform.scale(buttonImage, (150, 50))
         
-        button = sprites.Button(11, 0, buttonImage01, (225, 0, 150, 50), "Battlefields", values.font20, values)
-        button = sprites.Button(12, 0, buttonImage01, (400, 0, 150, 50), "Armies", values.font20, values)
-        button = sprites.Button(13, 0, buttonImage01, (575, 0, 150, 50), "Game Settings", values.font20, values)
-        button = sprites.Button(14, 0, buttonImage01, (750, 0, 150, 50), "Start Game", values.font20, values)
-        button = sprites.Button(15, 0, buttonImage01, (925, 0, 150, 50), "Back", values.font20, values)
+        sprites.Button(11, 0, buttonImage01, (225, 0, 150, 50), "Battlefields", values.font20, values)
+        sprites.Button(12, 0, buttonImage01, (400, 0, 150, 50), "Armies", values.font20, values)
+        sprites.Button(13, 0, buttonImage01, (575, 0, 150, 50), "Game Settings", values.font20, values)
+        sprites.Button(14, 0, buttonImage01, (750, 0, 150, 50), "Start Game", values.font20, values)
+        sprites.Button(15, 0, buttonImage01, (925, 0, 150, 50), "Back", values.font20, values)
         
         for button in values.buttons:
             self.group.add(button.sprites)
@@ -363,12 +169,12 @@ class ScreenManager:
         self.print_army_info(values, spr, army1, 450, 100)
 
         # If Player 1 has an army, display key info
-        if self.missionSettings.player1Army != None:
+        if self.missionSettings.player1Army is not None:
             army1 = self.missionSettings.player1Army
             self.print_army_info(values, spr, army1, 900, 130)
         
         # Do same for player 2
-        if self.missionSettings.player2Army != None:
+        if self.missionSettings.player2Army is not None:
             army1 = self.missionSettings.player2Army
             self.print_army_info(values, spr, army1, 900, 430)
             
@@ -421,6 +227,217 @@ class ScreenManager:
             y += 10
         
         self.textGroup.add(spr)
+
+    def handle_events(self, values, event):
+        leftClick = False
+        clicked = False
+        if event.type == pyLocals.MOUSEBUTTONUP:
+            if event.button == 1:
+                pos = pygame.mouse.get_pos()
+                leftClick = True
+
+        if leftClick:
+            for button in values.buttons:
+                clicked = misc.is_point_inside_rect(pos[0], pos[1], button.rect)
+                if clicked:
+                    break
+
+        if clicked:
+            if button.code == 0:
+                values.settings.mode = 0
+                self.state = 1
+                self.screenSetUp = False
+            elif button.code == 5:
+                raise Exception
+
+            # Create game
+            elif button.code == 6:
+                self.state = 2
+                self.screenSetUp = False
+
+            # Army builder selected
+            elif button.code == 7:
+                values.state = 1
+                self.screenSetUp = False
+
+            elif button.code == 9:
+                self.state = 0
+                self.screenSetUp = False
+            elif button.code == 11:
+                self.tabGroup.empty()
+                self.textGroup.empty()
+                """
+                for button in values.buttons[:]:
+                    if button.code >= 16:
+                        values.buttons.remove(button)
+                """
+                #Remove all buttons with a code greater than or equal to 16
+                values.buttons = list(set(values.buttons) - set(filter(lambda x: x.code >= 16, values.buttons)))
+                self.set_up_battlefield_tab(values)
+
+            # Selecting Armies tab
+            elif button.code == 12:
+                self.tabGroup.empty()
+                self.textGroup.empty()
+                """
+                for button in values.buttons[:]:
+                    if button.code >= 16:
+                        values.buttons.remove(button)
+                """
+                # Remove all buttons with a code greater than or equal to 16
+                values.buttons = list(set(values.buttons) - set(filter(lambda x: x.code >= 16, values.buttons)))
+                self.set_up_armies_tab(values)
+
+            # Start game button
+            elif button.code == 14:
+                """
+                if (self.missionSettings.currentBattlefield != None and
+                    self.missionSettings.currentDeployment != None):
+                    values.state = 1
+                    self.state = 1
+                    self.tabGroup.empty()
+                    self.textGroup.empty()
+                    self.screenSetUp = False
+                    self.gameSetup = False
+                else:
+                    print("Selections to be made!")
+                """
+                if (self.missionSettings.currentBattlefield is not None and
+                        self.missionSettings.player1Army is not None and
+                        self.missionSettings.player2Army is not None and
+                        self.missionSettings.pointCap is not None):
+                    self.start_game(values)
+                else:
+                    print("Selections to be made!")
+
+            # Back out of game setup
+            elif button.code == 15:
+                self.state = 1
+                self.screenSetUp = False
+                self.gameSetup = False
+                self.currentArmy = None
+                self.missionSettings.currentBattlefield = None
+                self.missionSettings.player1Army = None
+                self.missionSettings.player2Army = None
+                self.tabGroup.empty()
+                self.textGroup.empty()
+
+            # Select battlefield
+            elif button.code == 17:
+                # Change previous selected battlefield's colour to white
+                if self.missionSettings.currentBattlefield is not None:
+                    image = values.font20.render(self.missionSettings.currentBattlefield.storage.name,
+                                                 True, values.colours["White"])
+                    self.missionSettings.currentBattlefield.sprites[1].image = image
+                self.missionSettings.currentBattlefield = button
+                image = values.font20.render(self.missionSettings.currentBattlefield.storage.name,
+                                             True, values.colours["Lime"])
+                self.missionSettings.currentBattlefield.sprites[1].image = image
+
+                # Show battlefield info
+                self.get_battlefield_tab_display(values)
+
+            # Select an army
+            elif button.code == 18:
+                # Set army as current army
+                if self.currentArmy is not None:
+                    image = values.font20.render(self.currentArmy.storage.name, True,
+                                                 values.colours["White"])
+                    self.currentArmy.sprites[1].image = image
+                self.currentArmy = button
+                image = values.font20.render(self.currentArmy.storage.name, True,
+                                             values.colours["Lime"])
+                self.currentArmy.sprites[1].image = image
+
+                # Assign army if there is a selected player
+                if self.selectedPlayer == 1:
+                    self.missionSettings.player1Army = self.currentArmy.storage
+                elif self.selectedPlayer == 2:
+                    self.missionSettings.player2Army = self.currentArmy.storage
+                self.selectedPlayer = None
+                for b in values.buttons:
+                    if b.code == 19:
+                        image = values.font20.render("Player 1", True,
+                                                     values.colours["White"])
+                        b.sprites[1].image = image
+                    elif b.code == 20:
+                        image = values.font20.render("Player 2", True,
+                                                     values.colours["White"])
+                        b.sprites[1].image = image
+
+                # Display army info
+                self.get_armies_tab_display(values)
+
+            # Select player 1 button
+            elif button.code == 19:
+                # If player is already selected
+                if self.selectedPlayer == 1:
+                    # Deselect player
+                    self.selectedPlayer = None
+                    # Turn highlight to white
+                    image = values.font20.render("Player 1", True, values.colours["White"])
+                    button.sprites[1].image = image
+                # Else
+                else:
+                    # Set selected player to 1
+                    self.selectedPlayer = 1
+                    # Highlight player text green
+                    image = values.font20.render("Player 1", True, values.colours["Lime"])
+                    button.sprites[1].image = image
+                    # Turn player 2 button white
+                    for b in values.buttons:
+                        if b.code == 20:
+                            image = values.font20.render("Player 2", True,
+                                                         values.colours["White"])
+                            b.sprites[1].image = image
+
+            # Select player 2 button
+            elif button.code == 20:
+                # If player is already selected
+                if self.selectedPlayer == 2:
+                    # Deselect player
+                    self.selectedPlayer = None
+                    # Turn highlight to white
+                    image = values.font20.render("Player 2", True, values.colours["White"])
+                    button.sprites[1].image = image
+                # Else
+                else:
+                    # Set selected player to 2
+                    self.selectedPlayer = 2
+                    # Highlight player text green
+                    image = values.font20.render("Player 2", True, values.colours["Lime"])
+                    button.sprites[1].image = image
+                    # Turn player 2 button white
+                    for b in values.buttons:
+                        if b.code == 19:
+                            image = values.font20.render("Player 1", True,
+                                                         values.colours["White"])
+                            b.sprites[1].image = image
+
+    def start_game(self, values):
+        if ((self.missionSettings.player1Army.totalPoints
+             <= self.missionSettings.pointCap) and
+                (self.missionSettings.player2Army.totalPoints
+                 <= self.missionSettings.pointCap)):
+            print("READY TO PLAY")
+            # Reset game setup variables
+            values.state = 2
+            self.screenSetUp = False
+            self.state = 1
+            self.gameSetup = False
+            self.currentArmy = None
+            self.tabGroup.empty()
+            self.textGroup.empty()
+
+            # Create battle
+            values.battle = battle.Battle(values, [self.missionSettings.player1Army, self.missionSettings.player2Army],
+                                          self.missionSettings.currentBattlefield.storage)
+
+            self.missionSettings.currentBattlefield = None
+            self.missionSettings.player1Army = None
+            self.missionSettings.player2Army = None
+        else:
+            print("Armies above point cap")
         
     def set_up_armies_tab(self, values):
         
@@ -450,8 +467,18 @@ class ScreenManager:
         self.tabGroup.add(button.sprites)
         
         #display current army setup
-        if self.missionSettings.player1Army != None or self.missionSettings.player2Army != None:
+        if self.missionSettings.player1Army is not None or self.missionSettings.player2Army is not None:
             self.get_armies_tab_display(values)
+
+    def set_up_battlefield_buttons(self, values, buttonImage, b, x, y):
+        if b == self.missionSettings.currentBattlefield.storage:
+            button = sprites.Button(17, 0, buttonImage, (x, y, 255, 25), b.name, values.font20, values,
+                                    colour=values.colours["Lime"], storage=b)
+            self.missionSettings.currentBattlefield = button
+        else:
+            button = sprites.Button(17, 0, buttonImage, (x, y, 255, 25), b.name, values.font20, values, storage=b)
+
+        return button
 
     def set_up_battlefield_tab(self, values):
         
@@ -461,18 +488,14 @@ class ScreenManager:
         y = 85
         
         for b in self.battlefieldsList:
-            if self.missionSettings.currentBattlefield != None:
-                if b == self.missionSettings.currentBattlefield.storage:
-                    button = sprites.Button(17, 0, buttonImage, (x, y, 255, 25), b.name, values.font20, values, colour=values.colours["Lime"], storage=b)
-                    self.missionSettings.currentBattlefield = button
-                else:
-                    button = sprites.Button(17, 0, buttonImage, (x, y, 255, 25), b.name, values.font20, values, storage=b)
+            if self.missionSettings.currentBattlefield is not None:
+                button = self.set_up_battlefield_buttons(values, buttonImage, b, x, y)
             else:
                 button = sprites.Button(17, 0, buttonImage, (x, y, 255, 25), b.name, values.font20, values, storage=b)
             y += 25
             self.tabGroup.add(button.sprites)
             
-        if self.missionSettings.currentBattlefield != None:
+        if self.missionSettings.currentBattlefield is not None:
             self.get_battlefield_tab_display(values)
             
     def print_army_info(self, values, spr, army1, x, y):
