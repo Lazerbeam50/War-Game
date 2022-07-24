@@ -186,85 +186,8 @@ class Battle:
                 
                 node = Node()
                 img = []
-                
-                if battlefield.tileset == 0:
                     
-                    if char == "*":
-                        
-                        node.terrain = "Grass"
-                        
-                        if "dense_forest_standard_ground_tile.png" not in images:
-                            images["dense_forest_standard_ground_tile.png"] = resources.load_primary_sprite(
-                                "dense_forest_standard_ground_tile.png")
-                        img.append(images["dense_forest_standard_ground_tile.png"])
-                        
-                    elif char == "r":
-                        
-                        node.terrain = "Rock"
-                        
-                        if "dense_forest_standard_ground_tile.png" not in images:
-                            images["dense_forest_standard_ground_tile.png"] = resources.load_primary_sprite(
-                                "dense_forest_standard_ground_tile.png")
-                        img.append(images["dense_forest_standard_ground_tile.png"])
-                        
-                        if "dense_forest_rock_tile.png" not in images:
-                            images["dense_forest_rock_tile.png"] = resources.load_primary_sprite(
-                                "dense_forest_rock_tile.png")
-                        img.append(images["dense_forest_rock_tile.png"])
-                        
-                    elif char == "t":
-                        
-                        node.terrain = "Small tree"
-                        node.cover = 1
-                        
-                        if "dense_forest_standard_ground_tile.png" not in images:
-                            images["dense_forest_standard_ground_tile.png"] = resources.load_primary_sprite(
-                                "dense_forest_standard_ground_tile.png")
-                        img.append(images["dense_forest_standard_ground_tile.png"])
-                        
-                        if "tree_tile.png" not in images:
-                            images["tree_tile.png"] = resources.load_primary_sprite("tree_tile.png")
-                        img.append(images["tree_tile.png"])
-                        
-                    elif char == "T":
-                        
-                        node.terrain = "Large tree"
-                        node.cover = 2
-                        
-                        if "dense_forest_standard_ground_tile.png" not in images:
-                            images["dense_forest_standard_ground_tile.png"] = resources.load_primary_sprite(
-                                "dense_forest_standard_ground_tile.png")
-                        img.append(images["dense_forest_standard_ground_tile.png"])
-                        
-                        if "tree_tile2.png" not in images:
-                            images["tree_tile2.png"] = resources.load_primary_sprite("tree_tile2.png")
-                        img.append(images["tree_tile2.png"])
-                        
-                    elif char == "m":
-                        
-                        node.terrain = "Large mossy rock"
-                        node.blocksLOS = True
-                        node.walkable = False
-                        
-                        if "dense_forest_standard_ground_tile.png" not in images:
-                            images["dense_forest_standard_ground_tile.png"] = resources.load_primary_sprite(
-                                "dense_forest_standard_ground_tile.png")
-                        img.append(images["dense_forest_standard_ground_tile.png"])
-                        
-                        if "dense_forest_mossy_rock_tile.png" not in images:
-                            images["dense_forest_mossy_rock_tile.png"] = resources.load_primary_sprite(
-                                "dense_forest_mossy_rock_tile.png")
-                        img.append(images["dense_forest_mossy_rock_tile.png"])
-                        
-                    elif char == "w":
-                        
-                        node.terrain = "Water"
-                        node.walkable = False
-                        
-                        if "dense_forest_water_tile.png" not in images:
-                            images["dense_forest_water_tile.png"] = resources.load_primary_sprite(
-                                "dense_forest_water_tile.png")
-                        img.append(images["dense_forest_water_tile.png"])
+                img, images = self.load_tileset(battlefield, char, img, images, node)
                         
                 node.coordinates = (x, y)
                 node.backSprite = sprites.GameSprite(img[0], ((x * 32) + 160, (y * 32) + 32, 32, 32))
@@ -414,189 +337,8 @@ class Battle:
     def update(self, values, event=None):
         
         if self.awaitingEvent and not self.checkingExplosions:
-            if event != None:
-                if event.type == pyLocals.KEYUP:
-                    
-                    if event.key == pyLocals.K_LCTRL:
-                        if self.hideUI:
-                            self.hideUI = False
-                        else:
-                            self.hideUI = True
-                            
-                    elif event.key == pyLocals.K_UP:
-                        self.upPressed = False
-                    elif event.key == pyLocals.K_DOWN:
-                        self.downPressed = False
-                    elif event.key == pyLocals.K_LEFT:
-                        self.leftPressed = False
-                    elif event.key == pyLocals.K_RIGHT:
-                        self.rightPressed = False
-                        
-                    elif event.key == pyLocals.K_SPACE:
-                        #check if current unit is none
-                        if self.currentUnit != None:
-                            #If not, move camera to the first node of the first model
-                            if len(self.currentUnit.models[0].nodes) > 0:
-                                point = self.currentUnit.models[0].nodes[0]
-                                self.centre_camera_on_point(values, point)
-                        
-                    elif event.key == pyLocals.K_1 or event.key == pyLocals.K_KP1:
-                        self.centre_camera_on_point(values, self.controlPoints[0])
-                        
-                    elif event.key == pyLocals.K_2 or event.key == pyLocals.K_KP2:
-                        self.centre_camera_on_point(values, self.controlPoints[1])
-                        
-                    elif event.key == pyLocals.K_3 or event.key == pyLocals.K_KP3:
-                        self.centre_camera_on_point(values, self.controlPoints[2])
-                        
-                    elif event.key == pyLocals.K_4 or event.key == pyLocals.K_KP4:
-                        self.centre_camera_on_point(values, self.controlPoints[3])
-                        
-                    elif event.key == pyLocals.K_5 or event.key == pyLocals.K_KP5:
-                        self.centre_camera_on_point(values, self.controlPoints[4])
-                        
-                    elif event.key == pyLocals.K_6 or event.key == pyLocals.K_KP6:
-                        self.centre_camera_on_point(values, self.controlPoints[5])
-                        
-                    elif event.key == ord('u'):
-                        if self.showInfo:
-                            self.infoType = 0
-                            self.get_panel_info(values)
-                            
-                    elif event.key == ord('t'):
-                        if self.showInfo:
-                            self.infoType = 1
-                            self.get_panel_info(values)
-                            
-                    elif event.key == ord('m'):
-                        if self.showInfo:
-                            self.infoType = 2
-                            self.get_panel_info(values)
-                            
-                    elif event.key == ord('n'):
-                        if self.showInfo:
-                            self.infoType = 3
-                            self.get_panel_info(values)
-                            
-                    elif event.key == ord('p'):
-                        if self.showInfo:
-                            self.get_panel_info(values, controlPoints=True)
-                            
-                    elif event.key == ord('h'):
-                        if self.highlighting:
-                            self.highlighting = False
-                            self.highlightGroup.empty()
-                        else:
-                            self.highlighting = True
-                            self.toggle_highlighting()
-                            
-                    elif event.key in [ord('q'), ord('w'), ord('a'), ord('s'), ord('z'), ord('x'), ord('e'),
-                                        ord('r'), ord('d'), ord('f'), ord('c'), ord('v')]:
-                        for button in values.buttons:
-                            if event.key == ord(button.code):
-                                self.handle_button(values, button)
-                                break
-                            
-                        if event.key == ord('c'):
-                            self.cPressed = False
-                            
-                    elif event.key == pyLocals.K_LCTRL:
-                        self.ctrlPressed = False
-                        
-                    elif event.key == pyLocals.K_LALT:
-                        self.altPressed = False
-                    
-                elif event.type == pyLocals.KEYDOWN:
-                    
-                    if event.key == pyLocals.K_UP:
-                        self.upPressed = True
-                        self.downPressed = False
-                        
-                    elif event.key == pyLocals.K_DOWN:
-                        self.downPressed = True
-                        self.upPressed = False
-                        
-                    elif event.key == pyLocals.K_LEFT:
-                        self.leftPressed = True
-                        self.rightPressed = False
-                        
-                    elif event.key == pyLocals.K_RIGHT:
-                        self.rightPressed = True
-                        self.leftPressed = False
-                        
-                    elif event.key == ord('c'):
-                        self.cPressed = True
-                        
-                    elif event.key == pyLocals.K_LCTRL:
-                        self.ctrlPressed = True
-                        
-                    elif event.key == pyLocals.K_LALT:
-                        self.altPressed = True
-                        
-                elif event.type == pyLocals.MOUSEBUTTONUP:
-                    if event.button == 1:
-                        pos = pygame.mouse.get_pos()
-                        #Find out if click is on the UI
-                        if not self.hideUI and (pos[1] < 32 or pos[0] < 160 or pos[0] > 1119 or pos[1] > 511):
-                            #See if click was with a command or on the even log
-                            isCommand = misc.is_point_inside_rect(pos[0], pos[1], pygame.Rect(860, 520, 420, 200))
-                            isEvent = misc.is_point_inside_rect(pos[0], pos[1], pygame.Rect(430, 520, 420, 200))
-                            if isCommand:
-                            #Adjust pos to reflect where it is in the command surface
-                                pos = (pos[0] - 860, pos[1] - 520)
-                                for button in values.buttons[:]:
-                                    clicked = misc.is_point_inside_rect(pos[0], pos[1], button.rect)
-                                    if clicked:
-                                        self.handle_button(values, button) 
-                                        break
-                            elif isEvent:
-                                #Adjust pos to reflect where it is in the event surface
-                                pos = (pos[0] - 430, pos[1] - 520)
-                                for button in self.logButtons:
-                                    clicked = misc.is_point_inside_rect(pos[0], pos[1], button.sprite.rect)
-                                    if clicked:
-                                        if button.use == 0:
-                                            direction = -1
-                                        elif button.use == 1:
-                                            direction = 1
-                                        else:
-                                            direction = 0
-                                        if direction != 0:
-                                            self.update_event_log(values, scroll=True, direction=direction)
-                                            break         
-                            else:
-                                print("Isn't a command or event")
-                        else:
-                            worldPos = (pos[0] + self.xOffset, pos[1] + self.yOffset)
-                            #Is the click out of bounds
-                            if (worldPos[0] < self.lowestX or worldPos[0] > self.highestX or
-                                worldPos[1] < self.lowestY or worldPos[1] > self.highestY):
-                                print("OUT OF BOUNDS")
-                                
-                            else:
-                                #Find node that click is in and save it
-                                x = max(int((worldPos[0] - 160)/32), 0)
-                                y = max(int((worldPos[1] - 32)/32), 0)
-                                self.currentNode = self.nodes[(x, y)]
-                                #Take action based on game state/show info
-                                
-                                if self.showInfo:
-                                    self.get_panel_info(values)
-                                
-                                self.handle_field_click(values)
-                                
-                    elif event.button in [4, 5]:
-                        pos = pygame.mouse.get_pos()
-                        #Find out if scroll is on the UI
-                        if not self.hideUI and (pos[1] < 32 or pos[0] < 160 or pos[0] > 1119 or pos[1] > 511):
-                            #See if in the even log
-                            isEvent = misc.is_point_inside_rect(pos[0], pos[1], pygame.Rect(430, 520, 420, 200))
-                            if isEvent:
-                                if event.button == 4:
-                                    direction = -1
-                                else:
-                                    direction = 1
-                                self.update_event_log(values, scroll=True, direction=direction)
+            if event is not None:
+                self.handle_events(values, event)
                                 
             elif self.ctrlPressed and self.altPressed and self.cPressed and self.state not in [54, 55, 56]:
                 self.state = 56
@@ -666,14 +408,14 @@ class Battle:
                 attack.primaryTarget = None
                 #keep popping targets until a living one can be found
                 try:
-                    while attack.primaryTarget == None:
+                    while attack.primaryTarget is None:
                         attack.primaryTarget = attack.otherTargets.pop(0)
                         if attack.primaryTarget.dead:
                             attack.primaryTarget = None
                 except IndexError:
                     pass
             #If main target is not none, carry out attack
-            if attack.primaryTarget != None:
+            if attack.primaryTarget is not None:
                 
                 success = True
                 
@@ -760,7 +502,7 @@ class Battle:
         #Report deaths
         self.update_control_point_status(values)
         
-        if spell != None:
+        if spell is not None:
             text1 = self.currentUnit.name + " casts " + spell.name + " on " + unit.name + "!"
             text2 = "The spell hits, dealing " + str(damage) + " damage"
             if len(deaths) > 0:
@@ -866,7 +608,7 @@ class Battle:
                 
             #If current unit charged this turn and its target is still alive
             chooseTarget = False
-            if self.currentUnit.chargedUnit != None:
+            if self.currentUnit.chargedUnit is not None:
                 if not self.units[self.currentUnit.chargedUnit].destroyed:
                     targetFound = False
                     self.attackingModels = []
@@ -1043,7 +785,7 @@ class Battle:
         
     def delete_unit_from_field(self, unit):
         for model in unit.models:
-            if model.sprite != None:
+            if model.sprite is not None:
                 model.sprite.kill()
                 
             #remove node associations
@@ -1072,7 +814,7 @@ class Battle:
                 infantry = False
                 break
         
-        if deployment and infantry and selectedNode.takenBy != None:
+        if deployment and infantry and selectedNode.takenBy is not None:
             if ("TRANSPORT" in self.models[selectedNode.takenBy].keywords and
                 selectedNode.takenBy in self.currentTurn.models):
                 self.currentTransport = self.units[self.models[selectedNode.takenBy].unitID]
@@ -1118,7 +860,7 @@ class Battle:
                                 model.nodes.append(n)
                                 
                                 #Set top left node
-                                if model.topLeftNode == None:
+                                if model.topLeftNode is None:
                                     model.topLeftNode = n
                                 else:
                                     if n[0] <= model.topLeftNode[0] and n[1] <= model.topLeftNode[1]:
@@ -1451,7 +1193,7 @@ class Battle:
                             adjNode = (x + node[0], y + node[1])
                             if adjNode in self.nodes:
                                 #If node contains an enemy from the target unit, approve for list
-                                if self.nodes[adjNode].takenBy != None:
+                                if self.nodes[adjNode].takenBy is not None:
                                     if (self.models[self.nodes[adjNode].takenBy] in target.models and
                                         adjNode not in result):
                                         success = True
@@ -1575,10 +1317,10 @@ class Battle:
         
         #If only one flag is true, assign that player the current turn
         #Otherwise, if both are true and current turn is none, assign saved current turn as current turn
-        if currentPlayer and otherPlayer and self.currentTurn == None:
+        if currentPlayer and otherPlayer and self.currentTurn is None:
             otherPlayer = False
         #Else, if both are true and current turn is not none, alternate current player
-        elif currentPlayer and otherPlayer and self.currentTurn != None:
+        elif currentPlayer and otherPlayer and self.currentTurn is not None:
             if self.currentTurn == self.currentTurnSaved:
                 currentPlayer = False
             else:
@@ -1619,10 +1361,10 @@ class Battle:
         spr = []
         rightPanel = False
         
-        if self.currentNode != None and not controlPoints:
+        if self.currentNode is not None and not controlPoints:
         
             #Unit display
-            if self.infoType == 0 and self.currentNode.takenBy != None:
+            if self.infoType == 0 and self.currentNode.takenBy is not None:
                 y = 190
                 unit = self.units[self.models[self.currentNode.takenBy].unitID]
                 #Display name
@@ -1647,7 +1389,7 @@ class Battle:
                 spr.append(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 160, 0), 40, 
                                                       image.get_width(), image.get_height())))
                 #Mage profile (if applicable)
-                if unit.currentMana != None:
+                if unit.currentMana is not None:
                     text = "Mana: " + str(unit.currentMana) + "/" + str(unit.maxMana)
                     image = values.font20.render(text, True, values.colours["Black"])
                     spr.append(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 160, 0), y, 
@@ -1690,7 +1432,7 @@ class Battle:
                     y += 20
                     
                 #Set up charged unit info
-                if unit.chargedUnit != None:
+                if unit.chargedUnit is not None:
                     text = "Charged " + self.units[unit.chargedUnit].name + " this turn"
                     newText = misc.cut_down_string(text, 22)
                     for t in newText:
@@ -1745,7 +1487,7 @@ class Battle:
                     spr.append(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 160, 0), y, 
                                                       image.get_width(), image.get_height())))
                     
-            elif self.infoType == 2 and self.currentNode.takenBy != None:
+            elif self.infoType == 2 and self.currentNode.takenBy is not None:
                 y = 190
                 model = self.models[self.currentNode.takenBy]
                 #Name
@@ -1833,7 +1575,7 @@ class Battle:
                     self.leftPanelGroup.empty()
                    
             #Transport view 
-            elif self.infoType == 3 and self.currentNode.takenBy != None:
+            elif self.infoType == 3 and self.currentNode.takenBy is not None:
                 if "TRANSPORT" in self.models[self.currentNode.takenBy].keywords:
                     y = 190
                     unit = self.units[self.models[self.currentNode.takenBy].unitID]
@@ -1941,7 +1683,7 @@ class Battle:
             for x in range(0, size[0]):
                 for y in range(0, size[1]):
                     currentNode = (node.coordinates[0] + x, node.coordinates[1] + y) 
-                    if self.nodes[currentNode].takenBy != None and not allowTaken:
+                    if self.nodes[currentNode].takenBy is not None and not allowTaken:
                         if self.nodes[currentNode].takenBy != modelID:
                             otherModel = self.models[self.nodes[currentNode].takenBy]
                             if 'AIRBORNE' not in otherModel.keywords:
@@ -1954,8 +1696,8 @@ class Battle:
                             for y2 in range(-1, 2):
                                 closeNode = (currentNode[0] + x2, currentNode[1] + y2)
                                 if closeNode in self.nodes:
-                                    if self.nodes[closeNode].takenBy != None:
-                                        if passCloseSpecific == None:
+                                    if self.nodes[closeNode].takenBy is not None:
+                                        if passCloseSpecific is None:
                                             if self.nodes[closeNode].takenBy in enemyModels:
                                                 success = False
                                         else:
@@ -2040,11 +1782,11 @@ class Battle:
                 for y in range(0, size[1]):
                     currentNode = (node.coordinates[0] + x, node.coordinates[1] + y) 
                     if deploymentOnly:
-                        if (self.nodes[currentNode].takenBy == None and 
+                        if (self.nodes[currentNode].takenBy is None and
                             currentNode in self.currentTurn.deploymentZoneNodes and not checkWalkable):
                             pass
                             #Node is good, look for next
-                        elif (self.nodes[currentNode].takenBy == None and 
+                        elif (self.nodes[currentNode].takenBy is None and
                             currentNode in self.currentTurn.deploymentZoneNodes and 
                             self.nodes[currentNode].walkable):
                             pass
@@ -2052,7 +1794,7 @@ class Battle:
                         else:
                             success = False
                     else:
-                        if self.nodes[currentNode].takenBy != None:
+                        if self.nodes[currentNode].takenBy is not None:
                             if self.nodes[currentNode].takenBy != modelID:
                                 success = False
                         if success and checkWalkable and not self.nodes[currentNode].walkable:
@@ -2063,8 +1805,8 @@ class Battle:
                                 for y2 in range(-1, 2):
                                     closeNode = (currentNode[0] + x2, currentNode[1] + y2)
                                     if closeNode in self.nodes:
-                                        if self.nodes[closeNode].takenBy != None:
-                                            if standCloseSpecific == None:
+                                        if self.nodes[closeNode].takenBy is not None:
+                                            if standCloseSpecific is None:
                                                 if (not allowClose and self.nodes[closeNode].takenBy in 
                                                     enemyModels):
                                                     success = False
@@ -2438,7 +2180,7 @@ class Battle:
             
         #Confirm mage for dispelling
         elif button.use == 27:
-            if self.otherUnit != None:
+            if self.otherUnit is not None:
                 #Subract mana from dispeller
                 self.otherUnit.currentMana = self.otherUnit.currentMana - math.floor(self.otherUnit.dispelRate * 
                                                                                      self.currentSpell.mana)
@@ -2466,7 +2208,7 @@ class Battle:
             
         #Cancel button when dispelling
         elif button.use == 28:
-            if self.otherUnit == None:
+            if self.otherUnit is None:
                 self.state = 22
                 self.awaitingEvent = False
             else:
@@ -3177,7 +2919,7 @@ class Battle:
         if self.state == 3:
             #Check that the current unit for coherency
             #If player is deploying a unit in a transport, ignore the coherency check
-            if self.currentTransport == None:
+            if self.currentTransport is None:
                 coherent = self.check_unit_coherency(self.currentUnit)
             else:
                 coherent = True
@@ -3185,7 +2927,7 @@ class Battle:
             if coherent:
                 #If deployment is in a transport, announce this approprately
                 #Set current transport back to none
-                if self.currentTransport == None:
+                if self.currentTransport is None:
                     text = self.currentTurn.name + " deploys " + self.currentUnit.name
                 else:
                     """
@@ -3360,6 +3102,190 @@ class Battle:
             self.update_event_log(values, text)
         
             self.awaitingEvent = True
+
+    def handle_events(self, values, event):
+        if event.type == pyLocals.KEYUP:
+
+            if event.key == pyLocals.K_LCTRL:
+                if self.hideUI:
+                    self.hideUI = False
+                else:
+                    self.hideUI = True
+
+            elif event.key == pyLocals.K_UP:
+                self.upPressed = False
+            elif event.key == pyLocals.K_DOWN:
+                self.downPressed = False
+            elif event.key == pyLocals.K_LEFT:
+                self.leftPressed = False
+            elif event.key == pyLocals.K_RIGHT:
+                self.rightPressed = False
+
+            elif event.key == pyLocals.K_SPACE:
+                # check if current unit is none
+                if self.currentUnit is not None:
+                    # If not, move camera to the first node of the first model
+                    if len(self.currentUnit.models[0].nodes) > 0:
+                        point = self.currentUnit.models[0].nodes[0]
+                        self.centre_camera_on_point(values, point)
+
+            elif event.key == pyLocals.K_1 or event.key == pyLocals.K_KP1:
+                self.centre_camera_on_point(values, self.controlPoints[0])
+
+            elif event.key == pyLocals.K_2 or event.key == pyLocals.K_KP2:
+                self.centre_camera_on_point(values, self.controlPoints[1])
+
+            elif event.key == pyLocals.K_3 or event.key == pyLocals.K_KP3:
+                self.centre_camera_on_point(values, self.controlPoints[2])
+
+            elif event.key == pyLocals.K_4 or event.key == pyLocals.K_KP4:
+                self.centre_camera_on_point(values, self.controlPoints[3])
+
+            elif event.key == pyLocals.K_5 or event.key == pyLocals.K_KP5:
+                self.centre_camera_on_point(values, self.controlPoints[4])
+
+            elif event.key == pyLocals.K_6 or event.key == pyLocals.K_KP6:
+                self.centre_camera_on_point(values, self.controlPoints[5])
+
+            elif event.key == ord('u'):
+                if self.showInfo:
+                    self.infoType = 0
+                    self.get_panel_info(values)
+
+            elif event.key == ord('t'):
+                if self.showInfo:
+                    self.infoType = 1
+                    self.get_panel_info(values)
+
+            elif event.key == ord('m'):
+                if self.showInfo:
+                    self.infoType = 2
+                    self.get_panel_info(values)
+
+            elif event.key == ord('n'):
+                if self.showInfo:
+                    self.infoType = 3
+                    self.get_panel_info(values)
+
+            elif event.key == ord('p'):
+                if self.showInfo:
+                    self.get_panel_info(values, controlPoints=True)
+
+            elif event.key == ord('h'):
+                if self.highlighting:
+                    self.highlighting = False
+                    self.highlightGroup.empty()
+                else:
+                    self.highlighting = True
+                    self.toggle_highlighting()
+
+            elif event.key in [ord('q'), ord('w'), ord('a'), ord('s'), ord('z'), ord('x'), ord('e'),
+                               ord('r'), ord('d'), ord('f'), ord('c'), ord('v')]:
+                for button in values.buttons:
+                    if event.key == ord(button.code):
+                        self.handle_button(values, button)
+                        break
+
+                if event.key == ord('c'):
+                    self.cPressed = False
+
+            elif event.key == pyLocals.K_LCTRL:
+                self.ctrlPressed = False
+
+            elif event.key == pyLocals.K_LALT:
+                self.altPressed = False
+
+        elif event.type == pyLocals.KEYDOWN:
+
+            if event.key == pyLocals.K_UP:
+                self.upPressed = True
+                self.downPressed = False
+
+            elif event.key == pyLocals.K_DOWN:
+                self.downPressed = True
+                self.upPressed = False
+
+            elif event.key == pyLocals.K_LEFT:
+                self.leftPressed = True
+                self.rightPressed = False
+
+            elif event.key == pyLocals.K_RIGHT:
+                self.rightPressed = True
+                self.leftPressed = False
+
+            elif event.key == ord('c'):
+                self.cPressed = True
+
+            elif event.key == pyLocals.K_LCTRL:
+                self.ctrlPressed = True
+
+            elif event.key == pyLocals.K_LALT:
+                self.altPressed = True
+
+        elif event.type == pyLocals.MOUSEBUTTONUP:
+            if event.button == 1:
+                pos = pygame.mouse.get_pos()
+                # Find out if click is on the UI
+                if not self.hideUI and (pos[1] < 32 or pos[0] < 160 or pos[0] > 1119 or pos[1] > 511):
+                    # See if click was with a command or on the even log
+                    isCommand = misc.is_point_inside_rect(pos[0], pos[1], pygame.Rect(860, 520, 420, 200))
+                    isEvent = misc.is_point_inside_rect(pos[0], pos[1], pygame.Rect(430, 520, 420, 200))
+                    if isCommand:
+                        # Adjust pos to reflect where it is in the command surface
+                        pos = (pos[0] - 860, pos[1] - 520)
+                        for button in values.buttons[:]:
+                            clicked = misc.is_point_inside_rect(pos[0], pos[1], button.rect)
+                            if clicked:
+                                self.handle_button(values, button)
+                                break
+                    elif isEvent:
+                        # Adjust pos to reflect where it is in the event surface
+                        pos = (pos[0] - 430, pos[1] - 520)
+                        for button in self.logButtons:
+                            clicked = misc.is_point_inside_rect(pos[0], pos[1], button.sprite.rect)
+                            if clicked:
+                                if button.use == 0:
+                                    direction = -1
+                                elif button.use == 1:
+                                    direction = 1
+                                else:
+                                    direction = 0
+                                if direction != 0:
+                                    self.update_event_log(values, scroll=True, direction=direction)
+                                    break
+                    else:
+                        print("Isn't a command or event")
+                else:
+                    worldPos = (pos[0] + self.xOffset, pos[1] + self.yOffset)
+                    # Is the click out of bounds
+                    if (worldPos[0] < self.lowestX or worldPos[0] > self.highestX or
+                            worldPos[1] < self.lowestY or worldPos[1] > self.highestY):
+                        print("OUT OF BOUNDS")
+
+                    else:
+                        # Find node that click is in and save it
+                        x = max(int((worldPos[0] - 160) / 32), 0)
+                        y = max(int((worldPos[1] - 32) / 32), 0)
+                        self.currentNode = self.nodes[(x, y)]
+                        # Take action based on game state/show info
+
+                        if self.showInfo:
+                            self.get_panel_info(values)
+
+                        self.handle_field_click(values)
+
+            elif event.button in [4, 5]:
+                pos = pygame.mouse.get_pos()
+                # Find out if scroll is on the UI
+                if not self.hideUI and (pos[1] < 32 or pos[0] < 160 or pos[0] > 1119 or pos[1] > 511):
+                    # See if in the even log
+                    isEvent = misc.is_point_inside_rect(pos[0], pos[1], pygame.Rect(430, 520, 420, 200))
+                    if isEvent:
+                        if event.button == 4:
+                            direction = -1
+                        else:
+                            direction = 1
+                        self.update_event_log(values, scroll=True, direction=direction)
         
     def handle_magic(self, values):
         
@@ -3372,7 +3298,7 @@ class Battle:
             #Loop through all units
             for unit in self.units:
                 #Flag non-mages as having completed the phase
-                if self.units[unit].currentMana == None:
+                if self.units[unit].currentMana is None:
                     self.units[unit].endPhase = True
                 else:
                     self.units[unit].endPhase = False
@@ -3594,7 +3520,7 @@ class Battle:
                 if self.units[unit].inMelee:
                     
                     #Assign to list based on priority and charge target
-                    if self.units[unit].chargedUnit == None:
+                    if self.units[unit].chargedUnit is None:
                         self.unitsForMelee[3].append(unit)
                     else:
                         self.unitsForMelee[2].append(unit)
@@ -4757,7 +4683,7 @@ class Battle:
         #Click on model to move during deployment     
         elif self.state == 3:
             #Does the clicked node contain a model?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Is that model a part of the current unit
                 if self.models[self.currentNode.takenBy] in self.currentUnit.models:
                     model = self.models[self.currentNode.takenBy]
@@ -4819,7 +4745,7 @@ class Battle:
         #Selecting a unit during movement phase
         elif self.state == 8:
             #Does the selected node contain a model?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #If so, has the unit the model belongs to completed the phase?
                 unit = self.units[self.models[self.currentNode.takenBy].unitID]
                 #If not, set unit as current unit and purple highlight it
@@ -4833,7 +4759,7 @@ class Battle:
         #Selecting a model to move in the movement phase
         elif self.state == 11:
             #Does the clicked node contain a model?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Is that model a part of the current unit
                 if self.models[self.currentNode.takenBy] in self.currentUnit.models:
                     #Has the model moved already?
@@ -4909,7 +4835,7 @@ class Battle:
                                     for y in range(-1, 2):
                                         closeNode = (node[0] + x, node[1] + y)
                                         if closeNode in self.nodes:
-                                            if self.nodes[closeNode].takenBy != None:
+                                            if self.nodes[closeNode].takenBy is not None:
                                                 if self.nodes[closeNode].takenBy in self.otherTurn.models:
                                                     mustBeClose = True
                                                     break
@@ -5081,7 +5007,7 @@ class Battle:
                                 bestNode = None
                                 bestDistance = 9999
                                 for node in moveRange:
-                                    if bestNode == None:
+                                    if bestNode is None:
                                         bestNode = node
                                         bestDistance = self.get_distance_between_nodes(node, model.targetNode)
                                     else:
@@ -5105,7 +5031,7 @@ class Battle:
         #Selecting a friendly mage unit for spellcasting
         elif self.state == 16:
             #Does the clicked node contain a unit?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Can the unit act and is it friendly?
                 unit = self.units[self.models[self.currentNode.takenBy].unitID]
                 if not unit.endPhase and unit.ID in self.currentTurn.units: 
@@ -5120,7 +5046,7 @@ class Battle:
         #Selecting a target for a spell
         elif self.state == 18:
             #Does the clicked node contain a unit?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #If spell is a damaging spell....
                 if self.currentSpell.use1 == 0:
                     #Make sure target is an enemy
@@ -5173,7 +5099,7 @@ class Battle:
         #Other player selecting a mage to dispel with                    
         elif self.state == 21:
             #Does the clicked node contain a unit?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Make sure selected unit is an enemy
                 if self.players[0] == self.currentTurn:
                     enemy = self.players[1]
@@ -5212,7 +5138,7 @@ class Battle:
         #Selecting a unit to shoot with in the shooting phase            
         elif self.state == 25:
             #Does the clicked node contain a unit?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Can the unit act
                 unit = self.units[self.models[self.currentNode.takenBy].unitID]
                 if not unit.endPhase: 
@@ -5227,7 +5153,7 @@ class Battle:
         #Select models to shoot with in the shooting phase
         elif self.state == 28:
             #Does clicked node contain a model?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Is model in the current unit?
                 model = self.models[self.currentNode.takenBy]
                 if self.phase == 3:
@@ -5267,7 +5193,7 @@ class Battle:
         #Select a target to shoot        
         elif self.state == 29:
             #Does the clicked node contain a unit?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 self.targetedNodes = []
                 self.attackingModels = []
                 #Make sure selected unit is an enemy
@@ -5335,7 +5261,7 @@ class Battle:
         #Selecting a unit to charge with in the charging phase    
         elif self.state == 34:
             #Does the clicked node contain a unit?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Is model owned by the current player?
                 if self.currentNode.takenBy in self.currentTurn.models:
                     #Can the unit act
@@ -5352,7 +5278,7 @@ class Battle:
         #Selecting a target to charge        
         elif self.state == 35:
             #Does the clicked node contain a unit?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Is unit an enemy?
                 if self.currentNode.takenBy in self.otherTurn.models:
                     success = True
@@ -5381,7 +5307,7 @@ class Battle:
         #Selecting a CHARACTER to move during intervention            
         elif self.state == 42:
             #Does the clicked node contain a unit?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Can the model act?
                 unit = self.units[self.models[self.currentNode.takenBy].unitID]
                 if not unit.endPhase:
@@ -5393,7 +5319,7 @@ class Battle:
         #Select models to attack with in the melee phase
         elif self.state == 48:
             #Does clicked node contain a model?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Is model in the current unit?
                 model = self.models[self.currentNode.takenBy]
                 if model in self.currentUnit.models:
@@ -5419,7 +5345,7 @@ class Battle:
         #Select target in melee phase        
         elif self.state == 49:
             #Does clicked node contain a model?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 #Is model is in an enemy unit?
                 if self.currentNode.takenBy in self.otherTurn.models:
                     #Get target unit
@@ -5459,7 +5385,7 @@ class Battle:
         #Selecting a transport to embark onto        
         elif self.state == 58:
             #Does the clicked node contain a model?
-            if self.currentNode.takenBy != None:
+            if self.currentNode.takenBy is not None:
                 transport = self.models[self.currentNode.takenBy]
                 #Is the model in the current players models?
                 if transport.ID in self.currentTurn.models:
@@ -5556,7 +5482,7 @@ class Battle:
                 #If so, break and return false
                 success = False
                 break
-            elif self.nodes[currentNode].takenBy != None:
+            elif self.nodes[currentNode].takenBy is not None:
                 model = self.models[self.nodes[currentNode].takenBy]
                 if model.ID in enemy.models and 'AIRBORNE' not in model.keywords:
                     success = False
@@ -5596,7 +5522,7 @@ class Battle:
         for model in unit.models:
             if not model.dead:
                 alive = True
-            if targetCodex != None:
+            if targetCodex is not None:
                 data = targetCodex.models[model.data]
                 if 'Artillery' in data.abilities:
                     artillery = True
@@ -5633,6 +5559,89 @@ class Battle:
         #If unit has been wiped, return true
         #otherwise, return false
         return alive
+
+    def load_tileset(self, battlefield, char, img, images, node):
+
+        if battlefield.tileset == 0:
+
+            if char == "*":
+
+                node.terrain = "Grass"
+
+                if "dense_forest_standard_ground_tile.png" not in images:
+                    images["dense_forest_standard_ground_tile.png"] = resources.load_primary_sprite(
+                        "dense_forest_standard_ground_tile.png")
+                img.append(images["dense_forest_standard_ground_tile.png"])
+
+            elif char == "r":
+
+                node.terrain = "Rock"
+
+                if "dense_forest_standard_ground_tile.png" not in images:
+                    images["dense_forest_standard_ground_tile.png"] = resources.load_primary_sprite(
+                        "dense_forest_standard_ground_tile.png")
+                img.append(images["dense_forest_standard_ground_tile.png"])
+
+                if "dense_forest_rock_tile.png" not in images:
+                    images["dense_forest_rock_tile.png"] = resources.load_primary_sprite(
+                        "dense_forest_rock_tile.png")
+                img.append(images["dense_forest_rock_tile.png"])
+
+            elif char == "t":
+
+                node.terrain = "Small tree"
+                node.cover = 1
+
+                if "dense_forest_standard_ground_tile.png" not in images:
+                    images["dense_forest_standard_ground_tile.png"] = resources.load_primary_sprite(
+                        "dense_forest_standard_ground_tile.png")
+                img.append(images["dense_forest_standard_ground_tile.png"])
+
+                if "tree_tile.png" not in images:
+                    images["tree_tile.png"] = resources.load_primary_sprite("tree_tile.png")
+                img.append(images["tree_tile.png"])
+
+            elif char == "T":
+
+                node.terrain = "Large tree"
+                node.cover = 2
+
+                if "dense_forest_standard_ground_tile.png" not in images:
+                    images["dense_forest_standard_ground_tile.png"] = resources.load_primary_sprite(
+                        "dense_forest_standard_ground_tile.png")
+                img.append(images["dense_forest_standard_ground_tile.png"])
+
+                if "tree_tile2.png" not in images:
+                    images["tree_tile2.png"] = resources.load_primary_sprite("tree_tile2.png")
+                img.append(images["tree_tile2.png"])
+
+            elif char == "m":
+
+                node.terrain = "Large mossy rock"
+                node.blocksLOS = True
+                node.walkable = False
+
+                if "dense_forest_standard_ground_tile.png" not in images:
+                    images["dense_forest_standard_ground_tile.png"] = resources.load_primary_sprite(
+                        "dense_forest_standard_ground_tile.png")
+                img.append(images["dense_forest_standard_ground_tile.png"])
+
+                if "dense_forest_mossy_rock_tile.png" not in images:
+                    images["dense_forest_mossy_rock_tile.png"] = resources.load_primary_sprite(
+                        "dense_forest_mossy_rock_tile.png")
+                img.append(images["dense_forest_mossy_rock_tile.png"])
+
+            elif char == "w":
+
+                node.terrain = "Water"
+                node.walkable = False
+
+                if "dense_forest_water_tile.png" not in images:
+                    images["dense_forest_water_tile.png"] = resources.load_primary_sprite(
+                        "dense_forest_water_tile.png")
+                img.append(images["dense_forest_water_tile.png"])
+
+        return img, images
                 
     def move_model_to_point(self, model, size, node):
         #move sprite's rect to node
@@ -5736,7 +5745,7 @@ class Battle:
         #Loop through nodes
         for node in self.nodes:
             #If node is taken
-            if self.nodes[node].takenBy != None:
+            if self.nodes[node].takenBy is not None:
                 #If unit is in current player's army
                 model = self.models[self.nodes[node].takenBy]
                 unit = self.units[model.unitID]
@@ -5777,7 +5786,7 @@ class Battle:
             player1 = []
             player2 = []
             for node in nodes:
-                if self.nodes[node].takenBy != None:
+                if self.nodes[node].takenBy is not None:
                     model = self.models[self.nodes[node].takenBy]
                     if model.ID in self.players[0].models and 'AIRBORNE' not in model.keywords:
                         if model.ID not in player1:
@@ -5866,7 +5875,7 @@ class Battle:
                     self.eventLogGroup.add(button.sprite)
             
     def update_main_message(self, values, text, otherPlayer=False):
-        if self.mainMessage != None:
+        if self.mainMessage is not None:
             self.mainMessage.kill()
         if not otherPlayer:
             colour = self.currentTurn.colour
@@ -5899,7 +5908,7 @@ class Battle:
                         for y in range(-1, 2):
                             node2 = (node[0] + x, node[1] + y)
                             if node2 in self.nodes:
-                                if self.nodes[node2].takenBy != None:
+                                if self.nodes[node2].takenBy is not None:
                                     if self.nodes[node2].takenBy in enemyPlayer.models:
                                         inMelee = True
                                         break

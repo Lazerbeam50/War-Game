@@ -1,0 +1,24 @@
+=== ANYWHERE THE CAMERA OBJECT IS CREATED NEEDS TO REFERENCE THE SCALED SURFACE ===
+
+game.main_loop()
+	- All groups are drawn on values.battle.surface, which could always be scaled
+
+battle.Battle.__init__()
+	- width and height are set based on 32x32
+	- terrain sizes and locations are based on 32x32
+	- max offsets are set based on 32x32
+	- control point sprites are based on 32x32
+
+battle.Battle.get_purple_squares()
+	- purple squares are created as 32x32
+
+battle.Battle.handle_field_click()
+	- lime green squares are created as 32x32
+	- Target sprites are created as 32x32
+		- This is done multiple times
+
+battle.Battle.toggle_highlight():
+	- hightlight squares are created as 32x32
+
+
+
