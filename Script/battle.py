@@ -4022,8 +4022,8 @@ class Battle:
                 commands = ["Confirm", "Reset", "Embark", "Cancel"]
                 self.get_command_list(values, commands, actionList=[14, 15, 74, 16])
             elif len(self.currentUnit.onboard) > 0 and self.phase == 1:
-                commands = ["Confirm", "Reset", "Disembark", "Cancel"]
-                self.get_command_list(values, commands, actionList=[14, 15, 78, 16])
+                commands = ["Confirm", "Reset", "Cancel"]
+                self.get_command_list(values, commands, actionList=[14, 15, 16])
             else:
                 commands = ["Confirm", "Reset", "Cancel"]
                 self.get_command_list(values, commands, actionList=[14, 15, 16])
@@ -5457,7 +5457,8 @@ class Battle:
         #Selecting where to disembark a unit
         elif self.state == 61:
             #attempt to deploy
-            self.deploy_unit(values, self.currentNode, self.disembarkNodes, self.currentUnit, self.currentTurn.playerArmy.codex, False)
+            self.deploy_unit(values, self.currentNode, self.disembarkNodes, self.currentUnit,
+                             self.currentTurn.playerArmy.codex, False)
                         
     def is_node_in_line_of_sight(self, startNode, targetNode, enemy):
         #Create a current node and set success to true
