@@ -5,10 +5,12 @@ Leaders
 - Mixed assassins
 - Defenders
 - Supporters
+- Mages
 
 Elites
 ======
 - Specialists
+- Mages
 - Stronger versions of other units
 
 Troops

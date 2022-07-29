@@ -18,6 +18,7 @@
 - Set up post-game screen.
 - Add shoot with all models excluding custom gear option.
 - Add transports.
+	- Need to fix bug where transports can move, disembark a unit, and then cancel their move.
 - ~~Add two weapon attack speed bonus.~~
 
 ## Game Setup/Other

@@ -32,3 +32,5 @@ the relative model area ratio rather than largest dimension.
 		- "Blast" may have to be an ability rather than a weapon type, else weapons like
 		light grenades would be OP.
 - Consider adding rules for melee/range skills of 6-10
+	- Instead of granting re-rolls, buffs can give +1 skill
+	- In-battle changes to skill would have to be capped at -1/+1
