@@ -701,8 +701,10 @@ class Battle:
                 #Calculate range around model
                 for x in range(self.models[m]):
                     pass
-                #Loop through nodes in range
-                #
+                #Loop through nodes in range and grab models
+                #Set up attacks for each model
+                #Turn off check explosions
+                #Apply damage
         
     def check_kill_points(self, values, unit):
         

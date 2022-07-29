@@ -55,7 +55,7 @@ class ArmyManager:
     def update(self, values, event=None, typeText=None):
         
         if self.screenSetUp:
-            if event != None:            
+            if event is not None:
                 if event.type == pyLocals.MOUSEBUTTONUP:
                     if event.button == 1:
                         pos = pygame.mouse.get_pos()
@@ -86,7 +86,7 @@ class ArmyManager:
                                 #Select a faction from the faction selection screen
                                 elif button.code == 3:
                                     #Change previous selected factions's colour to white
-                                    if self.playerArmy.faction != None:
+                                    if self.playerArmy.faction is not None:
                                         image = values.font30.render(self.playerArmy.faction.storage.name,
                                                                      True, values.colours["White"])
                                         self.playerArmy.faction.sprites[1].image = image
@@ -99,11 +99,11 @@ class ArmyManager:
                                     
                                 elif button.code == 4:
                                     #Confirm faction
-                                    if self.playerArmy.faction != None:
+                                    if self.playerArmy.faction is not None:
                                         
                                         self.playerArmy.codex = get_codex(self.playerArmy.faction.storage.ID)
                                         
-                                        if values.mageProfiles == None:
+                                        if values.mageProfiles is None:
                                             db = sqlite3.connect('Game Data/game database') #connect to database
                                             cursor = db.cursor()
                                             
@@ -163,11 +163,11 @@ class ArmyManager:
                                         for u in d.units:
                                             b = []
                                             b.append(u.data)
-                                            if u.dispelLevel == None:
+                                            if u.dispelLevel is None:
                                                 b.append(-1)
                                             else:
                                                 b.append(u.dispelLevel)
-                                            if u.dispelRate == None:
+                                            if u.dispelRate is None:
                                                 b.append(-1)
                                             else:
                                                 b.append(u.dispelRate)
@@ -176,7 +176,7 @@ class ArmyManager:
                                             b.append(tuple(u.options))
                                             b.append(int(u.sharedKeywords))
                                             b.append(tuple(u.spells))
-                                            if u.currentMana == None:
+                                            if u.currentMana is None:
                                                 b.append(-1)
                                                 b.append(-1)
                                             else:
@@ -247,7 +247,7 @@ class ArmyManager:
                                     #Empty the text group
                                     self.textGroup.empty()
                                     #Change previous selected detachment's colour to white
-                                    if self.currentDetachment != None:
+                                    if self.currentDetachment is not None:
                                         image = values.font30.render(self.currentDetachment.storage.detachmentName,
                                                                      True, values.colours["White"])
                                         self.currentDetachment.sprites[1].image = image
@@ -333,7 +333,7 @@ class ArmyManager:
                                     
                                 #Confirm detachment
                                 elif button.code == 13:
-                                    if self.currentDetachment != None:
+                                    if self.currentDetachment is not None:
                                         self.state = 4
                                         self.screenSetUp = False
                                         self.currentDetachment = self.currentDetachment.storage
@@ -449,7 +449,7 @@ class ArmyManager:
                                 #Select a unit on the creation screen
                                 elif button.code == 20:
                                     #Change previous selected unit's colour to white
-                                    if self.currentUnit != None:
+                                    if self.currentUnit is not None:
                                         image = values.font30.render(self.currentUnit.storage.title,
                                                                      True, values.colours["White"])
                                         self.currentUnit.sprites[1].image = image
@@ -462,7 +462,7 @@ class ArmyManager:
                                     
                                 #Confirm unit selection
                                 elif button.code == 21:
-                                    if self.currentUnit != None:
+                                    if self.currentUnit is not None:
                                         self.state = 6
                                         self.screenSetUp = False
                                         self.currentUnit = Unit(self.currentUnit.storage, self.playerArmy.codex,
@@ -489,7 +489,7 @@ class ArmyManager:
                                 #Make unit the boss
                                 elif button.code == 24:
                                     #If player has already picked a unit to be the boss, set their boss flag to false
-                                    if self.playerArmy.boss != None:
+                                    if self.playerArmy.boss is not None:
                                         self.playerArmy.boss.isBoss = False
                                     self.playerArmy.boss = self.currentUnit
                                     self.playerArmy.boss.isBoss = True
@@ -623,7 +623,7 @@ class ArmyManager:
                                 #Confirm button on wargear selection screen
                                 elif button.code == 32:
                                     
-                                    if self.currentModel != None and self.currentWargear != None:
+                                    if self.currentModel is not None and self.currentWargear is not None:
                                         
                                         #If new wargear is a invul shield, check to see if model has a shield already
                                         isShield = False
@@ -681,7 +681,7 @@ class ArmyManager:
                                 elif button.code == 34:
                                     #If selected button is not the current model
                                     if self.currentModel != button:
-                                        if self.currentModel != None:
+                                        if self.currentModel is not None:
                                             image = values.font20.render(self.currentModel.storage[1], True, values.colours["White"])
                                             self.currentModel.sprites[1].image = image
                                             
@@ -696,7 +696,7 @@ class ArmyManager:
                                 elif button.code == 35:
                                     #If selected button is not the current wargear
                                     if self.currentWargear != button:
-                                        if self.currentWargear != None:
+                                        if self.currentWargear is not None:
                                             image = values.font20.render(self.currentWargear.storage[1], True, values.colours["White"])
                                             self.currentWargear.sprites[1].image = image
                                             
@@ -748,7 +748,7 @@ class ArmyManager:
             
             if self.state == 0:
                 
-                if self.textInput == None:
+                if self.textInput is None:
                     self.textInput = eztext.Input(maxlength=25, color=values.colours["White"],
                                                   prompt='_', font=values.font30)
                 
@@ -785,7 +785,7 @@ class ArmyManager:
             #Update the text sprite
             sprites.update_typed_text(values, self.textInput, self.typingButton)
             
-            if typeText != None:
+            if typeText is not None:
                 #Only reset the string if the user typed something new in
                 if typeText != "":
                     if self.state == 2:
@@ -827,7 +827,7 @@ class ArmyManager:
         for button in values.buttons:
             self.group.add(button.sprites)
             
-        if values.mageProfiles == None:
+        if values.mageProfiles is None:
             db = sqlite3.connect('Game Data/game database') #connect to database
             cursor = db.cursor()
             
@@ -907,7 +907,7 @@ class ArmyManager:
         spriteList.append(sprites.GameSprite(image, (20, 25, image.get_width(), image.get_height())))
         
         #Add boss text
-        if self.playerArmy.boss == None:
+        if self.playerArmy.boss is None:
             text = "None"
         else:
             unitData = self.playerArmy.codex.units[self.playerArmy.boss.data]
@@ -1740,7 +1740,7 @@ class ArmyManager:
         
         self.textGroup.empty()
         
-        if self.currentWargear != None:
+        if self.currentWargear is not None:
             
             #Set up text for wargear first
             
@@ -1802,7 +1802,7 @@ class ArmyManager:
                 
                 y += 20
                 
-        if self.currentModel != None:
+        if self.currentModel is not None:
             
             image = values.font30.render(self.currentModel.storage[1], True, values.colours["White"])
             self.textGroup.add(sprites.GameSprite(image, (sprites.centre_x(image.get_width(), 600, 650), 
@@ -1898,7 +1898,7 @@ class Model:
     def __init__(self, data=None, factionCodex=None, newModel=True):
         self.attackSpeed = None
         self.armour = None
-        if data != None:
+        if data is not None:
             self.data = data.ID
         else:
             self.data = data
@@ -1975,7 +1975,7 @@ class Model:
         
 class Unit:
     def __init__(self, data=None, factionCodex=None, mageProfiles=None, newUnit=True):
-        if data != None:
+        if data is not None:
             self.data = data.ID
         else:
             self.data = data
@@ -2509,7 +2509,7 @@ def save_army(playerArmy, detachments, cursor):
     detachments = str(detachments)
     print(detachments)
     print(type(detachments))
-    if playerArmy.bossTrait == None:
+    if playerArmy.bossTrait is None:
         bossTrait = -1
     else:
         bossTrait = playerArmy.bossTrait
