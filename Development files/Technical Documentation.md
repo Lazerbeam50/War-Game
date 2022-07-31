@@ -43,6 +43,7 @@
 
 ## Part IV: General/Misc
 
+1. Save data
 1. Start game screens
 
 
@@ -371,3 +372,44 @@ The checks involve looping through all available models and checking to see if:
 - The game only checks if “Conquest” and “Full Distance” have been achieved on the final turn of the game.
 - “First Blood” and “Kingslayer” are announced as events as soon as they are achieved, but points are awarded at the end of the turn. 
 - The player can only select “end turn”
+
+# Part I: General/Misc
+
+## Save data
+
+Save data structure for armies is stated below. **Bold** indicates a file/database, *Italics* indicate a table, and bullet points indicate columns
+
+**Army list**
+
+*Army list**
+
+- Name (PK)
+- BossName
+- BossTrait
+- Faction
+- TotalPoints
+- TotalSP
+
+**[Army Name]** (One file/DB per saved army)
+
+*Detachments*
+
+- DetachmentName
+- DetachmentID
+- DetachmentType
+
+*Units*
+
+- DetachmentID
+- UnitID
+- UnitData
+- options
+- spells
+
+*Models*
+
+- UnitID
+- ModelData
+- Invul
+- Wargear
+

@@ -13,6 +13,7 @@ import sqlite3
 import codex # @UnresolvedImport
 import misc # @UnresolvedImport
 import resources # @UnresolvedImport
+import save_data
 import sprites # @UnresolvedImport
 
 class Army:
@@ -140,7 +141,10 @@ class ArmyManager:
                                 
                                 #save current army
                                 elif button.code == 7:
-                                    
+
+                                    save_data.create_save_file()
+                                    save_data.save_army(self.playerArmy)
+                                    """
                                     #create or connect to database
                                     db = sqlite3.connect('Save Data/save data')
                                     cursor = db.cursor()
@@ -230,6 +234,9 @@ class ArmyManager:
                                     db.commit()
                                         #if name is taken, delete old army and save new one
                                     print("Army saved")
+                                    """
+                                    
+
                                 elif button.code == 10:
                                     
                                     self.state = 0

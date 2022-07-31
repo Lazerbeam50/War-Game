@@ -18,6 +18,7 @@ Units
 -----
 DetachmentID
 UnitID
+isBoss
 options
 spells
 
