@@ -17,6 +17,7 @@ def create_save_file():
     ,Faction INTEGER
     ,TotalPoints INTEGER
     ,TotalSP INTEGER
+    ,NoOfDetachments INTEGER
     )
     ''')
 
@@ -49,11 +50,21 @@ def save_army(playerArmy):
     ,Faction
     ,TotalPoints
     ,TotalSP
+    ,NoOfDetachments
     )
     
-    VALUES (?,?,?,?,?,?)
+    VALUES (?,?,?,?,?,?,?)
     
-    ''', (playerArmy.name,bossName,"None",playerArmy.faction,playerArmy.totalPoints,playerArmy.totalSP))
+    ''', (
+        playerArmy.name,
+        bossName,
+        "None",
+        playerArmy.faction,
+        playerArmy.totalPoints,
+        playerArmy.totalSP,
+        len(playerArmy.detachments)
+    )
+                   )
 
     #Connect to database file for army
 
@@ -93,6 +104,7 @@ def save_army(playerArmy):
      ,UnitData TEXT
      ,options TEXT
      ,spells TEXT
+     ,isBoss INTEGER
     )
     ''')
 
@@ -117,10 +129,12 @@ def save_army(playerArmy):
         detachments.append((d.name, detachmentID, d.detachmentType))
 
         for u in d.units:
-            units.append((detachmentID, unitID, str(u.data), str(u.options), str(u.spells)))
+            units.append(
+                (detachmentID, unitID, str(u.data), str(tuple(u.options)), str(tuple(u.spells)), int(u.isBoss))
+            )
 
             for m in u.models:
-                models.append((unitID, str(m.data), m.invul, str(m.wargear)))
+                models.append((unitID, str(m.data), m.invul, str(tuple(m.wargear))))
 
             unitID += 1
 
@@ -132,8 +146,8 @@ def save_army(playerArmy):
     ''', detachments)
 
     armyCursor.executemany('''
-    INSERT INTO Units (DetachmentID, UnitID, UnitData, options, spells)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO Units (DetachmentID, UnitID, UnitData, options, spells, isBoss)
+    VALUES (?, ?, ?, ?, ?, ?)
     ''', units)
 
     armyCursor.executemany('''

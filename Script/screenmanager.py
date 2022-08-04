@@ -11,6 +11,7 @@ import sqlite3 #database script
 import army # @UnresolvedImport
 import battle # @UnresolvedImport
 import battlefields  # @UnresolvedImport
+import load_data
 import misc  # @UnresolvedImport
 import resources  # @UnresolvedImport
 import sprites  # @UnresolvedImport
@@ -341,11 +342,11 @@ class ScreenManager:
             elif button.code == 18:
                 # Set army as current army
                 if self.currentArmy is not None:
-                    image = values.font20.render(self.currentArmy.storage.name, True,
+                    image = values.font20.render(self.currentArmy.storage[0], True,
                                                  values.colours["White"])
                     self.currentArmy.sprites[1].image = image
                 self.currentArmy = button
-                image = values.font20.render(self.currentArmy.storage.name, True,
+                image = values.font20.render(self.currentArmy.storage[0], True,
                                              values.colours["Lime"])
                 self.currentArmy.sprites[1].image = image
 
@@ -415,9 +416,9 @@ class ScreenManager:
                             b.sprites[1].image = image
 
     def start_game(self, values):
-        if ((self.missionSettings.player1Army.totalPoints
+        if ((self.missionSettings.player1Army[4]
              <= self.missionSettings.pointCap) and
-                (self.missionSettings.player2Army.totalPoints
+                (self.missionSettings.player2Army[4]
                  <= self.missionSettings.pointCap)):
             print("READY TO PLAY")
             # Reset game setup variables
@@ -428,6 +429,16 @@ class ScreenManager:
             self.currentArmy = None
             self.tabGroup.empty()
             self.textGroup.empty()
+
+            fullData = load_data.load_army(self.missionSettings.player1Army[0])
+            playerArmy = army.Army()
+            playerArmy.load_from_sql(values, self.missionSettings.player1Army, fullData)
+            self.missionSettings.player1Army = playerArmy
+
+            fullData = load_data.load_army(self.missionSettings.player2Army[0])
+            playerArmy = army.Army()
+            playerArmy.load_from_sql(values, self.missionSettings.player2Army, fullData)
+            self.missionSettings.player2Army = playerArmy
 
             # Create battle
             values.battle = battle.Battle(values, [self.missionSettings.player1Army, self.missionSettings.player2Army],
@@ -445,7 +456,7 @@ class ScreenManager:
         buttonImage = pygame.transform.scale(widePanelImage, (255, 25))
         x = sprites.centre_x(255, 270, 50)
         y = 85
-        
+        """
         #load armies from save data
         db = sqlite3.connect('Save Data/save data') #connect to database
         cursor = db.cursor()
@@ -453,10 +464,18 @@ class ScreenManager:
         cursor.execute('''SELECT name, bossTrait, faction, totalSP, totalPoints, detachments FROM armies''')
         data = cursor.fetchall()
         self.armies = army.get_army_lists(data)
-        
         #Set up buttons for list
         for a in self.armies:
             button = sprites.Button(18, 0, buttonImage, (x, y, 255, 25), a.name, values.font20, values, storage=a)
+            y += 25
+            self.tabGroup.add(button.sprites)
+        """
+
+        self.armies = load_data.load_army_list()
+
+        # Set up buttons for list
+        for a in self.armies:
+            button = sprites.Button(18, 0, buttonImage, (x, y, 255, 25), a[0], values.font20, values, storage=a)
             y += 25
             self.tabGroup.add(button.sprites)
             
@@ -502,12 +521,12 @@ class ScreenManager:
         
         factions = ["Paladins", "Orcs", "Sorcerers", "Earthlings", "Valkyries", "Titans", "Elves", "Undead",
                     "Hobgoblins", "The Kraaw", "Demonic Legion"]
-        armyFaction = "Faction :  " + factions[army1.faction]
-        bossName = "Boss : " + army1.codex.units[army1.boss.data].title
+        armyFaction = "Faction :  " + factions[army1[3]]
+        bossName = "Boss : " + army1[1]
         
         # Name, Faction, Points, Boss, SP, No. of detachments
-        info = [army1.name, " ", armyFaction, "Points : " + str(army1.totalPoints), bossName, 
-                "Total SP : " + str(army1.totalSP), "No. of Detachments : " + str(len(army1.detachments))]
+        info = [army1[0], " ", armyFaction, "Points : " + str(army1[4]), bossName,
+                "Total SP : " + str(army1[5]), "No. of Detachments : " + str(army1[6])]
         
         for text in info:
             image = values.font30.render(text, True, values.colours["White"])

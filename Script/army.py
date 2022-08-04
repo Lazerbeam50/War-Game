@@ -11,6 +11,7 @@ import eztext # @UnresolvedImport
 import sqlite3
 
 import codex # @UnresolvedImport
+import load_data
 import misc # @UnresolvedImport
 import resources # @UnresolvedImport
 import save_data
@@ -26,6 +27,110 @@ class Army:
         self.name = "Enter Name"
         self.totalSP = 3
         self.totalPoints = 0
+
+    def load_from_sql(self, values, armyListData, fullData):
+
+        #Get faction codex
+        factionCodex = get_codex(armyListData[3])
+
+        #Set up dicts for detachments and units and a list for models
+        detachments = {}
+        units = {}
+        models = []
+
+        for row in fullData:
+
+            if row[0] not in detachments:
+                detachments[row[0]] = get_detachment_list()[row[2]]
+                detachments[row[0]].name = row[1]
+
+            if row[3] not in units:
+                # Overwrite Options and Spell data
+                unitDataSheet = factionCodex.units[misc.string_to_list(row[4], intValues=True, giveTuple=True)]
+                unit = Unit(data=unitDataSheet, newUnit=False)
+                options = misc.string_to_list(row[5])
+                unit.options = [misc.string_to_list(o, intValues=True, giveTuple=True) for o in options]
+                spells = misc.string_to_list(row[6])
+                unit.spells = [misc.string_to_list(s, intValues=True, giveTuple=True) for s in spells]
+                unit.isBoss = bool(row[10])
+                units[row[3]] = (row[0], unit)
+
+            modelDataSheet = factionCodex.models[misc.string_to_list(row[7], intValues=True, giveTuple=True)]
+            model = Model(data=modelDataSheet, factionCodex=factionCodex)
+            # Overwrite Invul, Wargear
+            model.invul = row[8]
+            model.wargear = misc.string_to_list(row[9], intValues=True)
+            model.reset_points(factionCodex)
+            models.append((row[3], model))
+
+        #Assign models to units
+        for unitID, unit in units.items():
+            unit[1].models = [model[1] for model in models if model[0] == unitID]
+
+        #Assign units to detachments
+        for detachmentID, detachment in detachments.items():
+            detachment.units = [unit[1] for unit in units.values() if unit[0] == detachmentID]
+
+        if values.mageProfiles is None:
+            data = load_data.load_mage_profiles()
+            values.mageProfiles = []
+            for entry in data:
+                obj = codex.MageProfile()
+                obj.ID = misc.string_to_list(entry[0], True, True)
+                obj.itemNeeded = misc.string_to_list(entry[1], True, True)
+                obj.tier = entry[2]
+                obj.mana = entry[3]
+                obj.dispelLevel = entry[4]
+                obj.dispelCost = entry[5]
+
+                values.mageProfiles.append(obj)
+
+        #Set up shared keywords
+        for unit in units.values():
+            unitData = factionCodex.units[unit[1].data]
+
+            unit[1].sharedKeywords = unitData.sharedKeywords
+            if unit[1].sharedKeywords:
+                unit[1].keywords = copy.copy(unit[1].models[0].keywords)
+
+            #Set up mage stats
+            if 'MAGE' in unit[1].keywords:
+                for mp in values.mageProfiles:
+                    #Set default value
+                    if mp.ID == unit[1].data and mp.tier == 1:
+                        unit[1].dispelLevel = mp.dispelLevel
+                        unit[1].dispelRate = mp.dispelCost
+                        unit[1].currentMana = unit[1].maxMana = mp.mana
+                        break
+
+                for mp in values.mageProfiles:
+                    #Look if unit has wargear for improving mage stats
+                    if mp.ID == unit[1].data and mp.itemNeeded[1] in unit[1].models[0].wargear:
+                        unit[1].dispelLevel = max(mp.dispelLevel, unit[1].dispelLevel)
+                        unit[1].dispelRate = min(mp.dispelCost, unit[1].dispelRate)
+                        unit[1].currentMana = max(mp.mana, unit[1].maxMana)
+                        unit[1].maxMana = max(mp.mana, unit[1].maxMana)
+
+            # Recalculate points
+            unit[1].reset_points(factionCodex)
+
+        #Set final army attributes
+        self.boss = [unit[1] for unit in units.values() if unit[1].isBoss][0]
+        if armyListData[2] == 'None':
+            self.bossTrait = None
+        else:
+            self.bossTrait = armyListData[2]
+        self.codex = factionCodex
+        self.detachments = list(detachments.values())
+        self.faction = armyListData[3]
+        self.name = armyListData[0]
+        self.totalSP = armyListData[4]
+
+        #Recalculate points
+        self.totalPoints = 0
+        for d in self.detachments:
+            d.calculate_points()
+            self.totalPoints += d.points
         
 class ArmyManager:
     def __init__(self):
@@ -57,688 +162,7 @@ class ArmyManager:
         
         if self.screenSetUp:
             if event is not None:
-                if event.type == pyLocals.MOUSEBUTTONUP:
-                    if event.button == 1:
-                        pos = pygame.mouse.get_pos()
-                        pos = (pos[0], pos[1] + self.yOffset)
-                        clicked = False
-                        for button in values.buttons[:]:
-                            clicked = misc.is_point_inside_rect(pos[0], pos[1], button.rect)
-                            if clicked:
-                                if button.code == 0:
-                                    
-                                    self.playerArmy = Army()
-                                    
-                                    self.state = 1
-                                    self.screenSetUp = False
-                                    
-                                #Load army button
-                                elif button.code == 1:
-                                    self.state = 7
-                                    self.screenSetUp = False
-                                    
-                                #Quit army main screen
-                                elif button.code == 2:
-                                    values.state = 0
-                                    self.state = 0
-                                    self.screenSetUp = False
-                                    self.group.empty()
-                                    
-                                #Select a faction from the faction selection screen
-                                elif button.code == 3:
-                                    #Change previous selected factions's colour to white
-                                    if self.playerArmy.faction is not None:
-                                        image = values.font30.render(self.playerArmy.faction.storage.name,
-                                                                     True, values.colours["White"])
-                                        self.playerArmy.faction.sprites[1].image = image
-                                        
-                                    self.playerArmy.faction = button
-                                    #Highlight current faction text lime green
-                                    image = values.font30.render(self.playerArmy.faction.storage.name,
-                                                                     True, values.colours["Lime"])
-                                    self.playerArmy.faction.sprites[1].image = image
-                                    
-                                elif button.code == 4:
-                                    #Confirm faction
-                                    if self.playerArmy.faction is not None:
-                                        
-                                        self.playerArmy.codex = get_codex(self.playerArmy.faction.storage.ID)
-                                        
-                                        if values.mageProfiles is None:
-                                            db = sqlite3.connect('Game Data/game database') #connect to database
-                                            cursor = db.cursor()
-                                            
-                                            cursor.execute('''SELECT id, itemNeeded, tier, mana, dispelLevel, 
-                                            dispelCost FROM mage_profiles''')
-                                            data = cursor.fetchall()
-                                            values.mageProfiles = []
-                                            for entry in data:
-                                                obj = codex.MageProfile()
-                                                obj.ID = misc.string_to_list(entry[0], True, True)
-                                                obj.itemNeeded = misc.string_to_list(entry[1], True, True)
-                                                obj.tier = entry[2]
-                                                obj.mana = entry[3]
-                                                obj.dispelLevel = entry[4]
-                                                obj.dispelCost = entry[5]
-                                                
-                                                values.mageProfiles.append(obj)
-                                        
-                                        self.state = 2
-                                        self.screenSetUp = False
-                                        self.playerArmy.faction = self.playerArmy.faction.storage.ID
-                                    
-                                elif button.code == 5:
-                                    self.state = 0
-                                    self.screenSetUp = False
-                                    self.playerArmy.faction = None
-                                    
-                                elif button.code == 6:
-                                    self.typing = True #Turn on typing flag
-                                    self.typingButton = button #Set button for easy access
-                                    self.textInput.value = "" #Empty inputter value
-                                    sprites.update_typed_text(values, self.textInput, 
-                                                              button) #Update text sprite
-                                
-                                #save current army
-                                elif button.code == 7:
-
-                                    save_data.create_save_file()
-                                    save_data.save_army(self.playerArmy)
-                                    """
-                                    #create or connect to database
-                                    db = sqlite3.connect('Save Data/save data')
-                                    cursor = db.cursor()
-                                    #set up saved armies table
-                                    try:
-                                        cursor.execute('''CREATE TABLE armies(name TEXT PRIMARY KEY, 
-                                        bossTrait INTEGER, faction INTEGER, totalSP INTEGER, totalPoints INTEGER, 
-                                        detachments TEXT)''')
-                                    except sqlite3.OperationalError:
-                                        pass
-                                    #Set detachments up as stringed-list
-                                    detachments = []
-                                    for d in self.playerArmy.detachments:
-                                        a = []
-                                        a.append(d.name)
-                                        a.append(d.detachmentType)
-                                        a.append(d.points)
-                                        a.append([])
-                                        
-                                        for u in d.units:
-                                            b = []
-                                            b.append(u.data)
-                                            if u.dispelLevel is None:
-                                                b.append(-1)
-                                            else:
-                                                b.append(u.dispelLevel)
-                                            if u.dispelRate is None:
-                                                b.append(-1)
-                                            else:
-                                                b.append(u.dispelRate)
-                                            b.append(int(u.isBoss))
-                                            b.append(tuple(u.keywords))
-                                            b.append(tuple(u.options))
-                                            b.append(int(u.sharedKeywords))
-                                            b.append(tuple(u.spells))
-                                            if u.currentMana is None:
-                                                b.append(-1)
-                                                b.append(-1)
-                                            else:
-                                                b.append(u.currentMana)
-                                                b.append(u.maxMana)
-                                            b.append(u.modelPoints)
-                                            b.append(u.wargearPoints)
-                                            b.append(u.totalPoints)
-                                            b.append([])
-                                            
-                                            for m in u.models:
-                                                c = []
-                                                c.append(m.armour)
-                                                c.append(m.attackSpeed)
-                                                c.append(m.currentHP)
-                                                c.append(m.data)
-                                                c.append(m.fort)
-                                                c.append(m.invul)
-                                                c.append(tuple(m.keywords))
-                                                c.append(m.mSkill)
-                                                c.append(m.maxHP)
-                                                c.append(m.maxMove)
-                                                c.append(m.minMove)
-                                                c.append(m.rSkill)
-                                                c.append(m.strength)
-                                                c.append(tuple(m.wargear))
-                                                c.append(m.wargearPoints)
-                                                c.append(m.will)
-                                                
-                                                c = tuple(c)
-                                                b[13].append(c)
-                                            
-                                            b[13] = tuple(b[13])
-                                            b = tuple(b)
-                                            a[3].append(b)
-                                        
-                                        a[3] = tuple(a[3])
-                                        a = tuple(a)
-                                        detachments.append(a)
-                                        
-                                    detachments = tuple(detachments)
-                                    print("Lets take a look!")
-                                    #write army to database
-                                    try:
-                                        save_army(self.playerArmy, detachments, cursor)
-                                    except sqlite3.IntegrityError:
-                                        print("Army name taken. Overwriting.")
-                                        cursor.execute('''DELETE FROM armies WHERE name = ? ''', 
-                                                       (self.playerArmy.name,))
-                                        save_army(self.playerArmy, detachments, cursor)
-                                    db.commit()
-                                        #if name is taken, delete old army and save new one
-                                    print("Army saved")
-                                    """
-                                    
-
-                                elif button.code == 10:
-                                    
-                                    self.state = 0
-                                    self.screenSetUp = False
-                                    self.typing = False
-                                    self.textInput = None
-                                    
-                                elif button.code == 11:
-                                    if len(self.playerArmy.detachments) < 20:
-                                        self.state = 3
-                                        self.screenSetUp = False
-                                    
-                                #Select a detachment on the detachment creation screen
-                                elif button.code == 12:
-                                    #Empty the text group
-                                    self.textGroup.empty()
-                                    #Change previous selected detachment's colour to white
-                                    if self.currentDetachment is not None:
-                                        image = values.font30.render(self.currentDetachment.storage.detachmentName,
-                                                                     True, values.colours["White"])
-                                        self.currentDetachment.sprites[1].image = image
-                                        
-                                    self.currentDetachment = button
-                                    #Highlight current detachment text lime green
-                                    image = values.font30.render(self.currentDetachment.storage.detachmentName,
-                                                                     True, values.colours["Lime"])
-                                    self.currentDetachment.sprites[1].image = image
-                                    
-                                    #Write out the detachment info
-                                    text = self.currentDetachment.storage.detachmentName + " (+" + str(self.currentDetachment.storage.sp) + " SP)"
-                                    image = values.font60.render(text, True, 
-                                                                 values.colours["Black"])
-                                    spr = sprites.GameSprite(image, (950, 150, image.get_width(), image.get_height()))
-                                    self.textGroup.add(spr)
-                                    
-                                    if self.currentDetachment.storage.leaderMax == 0:
-                                        text = "Leaders: None"
-                                    else:
-                                        text = "Leaders: " + str(self.currentDetachment.storage.leaderMin) + "-" + str(self.currentDetachment.storage.leaderMax)
-                                    image = values.font30.render(text, True, values.colours["Black"])
-                                    spr = sprites.GameSprite(image, (850, 225, image.get_width(), image.get_height()))
-                                    self.textGroup.add(spr)
-                                    if self.currentDetachment.storage.troopsMax == 0:
-                                        text = "Troops: None"
-                                    else:
-                                        text = "Troops: " + str(self.currentDetachment.storage.troopsMin) + "-" + str(self.currentDetachment.storage.troopsMax)
-                                    image = values.font30.render(text, True, values.colours["Black"])
-                                    spr = sprites.GameSprite(image, (850, 250, image.get_width(), image.get_height()))
-                                    self.textGroup.add(spr)
-                                    if self.currentDetachment.storage.elitesMax == 0:
-                                        text = "Elites: None"
-                                    else:
-                                        text = "Elites: " + str(self.currentDetachment.storage.elitesMin) + "-" + str(self.currentDetachment.storage.elitesMax)
-                                    image = values.font30.render(text, True, values.colours["Black"])
-                                    spr = sprites.GameSprite(image, (850, 275, image.get_width(), image.get_height()))
-                                    self.textGroup.add(spr)
-                                    if self.currentDetachment.storage.fastAttackMax == 0:
-                                        text = "Fast Attack: None"
-                                    else:
-                                        text = "Fast Attack: " + str(self.currentDetachment.storage.fastAttackMin) + "-" + str(self.currentDetachment.storage.fastAttackMax)
-                                    image = values.font30.render(text, True, values.colours["Black"])
-                                    spr = sprites.GameSprite(image, (850, 300, image.get_width(), image.get_height()))
-                                    self.textGroup.add(spr)
-                                    if self.currentDetachment.storage.heavyMax == 0:
-                                        text = "Heavy Support: None"
-                                    else:
-                                        text = "Heavy Support: " + str(self.currentDetachment.storage.heavyMin) + "-" + str(self.currentDetachment.storage.heavyMax)
-                                    image = values.font30.render(text, True, values.colours["Black"])
-                                    spr = sprites.GameSprite(image, (850, 325, image.get_width(), image.get_height()))
-                                    self.textGroup.add(spr)
-                                    if self.currentDetachment.storage.flyerMax == 0:
-                                        text = "Air: None"
-                                    else:
-                                        text = "Air: " + str(self.currentDetachment.storage.flyerMin) + "-" + str(self.currentDetachment.storage.flyerMax)
-                                    image = values.font30.render(text, True, values.colours["Black"])
-                                    spr = sprites.GameSprite(image, (850, 350, image.get_width(), image.get_height()))
-                                    self.textGroup.add(spr)
-                                    if self.currentDetachment.storage.ultraMax == 0:
-                                        text = "Ultras: None"
-                                    else:
-                                        text = "Ultras: " + str(self.currentDetachment.storage.ultraMin) + "-" + str(self.currentDetachment.storage.ultraMax)
-                                    image = values.font30.render(text, True, values.colours["Black"])
-                                    spr = sprites.GameSprite(image, (850, 375, image.get_width(), image.get_height()))
-                                    self.textGroup.add(spr)
-                                    if self.currentDetachment.storage.structureMax == 0:
-                                        text = "Structures: None"
-                                    else:
-                                        text = "Structures: " + str(self.currentDetachment.storage.structureMin) + "-" + str(self.currentDetachment.storage.structureMax)
-                                    image = values.font30.render(text, True, values.colours["Black"])
-                                    spr = sprites.GameSprite(image, (850, 400, image.get_width(), image.get_height()))
-                                    self.textGroup.add(spr)
-                                    if self.currentDetachment.storage.transportRule:
-                                        text = "Transports: 1 per other unit"
-                                    elif self.currentDetachment.storage.transportMax == 0:
-                                        text = "Transports: None"
-                                    else:
-                                        text = "Transports: " + str(self.currentDetachment.storage.transportMin) + "-" + str(self.currentDetachment.storage.transportMax)
-                                    image = values.font30.render(text, True, values.colours["Black"])
-                                    spr = sprites.GameSprite(image, (850, 425, image.get_width(), image.get_height()))
-                                    self.textGroup.add(spr)
-                                    
-                                #Confirm detachment
-                                elif button.code == 13:
-                                    if self.currentDetachment is not None:
-                                        self.state = 4
-                                        self.screenSetUp = False
-                                        self.currentDetachment = self.currentDetachment.storage
-                                        self.playerArmy.detachments.append(self.currentDetachment)
-                                
-                                elif button.code == 14:
-                                    self.state = 2
-                                    self.screenSetUp = False
-                                    self.currentDetachment = None
-                                    
-                                elif button.code == 15:
-                                    self.typing = True #Turn on typing flag
-                                    self.typingButton = button #Set button for easy access
-                                    self.textInput.value = "" #Empty inputter value
-                                    sprites.update_typed_text(values, self.textInput, 
-                                                              button) #Update text sprite
-                                
-                                #deleting a detachment    
-                                elif button.code == 16:
-                                    self.state = 2
-                                    self.screenSetUp = False
-                                    self.typing = False
-                                    self.textInput.value = self.playerArmy.name
-                                    if self.playerArmy.boss in self.currentDetachment.units:
-                                        self.playerArmy.boss.isBoss = False
-                                        self.playerArmy.boss = None
-                                    self.playerArmy.detachments.remove(self.currentDetachment)
-                                    self.currentDetachment = None
-                                    
-                                elif button.code == 17:
-                                    self.state = 2
-                                    self.screenSetUp = False
-                                    self.typing = False
-                                    self.textInput.value = self.playerArmy.name
-                                    self.currentDetachment = None
-                                    
-                                #Selecting a created detachment from the army display screen
-                                elif button.code == 18:
-                                    self.state = 4
-                                    self.screenSetUp = False
-                                    self.typing = False
-                                    self.textInput.value = self.playerArmy.name
-                                    self.currentDetachment = button.storage
-                                    
-                                #Add unit to detachment
-                                elif button.code == 19:
-                                    #Check if any units can be added at all
-                                    counts, uniques = self.get_role_counts(True)
-                                    allowed = {}
-                                    
-                                    if counts[0] in range(0, self.currentDetachment.leaderMax):
-                                        allowed[0] = True
-                                    else:
-                                        allowed[0] = False
-                                    if counts[1] in range(0, self.currentDetachment.troopsMax):
-                                        allowed[1] = True
-                                    else:
-                                        allowed[1] = False
-                                    if counts[2] in range(0, self.currentDetachment.elitesMax):
-                                        allowed[2] = True
-                                    else:
-                                        allowed[2] = False
-                                    if counts[3] in range(0, self.currentDetachment.fastAttackMax):
-                                        allowed[3] = True
-                                    else:
-                                        allowed[3] = False
-                                    if counts[4] in range(0, self.currentDetachment.heavyMax):
-                                        allowed[4] = True
-                                    else:
-                                        allowed[4] = False
-                                    if self.currentDetachment.transportRule:
-                                        maxTransport = counts[9]
-                                    else:
-                                        maxTransport = self.currentDetachment.transportMax
-                                    if counts[5] in range(0, maxTransport):
-                                        allowed[5] = True
-                                    else:
-                                        allowed[5] = False
-                                    if counts[6] in range(0, self.currentDetachment.flyerMax):
-                                        allowed[6] = True
-                                    else:
-                                        allowed[6] = False
-                                    if counts[7] in range(0, self.currentDetachment.structureMax):
-                                        allowed[7] = True
-                                    else:
-                                        allowed[7] = False
-                                    if counts[8] in range(0, self.currentDetachment.ultraMax):
-                                        allowed[8] = True
-                                    else:
-                                        allowed[8] = False
-                                    
-                                    self.availableUnits = []
-                                    
-                                    for unit in self.playerArmy.codex.units:
-                                        role = self.playerArmy.codex.units[unit].bfRole
-                                        if allowed[role]:
-                                            approved = True
-                                            for model in self.playerArmy.codex.units[unit].defaultModels:
-                                                modelData = self.playerArmy.codex.models[(self.playerArmy.faction, model)]
-                                                for keyword in uniques:
-                                                    if keyword in modelData.keywords:
-                                                        approved = False
-                                                        break
-                                            if approved:
-                                                self.availableUnits.append(unit)
-                                            
-                                            
-                                    #If so, proceed to unit creation
-                                    if len(self.availableUnits) > 0:
-                                        self.state = 5
-                                        self.screenSetUp = False
-                                        
-                                #Select a unit on the creation screen
-                                elif button.code == 20:
-                                    #Change previous selected unit's colour to white
-                                    if self.currentUnit is not None:
-                                        image = values.font30.render(self.currentUnit.storage.title,
-                                                                     True, values.colours["White"])
-                                        self.currentUnit.sprites[1].image = image
-                                        
-                                    self.currentUnit = button
-                                    #Highlight current unit text lime green
-                                    image = values.font30.render(self.currentUnit.storage.title,
-                                                                     True, values.colours["Lime"])
-                                    self.currentUnit.sprites[1].image = image
-                                    
-                                #Confirm unit selection
-                                elif button.code == 21:
-                                    if self.currentUnit is not None:
-                                        self.state = 6
-                                        self.screenSetUp = False
-                                        self.currentUnit = Unit(self.currentUnit.storage, self.playerArmy.codex,
-                                                                values.mageProfiles)
-                                        self.currentDetachment.units.append(self.currentUnit)
-                                        
-                                    
-                                #Back out of unit creation    
-                                elif button.code == 22:
-                                    self.state = 4
-                                    self.screenSetUp = False
-                                    self.currentUnit = None
-                                    
-                                #Confirm unit on unit display screen
-                                elif button.code == 23:
-                                    
-                                    #recalculate points
-                                    self.currentDetachment.calculate_points()
-                                    
-                                    self.state = 4
-                                    self.screenSetUp = False
-                                    self.currentUnit = None
-                                    
-                                #Make unit the boss
-                                elif button.code == 24:
-                                    #If player has already picked a unit to be the boss, set their boss flag to false
-                                    if self.playerArmy.boss is not None:
-                                        self.playerArmy.boss.isBoss = False
-                                    self.playerArmy.boss = self.currentUnit
-                                    self.playerArmy.boss.isBoss = True
-                                
-                                #Delete unit
-                                elif button.code == 26:
-                                    
-                                    self.state = 4
-                                    self.screenSetUp = False
-                                    self.currentDetachment.units.remove(self.currentUnit)
-                                    #recalculate points
-                                    self.currentDetachment.calculate_points()
-                                    if self.currentUnit == self.playerArmy.boss:
-                                        self.playerArmy.boss = None
-                                    self.currentUnit = None
-                                  
-                                #Selecting a created unit from the detachment display screen  
-                                elif button.code == 27:
-                                    self.state = 6
-                                    self.screenSetUp = False
-                                    self.typing = False
-                                    self.textInput.value = self.currentDetachment.name
-                                    self.currentUnit = button.storage
-                                    
-                                #Adding a model to a unit
-                                elif button.code == 28:
-                                    #Count the number of times this option has been used
-                                    count = 0
-                                    for o in self.currentUnit.options:
-                                        if o == button.storage.ID:
-                                            count += 1
-                                    if count < button.storage.maximum:
-                                        #Add model to unit if below maximum
-                                        for m in button.storage.gaining:
-                                            modelData = self.playerArmy.codex.models[(self.playerArmy.faction, m)]
-                                            model = Model(modelData, self.playerArmy.codex)
-                                            self.currentUnit.models.append(model)
-                                        self.currentUnit.reset_points(self.playerArmy.codex)
-                                        self.currentDetachment.calculate_points()
-                                        #Add option code to unit's options
-                                        self.currentUnit.options.append(button.storage.ID)
-                                        #Refresh screen
-                                        self.screenSetUp = False
-                                        
-                                #Add wargear to a unit
-                                elif button.code == 29:
-                                    #count the number of times this option has been used
-                                    count = 0
-                                    for o in self.currentUnit.options:
-                                        if o == button.storage.ID:
-                                            count += 1
-                                    if count < button.storage.maximum or button.storage.maximum == 0:
-                                        #count the number of receiving models in the current unit
-                                        rm = 0
-                                        for m in self.currentUnit.models:
-                                            approved = True
-                                            for wargear in button.storage.requires:
-                                                if wargear not in m.wargear:
-                                                    approved = False
-                                            for wargear in button.storage.replacing:
-                                                if wargear not in m.wargear:
-                                                    approved = False
-                                            if approved and m.data[1] == button.storage.receivingModel:
-                                                rm += 1
-                                                model = m
-                                        #if there is only one receiving model in the unit and only one type of wargear is being given
-                                        if rm == 1 and button.storage.optionType == 1:
-                                            #Replace the old wargear, if needed
-                                            for wargear in button.storage.replacing:
-                                                if wargear in model.wargear:
-                                                    model.wargear.remove(wargear)
-                                            #If new wargear is a invul shield, check to see if model has a shield already
-                                            isShield = False
-                                            if self.playerArmy.codex.wargear[self.playerArmy.codex.ID, button.storage.gaining[0]].gearType == 7:
-                                                isShield = True
-                                                hasShield = False
-                                                for wargear in model.wargear:
-                                                    if self.playerArmy.codex.wargear[self.playerArmy.codex.ID, wargear].gearType == 7:
-                                                        hasShield = True
-                                                        shield = self.playerArmy.codex.wargear[self.playerArmy.codex.ID, wargear]
-                                                        break
-                                                #If so, remove shield from inventory and set invul save to default
-                                                if hasShield:
-                                                    model.wargear.remove(shield.ID[1])
-                                                    model.invul = self.playerArmy.codex.models[model.data].invul
-                                            #Apply bonus from new shield
-                                            if isShield:
-                                                model.invul = self.playerArmy.codex.wargear[self.playerArmy.codex.ID, button.storage.gaining[0]].strength
-                                            #Add the new wargear
-                                            for wargear in button.storage.gaining:
-                                                model.wargear.append(wargear)
-                                            #Update mage profile if necessary
-                                            if 'MAGE' in self.currentUnit.keywords:
-                                                for mp in values.mageProfiles:
-                                                    if (mp.ID == self.currentUnit.data and 
-                                                        mp.itemNeeded == (self.playerArmy.codex.ID, button.storage.gaining[0])):
-                                                        print("Received!")
-                                                        self.currentUnit.dispelLevel = mp.dispelLevel
-                                                        self.currentUnit.dispelRate = mp.dispelCost
-                                                        self.currentUnit.currentMana = self.currentUnit.maxMana = mp.mana
-                                                        break
-                                            model.reset_points(self.playerArmy.codex)
-                                            self.currentUnit.reset_points(self.playerArmy.codex)
-                                            self.currentDetachment.calculate_points()
-                                            #Add option code to unit's options
-                                            self.currentUnit.options.append(button.storage.ID)
-                                            #Refresh screen
-                                            self.screenSetUp = False
-                                            
-                                        #If multiple models can receive wargear or the target is a list, move to next screen
-                                        elif rm > 1 or (button.storage.optionType == 2 and rm > 0):
-                                            self.currentOption = button.storage
-                                            self.state = 8
-                                            self.screenSetUp = False
-                                            
-                                        
-                                #Add a spell to a unit
-                                elif button.code == 30:
-                                    if (len(self.currentUnit.spells) < 3 and 
-                                        button.storage.ID not in self.currentUnit.spells):
-                                        self.currentUnit.spells.append(button.storage.ID)
-                                        #Refresh screen
-                                        self.screenSetUp = False
-                                        
-                                #Army selected from load menu
-                                elif button.code == 31:
-                                    self.playerArmy = button.storage
-                                    self.state = 2
-                                    self.screenSetUp = False
-                                    
-                                #Confirm button on wargear selection screen
-                                elif button.code == 32:
-                                    
-                                    if self.currentModel is not None and self.currentWargear is not None:
-                                        
-                                        #If new wargear is a invul shield, check to see if model has a shield already
-                                        isShield = False
-                                        if self.playerArmy.codex.wargear[self.playerArmy.codex.ID, self.currentWargear.storage[0]].gearType == 7:
-                                            isShield = True
-                                            hasShield = False
-                                            for wargear in self.currentModel.storage[0].wargear:
-                                                if self.playerArmy.codex.wargear[self.playerArmy.codex.ID, wargear].gearType == 7:
-                                                    hasShield = True
-                                                    shield = self.playerArmy.codex.wargear[self.playerArmy.codex.ID, wargear]
-                                                    break
-                                            #If so, remove shield from inventory and set invul save to default
-                                            if hasShield:
-                                                self.currentModel.storage[0].wargear.remove(shield.ID[1])
-                                                self.currentModel.storage[0].invul = self.playerArmy.codex.models[self.currentModel.storage[0].data].invul
-                                        #Apply bonus from new shield
-                                        if isShield:
-                                            self.currentModel.storage[0].invul = self.playerArmy.codex.wargear[self.playerArmy.codex.ID, 
-                                                                                                    self.currentWargear.storage[0]].strength
-                                    
-                                        #Replace the old wargear, if needed
-                                        for wargear in self.currentOption.replacing:
-                                            if wargear in self.currentModel.storage[0].wargear:
-                                                self.currentModel.storage[0].wargear.remove(wargear)
-                                        #Add the new wargear
-                                        self.currentModel.storage[0].wargear.append(self.currentWargear.storage[0])
-                                        self.currentModel.storage[0].reset_points(self.playerArmy.codex)
-                                        self.currentUnit.reset_points(self.playerArmy.codex)
-                                        self.currentDetachment.calculate_points()
-                                        #Add option code to unit's options
-                                        self.currentUnit.options.append(self.currentOption.ID)
-                                        
-                                        #Clean up variables
-                                        self.currentOption = None
-                                        self.currentModel = None
-                                        self.currentWargear = None
-                                        
-                                        #Refresh screen
-                                        self.state = 6
-                                        self.screenSetUp = False
-                                    
-                                #Back button on wargear selection screen
-                                elif button.code == 33:
-                                    
-                                    #Clean up variables
-                                    self.currentOption = None
-                                    self.currentModel = None
-                                    self.currentWargear = None
-                                    
-                                    #Refresh screen
-                                    self.state = 6
-                                    self.screenSetUp = False
-                                    
-                                #Select model to receive wargear
-                                elif button.code == 34:
-                                    #If selected button is not the current model
-                                    if self.currentModel != button:
-                                        if self.currentModel is not None:
-                                            image = values.font20.render(self.currentModel.storage[1], True, values.colours["White"])
-                                            self.currentModel.sprites[1].image = image
-                                            
-                                        #Set button as current model
-                                        self.currentModel = button
-                                        image = values.font20.render(self.currentModel.storage[1], True, values.colours["Lime"])
-                                        self.currentModel.sprites[1].image = image
-                                        
-                                        self.get_wargear_screen_info(values)
-                                        
-                                #Select wargear to give to model
-                                elif button.code == 35:
-                                    #If selected button is not the current wargear
-                                    if self.currentWargear != button:
-                                        if self.currentWargear is not None:
-                                            image = values.font20.render(self.currentWargear.storage[1], True, values.colours["White"])
-                                            self.currentWargear.sprites[1].image = image
-                                            
-                                        #Set button as current wargear
-                                        self.currentWargear = button
-                                        image = values.font20.render(self.currentWargear.storage[1], True, values.colours["Lime"])
-                                        self.currentWargear.sprites[1].image = image
-                                        
-                                        self.get_wargear_screen_info(values)
-                                                                    
-                elif event.type == pyLocals.KEYDOWN:
-                    if event.key == pyLocals.K_UP:
-                        self.downPressed = False
-                        self.upPressed = True
-                    elif event.key == pyLocals.K_DOWN:
-                        self.upPressed = False
-                        self.downPressed = True
-                    elif event.key == ord('y'):
-                        print(self.yOffset)
-                
-                elif event.type == pyLocals.KEYUP:
-                    if event.key == pyLocals.K_UP:
-                        self.upPressed = False
-                    elif event.key == pyLocals.K_DOWN:
-                        self.downPressed = False
-                        
-                elif event.type == pyLocals.MOUSEBUTTONDOWN:
-                    if event.button == 4:
-                        self.upPressed = True
-                        self.scroll(values, 20)
-                        self.upPressed = False
-                    elif event.button == 5:
-                        self.downPressed = True
-                        self.scroll(values, 20)
-                        self.downPressed = False
+                self.handle_events(values, event)
                         
             else:
                 #Scrolling
@@ -808,6 +232,718 @@ class ArmyManager:
                     
                 self.typing = False
                 self.typingButton = None
+
+    def handle_events(self, values, event):
+        if event.type == pyLocals.MOUSEBUTTONUP:
+            if event.button == 1:
+                pos = pygame.mouse.get_pos()
+                pos = (pos[0], pos[1] + self.yOffset)
+                clicked = False
+                for button in values.buttons[:]:
+                    clicked = misc.is_point_inside_rect(pos[0], pos[1], button.rect)
+                    if clicked:
+                        if button.code == 0:
+
+                            self.playerArmy = Army()
+
+                            self.state = 1
+                            self.screenSetUp = False
+
+                        # Load army button
+                        elif button.code == 1:
+                            self.state = 7
+                            self.screenSetUp = False
+
+                        # Quit army main screen
+                        elif button.code == 2:
+                            values.state = 0
+                            self.state = 0
+                            self.screenSetUp = False
+                            self.group.empty()
+
+                        # Select a faction from the faction selection screen
+                        elif button.code == 3:
+                            # Change previous selected factions's colour to white
+                            if self.playerArmy.faction is not None:
+                                image = values.font30.render(self.playerArmy.faction.storage.name,
+                                                             True, values.colours["White"])
+                                self.playerArmy.faction.sprites[1].image = image
+
+                            self.playerArmy.faction = button
+                            # Highlight current faction text lime green
+                            image = values.font30.render(self.playerArmy.faction.storage.name,
+                                                         True, values.colours["Lime"])
+                            self.playerArmy.faction.sprites[1].image = image
+
+                        elif button.code == 4:
+                            # Confirm faction
+                            if self.playerArmy.faction is not None:
+
+                                self.playerArmy.codex = get_codex(self.playerArmy.faction.storage.ID)
+
+                                if values.mageProfiles is None:
+                                    db = sqlite3.connect('Game Data/game database')  # connect to database
+                                    cursor = db.cursor()
+
+                                    cursor.execute('''SELECT id, itemNeeded, tier, mana, dispelLevel, 
+                                    dispelCost FROM mage_profiles''')
+                                    data = cursor.fetchall()
+                                    values.mageProfiles = []
+                                    for entry in data:
+                                        obj = codex.MageProfile()
+                                        obj.ID = misc.string_to_list(entry[0], True, True)
+                                        obj.itemNeeded = misc.string_to_list(entry[1], True, True)
+                                        obj.tier = entry[2]
+                                        obj.mana = entry[3]
+                                        obj.dispelLevel = entry[4]
+                                        obj.dispelCost = entry[5]
+
+                                        values.mageProfiles.append(obj)
+
+                                self.state = 2
+                                self.screenSetUp = False
+                                self.playerArmy.faction = self.playerArmy.faction.storage.ID
+
+                        elif button.code == 5:
+                            self.state = 0
+                            self.screenSetUp = False
+                            self.playerArmy.faction = None
+
+                        elif button.code == 6:
+                            self.typing = True  # Turn on typing flag
+                            self.typingButton = button  # Set button for easy access
+                            self.textInput.value = ""  # Empty inputter value
+                            sprites.update_typed_text(values, self.textInput,
+                                                      button)  # Update text sprite
+
+                        # save current army
+                        elif button.code == 7:
+
+                            save_data.create_save_file()
+                            save_data.save_army(self.playerArmy)
+                            """
+                            #create or connect to database
+                            db = sqlite3.connect('Save Data/save data')
+                            cursor = db.cursor()
+                            #set up saved armies table
+                            try:
+                                cursor.execute('''CREATE TABLE armies(name TEXT PRIMARY KEY, 
+                                bossTrait INTEGER, faction INTEGER, totalSP INTEGER, totalPoints INTEGER, 
+                                detachments TEXT)''')
+                            except sqlite3.OperationalError:
+                                pass
+                            #Set detachments up as stringed-list
+                            detachments = []
+                            for d in self.playerArmy.detachments:
+                                a = []
+                                a.append(d.name)
+                                a.append(d.detachmentType)
+                                a.append(d.points)
+                                a.append([])
+
+                                for u in d.units:
+                                    b = []
+                                    b.append(u.data)
+                                    if u.dispelLevel is None:
+                                        b.append(-1)
+                                    else:
+                                        b.append(u.dispelLevel)
+                                    if u.dispelRate is None:
+                                        b.append(-1)
+                                    else:
+                                        b.append(u.dispelRate)
+                                    b.append(int(u.isBoss))
+                                    b.append(tuple(u.keywords))
+                                    b.append(tuple(u.options))
+                                    b.append(int(u.sharedKeywords))
+                                    b.append(tuple(u.spells))
+                                    if u.currentMana is None:
+                                        b.append(-1)
+                                        b.append(-1)
+                                    else:
+                                        b.append(u.currentMana)
+                                        b.append(u.maxMana)
+                                    b.append(u.modelPoints)
+                                    b.append(u.wargearPoints)
+                                    b.append(u.totalPoints)
+                                    b.append([])
+
+                                    for m in u.models:
+                                        c = []
+                                        c.append(m.armour)
+                                        c.append(m.attackSpeed)
+                                        c.append(m.currentHP)
+                                        c.append(m.data)
+                                        c.append(m.fort)
+                                        c.append(m.invul)
+                                        c.append(tuple(m.keywords))
+                                        c.append(m.mSkill)
+                                        c.append(m.maxHP)
+                                        c.append(m.maxMove)
+                                        c.append(m.minMove)
+                                        c.append(m.rSkill)
+                                        c.append(m.strength)
+                                        c.append(tuple(m.wargear))
+                                        c.append(m.wargearPoints)
+                                        c.append(m.will)
+
+                                        c = tuple(c)
+                                        b[13].append(c)
+
+                                    b[13] = tuple(b[13])
+                                    b = tuple(b)
+                                    a[3].append(b)
+
+                                a[3] = tuple(a[3])
+                                a = tuple(a)
+                                detachments.append(a)
+
+                            detachments = tuple(detachments)
+                            print("Lets take a look!")
+                            #write army to database
+                            try:
+                                save_army(self.playerArmy, detachments, cursor)
+                            except sqlite3.IntegrityError:
+                                print("Army name taken. Overwriting.")
+                                cursor.execute('''DELETE FROM armies WHERE name = ? ''', 
+                                               (self.playerArmy.name,))
+                                save_army(self.playerArmy, detachments, cursor)
+                            db.commit()
+                                #if name is taken, delete old army and save new one
+                            print("Army saved")
+                            """
+
+
+                        elif button.code == 10:
+
+                            self.state = 0
+                            self.screenSetUp = False
+                            self.typing = False
+                            self.textInput = None
+
+                        elif button.code == 11:
+                            if len(self.playerArmy.detachments) < 20:
+                                self.state = 3
+                                self.screenSetUp = False
+
+                        # Select a detachment on the detachment creation screen
+                        elif button.code == 12:
+                            # Empty the text group
+                            self.textGroup.empty()
+                            # Change previous selected detachment's colour to white
+                            if self.currentDetachment is not None:
+                                image = values.font30.render(self.currentDetachment.storage.detachmentName,
+                                                             True, values.colours["White"])
+                                self.currentDetachment.sprites[1].image = image
+
+                            self.currentDetachment = button
+                            # Highlight current detachment text lime green
+                            image = values.font30.render(self.currentDetachment.storage.detachmentName,
+                                                         True, values.colours["Lime"])
+                            self.currentDetachment.sprites[1].image = image
+
+                            # Write out the detachment info
+                            text = self.currentDetachment.storage.detachmentName + " (+" + str(
+                                self.currentDetachment.storage.sp) + " SP)"
+                            image = values.font60.render(text, True,
+                                                         values.colours["Black"])
+                            spr = sprites.GameSprite(image, (950, 150, image.get_width(), image.get_height()))
+                            self.textGroup.add(spr)
+
+                            if self.currentDetachment.storage.leaderMax == 0:
+                                text = "Leaders: None"
+                            else:
+                                text = "Leaders: " + str(self.currentDetachment.storage.leaderMin) + "-" + str(
+                                    self.currentDetachment.storage.leaderMax)
+                            image = values.font30.render(text, True, values.colours["Black"])
+                            spr = sprites.GameSprite(image, (850, 225, image.get_width(), image.get_height()))
+                            self.textGroup.add(spr)
+                            if self.currentDetachment.storage.troopsMax == 0:
+                                text = "Troops: None"
+                            else:
+                                text = "Troops: " + str(self.currentDetachment.storage.troopsMin) + "-" + str(
+                                    self.currentDetachment.storage.troopsMax)
+                            image = values.font30.render(text, True, values.colours["Black"])
+                            spr = sprites.GameSprite(image, (850, 250, image.get_width(), image.get_height()))
+                            self.textGroup.add(spr)
+                            if self.currentDetachment.storage.elitesMax == 0:
+                                text = "Elites: None"
+                            else:
+                                text = "Elites: " + str(self.currentDetachment.storage.elitesMin) + "-" + str(
+                                    self.currentDetachment.storage.elitesMax)
+                            image = values.font30.render(text, True, values.colours["Black"])
+                            spr = sprites.GameSprite(image, (850, 275, image.get_width(), image.get_height()))
+                            self.textGroup.add(spr)
+                            if self.currentDetachment.storage.fastAttackMax == 0:
+                                text = "Fast Attack: None"
+                            else:
+                                text = "Fast Attack: " + str(self.currentDetachment.storage.fastAttackMin) + "-" + str(
+                                    self.currentDetachment.storage.fastAttackMax)
+                            image = values.font30.render(text, True, values.colours["Black"])
+                            spr = sprites.GameSprite(image, (850, 300, image.get_width(), image.get_height()))
+                            self.textGroup.add(spr)
+                            if self.currentDetachment.storage.heavyMax == 0:
+                                text = "Heavy Support: None"
+                            else:
+                                text = "Heavy Support: " + str(self.currentDetachment.storage.heavyMin) + "-" + str(
+                                    self.currentDetachment.storage.heavyMax)
+                            image = values.font30.render(text, True, values.colours["Black"])
+                            spr = sprites.GameSprite(image, (850, 325, image.get_width(), image.get_height()))
+                            self.textGroup.add(spr)
+                            if self.currentDetachment.storage.flyerMax == 0:
+                                text = "Air: None"
+                            else:
+                                text = "Air: " + str(self.currentDetachment.storage.flyerMin) + "-" + str(
+                                    self.currentDetachment.storage.flyerMax)
+                            image = values.font30.render(text, True, values.colours["Black"])
+                            spr = sprites.GameSprite(image, (850, 350, image.get_width(), image.get_height()))
+                            self.textGroup.add(spr)
+                            if self.currentDetachment.storage.ultraMax == 0:
+                                text = "Ultras: None"
+                            else:
+                                text = "Ultras: " + str(self.currentDetachment.storage.ultraMin) + "-" + str(
+                                    self.currentDetachment.storage.ultraMax)
+                            image = values.font30.render(text, True, values.colours["Black"])
+                            spr = sprites.GameSprite(image, (850, 375, image.get_width(), image.get_height()))
+                            self.textGroup.add(spr)
+                            if self.currentDetachment.storage.structureMax == 0:
+                                text = "Structures: None"
+                            else:
+                                text = "Structures: " + str(self.currentDetachment.storage.structureMin) + "-" + str(
+                                    self.currentDetachment.storage.structureMax)
+                            image = values.font30.render(text, True, values.colours["Black"])
+                            spr = sprites.GameSprite(image, (850, 400, image.get_width(), image.get_height()))
+                            self.textGroup.add(spr)
+                            if self.currentDetachment.storage.transportRule:
+                                text = "Transports: 1 per other unit"
+                            elif self.currentDetachment.storage.transportMax == 0:
+                                text = "Transports: None"
+                            else:
+                                text = "Transports: " + str(self.currentDetachment.storage.transportMin) + "-" + str(
+                                    self.currentDetachment.storage.transportMax)
+                            image = values.font30.render(text, True, values.colours["Black"])
+                            spr = sprites.GameSprite(image, (850, 425, image.get_width(), image.get_height()))
+                            self.textGroup.add(spr)
+
+                        # Confirm detachment
+                        elif button.code == 13:
+                            if self.currentDetachment is not None:
+                                self.state = 4
+                                self.screenSetUp = False
+                                self.currentDetachment = self.currentDetachment.storage
+                                self.playerArmy.detachments.append(self.currentDetachment)
+
+                        elif button.code == 14:
+                            self.state = 2
+                            self.screenSetUp = False
+                            self.currentDetachment = None
+
+                        elif button.code == 15:
+                            self.typing = True  # Turn on typing flag
+                            self.typingButton = button  # Set button for easy access
+                            self.textInput.value = ""  # Empty inputter value
+                            sprites.update_typed_text(values, self.textInput,
+                                                      button)  # Update text sprite
+
+                        # deleting a detachment
+                        elif button.code == 16:
+                            self.state = 2
+                            self.screenSetUp = False
+                            self.typing = False
+                            self.textInput.value = self.playerArmy.name
+                            if self.playerArmy.boss in self.currentDetachment.units:
+                                self.playerArmy.boss.isBoss = False
+                                self.playerArmy.boss = None
+                            self.playerArmy.detachments.remove(self.currentDetachment)
+                            self.currentDetachment = None
+
+                        elif button.code == 17:
+                            self.state = 2
+                            self.screenSetUp = False
+                            self.typing = False
+                            self.textInput.value = self.playerArmy.name
+                            self.currentDetachment = None
+
+                        # Selecting a created detachment from the army display screen
+                        elif button.code == 18:
+                            self.state = 4
+                            self.screenSetUp = False
+                            self.typing = False
+                            self.textInput.value = self.playerArmy.name
+                            self.currentDetachment = button.storage
+
+                        # Add unit to detachment
+                        elif button.code == 19:
+                            # Check if any units can be added at all
+                            counts, uniques = self.get_role_counts(True)
+                            allowed = {}
+
+                            if counts[0] in range(0, self.currentDetachment.leaderMax):
+                                allowed[0] = True
+                            else:
+                                allowed[0] = False
+                            if counts[1] in range(0, self.currentDetachment.troopsMax):
+                                allowed[1] = True
+                            else:
+                                allowed[1] = False
+                            if counts[2] in range(0, self.currentDetachment.elitesMax):
+                                allowed[2] = True
+                            else:
+                                allowed[2] = False
+                            if counts[3] in range(0, self.currentDetachment.fastAttackMax):
+                                allowed[3] = True
+                            else:
+                                allowed[3] = False
+                            if counts[4] in range(0, self.currentDetachment.heavyMax):
+                                allowed[4] = True
+                            else:
+                                allowed[4] = False
+                            if self.currentDetachment.transportRule:
+                                maxTransport = counts[9]
+                            else:
+                                maxTransport = self.currentDetachment.transportMax
+                            if counts[5] in range(0, maxTransport):
+                                allowed[5] = True
+                            else:
+                                allowed[5] = False
+                            if counts[6] in range(0, self.currentDetachment.flyerMax):
+                                allowed[6] = True
+                            else:
+                                allowed[6] = False
+                            if counts[7] in range(0, self.currentDetachment.structureMax):
+                                allowed[7] = True
+                            else:
+                                allowed[7] = False
+                            if counts[8] in range(0, self.currentDetachment.ultraMax):
+                                allowed[8] = True
+                            else:
+                                allowed[8] = False
+
+                            self.availableUnits = []
+
+                            for unit in self.playerArmy.codex.units:
+                                role = self.playerArmy.codex.units[unit].bfRole
+                                if allowed[role]:
+                                    approved = True
+                                    for model in self.playerArmy.codex.units[unit].defaultModels:
+                                        modelData = self.playerArmy.codex.models[(self.playerArmy.faction, model)]
+                                        for keyword in uniques:
+                                            if keyword in modelData.keywords:
+                                                approved = False
+                                                break
+                                    if approved:
+                                        self.availableUnits.append(unit)
+
+                            # If so, proceed to unit creation
+                            if len(self.availableUnits) > 0:
+                                self.state = 5
+                                self.screenSetUp = False
+
+                        # Select a unit on the creation screen
+                        elif button.code == 20:
+                            # Change previous selected unit's colour to white
+                            if self.currentUnit is not None:
+                                image = values.font30.render(self.currentUnit.storage.title,
+                                                             True, values.colours["White"])
+                                self.currentUnit.sprites[1].image = image
+
+                            self.currentUnit = button
+                            # Highlight current unit text lime green
+                            image = values.font30.render(self.currentUnit.storage.title,
+                                                         True, values.colours["Lime"])
+                            self.currentUnit.sprites[1].image = image
+
+                        # Confirm unit selection
+                        elif button.code == 21:
+                            if self.currentUnit is not None:
+                                self.state = 6
+                                self.screenSetUp = False
+                                self.currentUnit = Unit(self.currentUnit.storage, self.playerArmy.codex,
+                                                        values.mageProfiles)
+                                self.currentDetachment.units.append(self.currentUnit)
+
+
+                        # Back out of unit creation
+                        elif button.code == 22:
+                            self.state = 4
+                            self.screenSetUp = False
+                            self.currentUnit = None
+
+                        # Confirm unit on unit display screen
+                        elif button.code == 23:
+
+                            # recalculate points
+                            self.currentDetachment.calculate_points()
+
+                            self.state = 4
+                            self.screenSetUp = False
+                            self.currentUnit = None
+
+                        # Make unit the boss
+                        elif button.code == 24:
+                            # If player has already picked a unit to be the boss, set their boss flag to false
+                            if self.playerArmy.boss is not None:
+                                self.playerArmy.boss.isBoss = False
+                            self.playerArmy.boss = self.currentUnit
+                            self.playerArmy.boss.isBoss = True
+
+                        # Delete unit
+                        elif button.code == 26:
+
+                            self.state = 4
+                            self.screenSetUp = False
+                            self.currentDetachment.units.remove(self.currentUnit)
+                            # recalculate points
+                            self.currentDetachment.calculate_points()
+                            if self.currentUnit == self.playerArmy.boss:
+                                self.playerArmy.boss = None
+                            self.currentUnit = None
+
+                        # Selecting a created unit from the detachment display screen
+                        elif button.code == 27:
+                            self.state = 6
+                            self.screenSetUp = False
+                            self.typing = False
+                            self.textInput.value = self.currentDetachment.name
+                            self.currentUnit = button.storage
+
+                        # Adding a model to a unit
+                        elif button.code == 28:
+                            # Count the number of times this option has been used
+                            count = 0
+                            for o in self.currentUnit.options:
+                                if o == button.storage.ID:
+                                    count += 1
+                            if count < button.storage.maximum:
+                                # Add model to unit if below maximum
+                                for m in button.storage.gaining:
+                                    modelData = self.playerArmy.codex.models[(self.playerArmy.faction, m)]
+                                    model = Model(modelData, self.playerArmy.codex)
+                                    self.currentUnit.models.append(model)
+                                self.currentUnit.reset_points(self.playerArmy.codex)
+                                self.currentDetachment.calculate_points()
+                                # Add option code to unit's options
+                                self.currentUnit.options.append(button.storage.ID)
+                                # Refresh screen
+                                self.screenSetUp = False
+
+                        # Add wargear to a unit
+                        elif button.code == 29:
+                            # count the number of times this option has been used
+                            count = 0
+                            for o in self.currentUnit.options:
+                                if o == button.storage.ID:
+                                    count += 1
+                            if count < button.storage.maximum or button.storage.maximum == 0:
+                                # count the number of receiving models in the current unit
+                                rm = 0
+                                for m in self.currentUnit.models:
+                                    approved = True
+                                    for wargear in button.storage.requires:
+                                        if wargear not in m.wargear:
+                                            approved = False
+                                    for wargear in button.storage.replacing:
+                                        if wargear not in m.wargear:
+                                            approved = False
+                                    if approved and m.data[1] == button.storage.receivingModel:
+                                        rm += 1
+                                        model = m
+                                # if there is only one receiving model in the unit and only one type of wargear is being given
+                                if rm == 1 and button.storage.optionType == 1:
+                                    # Replace the old wargear, if needed
+                                    for wargear in button.storage.replacing:
+                                        if wargear in model.wargear:
+                                            model.wargear.remove(wargear)
+                                    # If new wargear is a invul shield, check to see if model has a shield already
+                                    isShield = False
+                                    if self.playerArmy.codex.wargear[
+                                        self.playerArmy.codex.ID, button.storage.gaining[0]].gearType == 7:
+                                        isShield = True
+                                        hasShield = False
+                                        for wargear in model.wargear:
+                                            if self.playerArmy.codex.wargear[
+                                                self.playerArmy.codex.ID, wargear].gearType == 7:
+                                                hasShield = True
+                                                shield = self.playerArmy.codex.wargear[
+                                                    self.playerArmy.codex.ID, wargear]
+                                                break
+                                        # If so, remove shield from inventory and set invul save to default
+                                        if hasShield:
+                                            model.wargear.remove(shield.ID[1])
+                                            model.invul = self.playerArmy.codex.models[model.data].invul
+                                    # Apply bonus from new shield
+                                    if isShield:
+                                        model.invul = self.playerArmy.codex.wargear[
+                                            self.playerArmy.codex.ID, button.storage.gaining[0]].strength
+                                    # Add the new wargear
+                                    for wargear in button.storage.gaining:
+                                        model.wargear.append(wargear)
+                                    # Update mage profile if necessary
+                                    if 'MAGE' in self.currentUnit.keywords:
+                                        for mp in values.mageProfiles:
+                                            if (mp.ID == self.currentUnit.data and
+                                                    mp.itemNeeded == (
+                                                    self.playerArmy.codex.ID, button.storage.gaining[0])):
+                                                print("Received!")
+                                                self.currentUnit.dispelLevel = mp.dispelLevel
+                                                self.currentUnit.dispelRate = mp.dispelCost
+                                                self.currentUnit.currentMana = self.currentUnit.maxMana = mp.mana
+                                                break
+                                    model.reset_points(self.playerArmy.codex)
+                                    self.currentUnit.reset_points(self.playerArmy.codex)
+                                    self.currentDetachment.calculate_points()
+                                    # Add option code to unit's options
+                                    self.currentUnit.options.append(button.storage.ID)
+                                    # Refresh screen
+                                    self.screenSetUp = False
+
+                                # If multiple models can receive wargear or the target is a list, move to next screen
+                                elif rm > 1 or (button.storage.optionType == 2 and rm > 0):
+                                    self.currentOption = button.storage
+                                    self.state = 8
+                                    self.screenSetUp = False
+
+
+                        # Add a spell to a unit
+                        elif button.code == 30:
+                            if (len(self.currentUnit.spells) < 3 and
+                                    button.storage.ID not in self.currentUnit.spells):
+                                self.currentUnit.spells.append(button.storage.ID)
+                                # Refresh screen
+                                self.screenSetUp = False
+
+                        # Army selected from load menu
+                        elif button.code == 31:
+                            '''
+                            self.playerArmy = button.storage
+                            self.state = 2
+                            self.screenSetUp = False
+                            '''
+                            fullData = load_data.load_army(button.storage[0])
+                            self.playerArmy = Army()
+                            self.playerArmy.load_from_sql(values, button.storage, fullData)
+                            self.state = 2
+                            self.screenSetUp = False
+
+                        # Confirm button on wargear selection screen
+                        elif button.code == 32:
+
+                            if self.currentModel is not None and self.currentWargear is not None:
+
+                                # If new wargear is a invul shield, check to see if model has a shield already
+                                isShield = False
+                                if self.playerArmy.codex.wargear[
+                                    self.playerArmy.codex.ID, self.currentWargear.storage[0]].gearType == 7:
+                                    isShield = True
+                                    hasShield = False
+                                    for wargear in self.currentModel.storage[0].wargear:
+                                        if self.playerArmy.codex.wargear[
+                                            self.playerArmy.codex.ID, wargear].gearType == 7:
+                                            hasShield = True
+                                            shield = self.playerArmy.codex.wargear[self.playerArmy.codex.ID, wargear]
+                                            break
+                                    # If so, remove shield from inventory and set invul save to default
+                                    if hasShield:
+                                        self.currentModel.storage[0].wargear.remove(shield.ID[1])
+                                        self.currentModel.storage[0].invul = self.playerArmy.codex.models[
+                                            self.currentModel.storage[0].data].invul
+                                # Apply bonus from new shield
+                                if isShield:
+                                    self.currentModel.storage[0].invul = self.playerArmy.codex.wargear[
+                                        self.playerArmy.codex.ID,
+                                        self.currentWargear.storage[0]].strength
+
+                                # Replace the old wargear, if needed
+                                for wargear in self.currentOption.replacing:
+                                    if wargear in self.currentModel.storage[0].wargear:
+                                        self.currentModel.storage[0].wargear.remove(wargear)
+                                # Add the new wargear
+                                self.currentModel.storage[0].wargear.append(self.currentWargear.storage[0])
+                                self.currentModel.storage[0].reset_points(self.playerArmy.codex)
+                                self.currentUnit.reset_points(self.playerArmy.codex)
+                                self.currentDetachment.calculate_points()
+                                # Add option code to unit's options
+                                self.currentUnit.options.append(self.currentOption.ID)
+
+                                # Clean up variables
+                                self.currentOption = None
+                                self.currentModel = None
+                                self.currentWargear = None
+
+                                # Refresh screen
+                                self.state = 6
+                                self.screenSetUp = False
+
+                        # Back button on wargear selection screen
+                        elif button.code == 33:
+
+                            # Clean up variables
+                            self.currentOption = None
+                            self.currentModel = None
+                            self.currentWargear = None
+
+                            # Refresh screen
+                            self.state = 6
+                            self.screenSetUp = False
+
+                        # Select model to receive wargear
+                        elif button.code == 34:
+                            # If selected button is not the current model
+                            if self.currentModel != button:
+                                if self.currentModel is not None:
+                                    image = values.font20.render(self.currentModel.storage[1], True,
+                                                                 values.colours["White"])
+                                    self.currentModel.sprites[1].image = image
+
+                                # Set button as current model
+                                self.currentModel = button
+                                image = values.font20.render(self.currentModel.storage[1], True, values.colours["Lime"])
+                                self.currentModel.sprites[1].image = image
+
+                                self.get_wargear_screen_info(values)
+
+                        # Select wargear to give to model
+                        elif button.code == 35:
+                            # If selected button is not the current wargear
+                            if self.currentWargear != button:
+                                if self.currentWargear is not None:
+                                    image = values.font20.render(self.currentWargear.storage[1], True,
+                                                                 values.colours["White"])
+                                    self.currentWargear.sprites[1].image = image
+
+                                # Set button as current wargear
+                                self.currentWargear = button
+                                image = values.font20.render(self.currentWargear.storage[1], True,
+                                                             values.colours["Lime"])
+                                self.currentWargear.sprites[1].image = image
+
+                                self.get_wargear_screen_info(values)
+
+        elif event.type == pyLocals.KEYDOWN:
+            if event.key == pyLocals.K_UP:
+                self.downPressed = False
+                self.upPressed = True
+            elif event.key == pyLocals.K_DOWN:
+                self.upPressed = False
+                self.downPressed = True
+            elif event.key == ord('y'):
+                print(self.yOffset)
+
+        elif event.type == pyLocals.KEYUP:
+            if event.key == pyLocals.K_UP:
+                self.upPressed = False
+            elif event.key == pyLocals.K_DOWN:
+                self.downPressed = False
+
+        elif event.type == pyLocals.MOUSEBUTTONDOWN:
+            if event.button == 4:
+                self.upPressed = True
+                self.scroll(values, 20)
+                self.upPressed = False
+            elif event.button == 5:
+                self.downPressed = True
+                self.scroll(values, 20)
+                self.downPressed = False
             
     def set_up_army_main_screen(self, values):
         
@@ -1001,7 +1137,7 @@ class ArmyManager:
         buttonImage = pygame.transform.scale(widePanelImage, (255, 25))
         x = sprites.centre_x(255, 270, 50)
         y = 85
-        
+        """
         db = sqlite3.connect('Save Data/save data') #connect to database
         cursor = db.cursor()
         
@@ -1014,6 +1150,14 @@ class ArmyManager:
             button = sprites.Button(31, 1, buttonImage, (x, y, 255, 25), a.name, values.font20, values, storage=a)
             y += 25
             self.group.add(button.sprites)
+        """
+        self.armies = load_data.load_army_list()
+        # Set up buttons for list
+        for a in self.armies:
+            button = sprites.Button(31, 1, buttonImage, (x, y, 255, 25), a[0], values.font20, values, storage=a)
+            y += 25
+            self.group.add(button.sprites)
+
             
     def set_up_detachment_creation_screen(self, values):
         
