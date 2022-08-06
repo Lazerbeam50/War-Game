@@ -2075,7 +2075,7 @@ class Model:
         self.attackTargets = []
         self.cover = 0
         self.currentNodes = []
-        self.exploded = False
+        self.explosionSite = None
         self.fled = False
         self.dead = False
         self.grenadesUsed = False
@@ -2098,7 +2098,8 @@ class Model:
     def set_up(self, factionCodex):
         
         data = factionCodex.models[self.data]
-        
+
+        self.abilities = data.abilities.copy()
         self.attackSpeed = data.attackSpeed
         self.armour = data.armour
         self.invul = data.invul

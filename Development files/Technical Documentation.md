@@ -357,13 +357,13 @@ Mouse button up event. Game computes world position of click. Get node clicked i
 
 ## Unit abilities
 
-**Explodes** – Each model has a exploded flag which is set to False by default. After any point where a model can be destroyed, the game turns on an explosion checking flag, which causes it to continuously check for explosions rather than carry out its normal behaviour, until this flag is turned off. 
-The checks involve looping through all available models and checking to see if:
-- Their exploded flag is false
-- That they are dead
-- And that they have the “Explodes” ability
-- If all three of these conditions are true, the game will create one attack for each model within the explosion range and handle the attacks in the standard way. Attacks will be grouped by unit for execution, with each attack assigning its model as the primary target. The game will also check to see if the model is part of a unit that has passengers, and if so, allocated increased damage explosion attacks.
-- The explosion checking flag is only turned off once the game is able to go through each model once without a single one exploding.
+**Explodes** – Each model has a exploded flag which is set to False by default. After any point where a model with the Explodes ability is destroyed, the game turns on an explosion checking flag and adds the model to a list 
+of models to check. The game then iterates through a copy of this list rather than carry out its normal behaviour, executing explosions and adding new exploding models to the list. Only once the game iterates through the 
+entire list without finding a new explosion will the checkExplosions flag be turned off. 
+
+The checks involve iterating through a copy of the exploding list and checking to see if each model's exploded flag is false. If so, the game will create one attack for each model within the explosion range and handle the 
+attacks in the standard way. Attacks will be grouped by unit for execution, with each attack assigning its model as the primary target. The game will also check to see if the model is part of a unit that has passengers,
+and if so, allocated increased damage explosion attacks.
 
 ## Victory Points
 

@@ -51,7 +51,6 @@ class Battle:
         self.chatLogImage = resources.load_primary_background("battle_ui_bottom_panel.png")
         self.chatLogSurface = pygame.Surface((420, 200))
         self.chatLogText = []
-        self.checkingExplosions = False
         self.controlPointGroup = pygame.sprite.Group()
         self.controlPoints = [] #List of control point co-ordinates. Replace with tuple.
         #marks the status of an objective marker (0 = neutral, 1 = player1, 2 = player2, 3 = contested)
@@ -73,6 +72,7 @@ class Battle:
         self.eventLogImage = resources.load_primary_background("battle_ui_bottom_panel.png")
         self.eventLogSurface = pygame.Surface((420, 200))
         self.eventLogText = []
+        self.exploding = []
         self.firstBloodAwarded = False
         self.flagsGroup = pygame.sprite.Group()
         self.headerGroup = pygame.sprite.Group()
@@ -336,7 +336,7 @@ class Battle:
         
     def update(self, values, event=None):
         
-        if self.awaitingEvent and not self.checkingExplosions:
+        if self.awaitingEvent and not self.exploding:
             if event is not None:
                 self.handle_events(values, event)
                                 
@@ -347,9 +347,9 @@ class Battle:
             else:
                 self.scroll(values, 32) 
         
-        elif self.checkingExplosions:
+        elif self.exploding:
             print("Checking explosions!")
-            self.checkingExplosions = False #Adding this to prevent the script from crashing
+            self.check_explosions(values)
         
         else:
             
@@ -390,7 +390,7 @@ class Battle:
             elif self.state in [54, 55, 56]:
                 self.handle_endgame(values)
 
-    def apply_damage(self, values, attacks, targetCodex, spell=None, melee=False):
+    def apply_damage(self, values, attacks, targetCodex, spell=None, melee=False, explosion=False):
         
         damage = 0
         hits = 0
@@ -486,7 +486,7 @@ class Battle:
                             self.nodes[n].takenBy = None
                             attack.primaryTarget.nodes.remove(n)
                             
-                        attack.primaryTarget.topLeftNode = None
+
                         #Store death info
                         data = targetCodex.models[attack.primaryTarget.data].name
                         if data not in deaths:
@@ -494,7 +494,10 @@ class Battle:
                         else:
                             deaths[data] += 1
                             
-                        self.checkingExplosions = True
+                        if 'Explodes' in attack.primaryTarget.abilities:
+                            self.exploding.append(attack.primaryTarget)
+                            attack.primaryTarget.explosionSite = attack.primaryTarget.topLeftNode
+                        attack.primaryTarget.topLeftNode = None
                             
                         #Pass details to is unit still alive
                         unitAlive = self.is_unit_still_alive(values, unit, targetCodex=targetCodex)
@@ -564,6 +567,38 @@ class Battle:
                     if unit.ID in p:
                         p.remove(unit.ID)
             
+            text = text1 + text2 + text3 + text4
+
+        elif explosion:
+            text1 = f"{unit.name} is caught in the explosion! {unit.name} takes {str(damage)} damage"
+            text2 = ""
+            if len(deaths) > 0:
+                i = 1
+                text3 = " killing "
+                for d in deaths:
+                    # first string
+                    if i == 1:
+                        text3 = text3 + str(deaths[d]) + " " + d + "(s)"
+                    # last string in dict
+                    elif i == len(deaths):
+                        text3 = text3 + " and " + str(deaths[d]) + " " + d + "(s)!"
+                    else:
+                        text3 = text3 + ", " + str(deaths[d]) + " " + d + "(s)"
+                    i += 1
+
+                if i == 2:
+                    text3 = text3 + "!"
+            else:
+                text3 = ""
+            if unitAlive:
+                text4 = ""
+            else:
+                text4 = unit.name + " has been destroyed!"
+                unit.destroyed = True
+                for p in self.unitsForMelee:
+                    if unit.ID in p:
+                        p.remove(unit.ID)
+
             text = text1 + text2 + text3 + text4
             
         else:
@@ -693,18 +728,46 @@ class Battle:
         self.set_up_header_display(values)
         
     def check_explosions(self, values):
-        newExplosions = False
-        for m in self.models:
-            if self.models[m].dead and not self.models[m].exploded and 'Explodes' in self.models[m].keywords:
-                newExplosions = True
-                self.models[m].exploded = True
-                #Calculate range around model
-                for x in range(self.models[m]):
-                    pass
-                #Loop through nodes in range and grab models
-                #Set up attacks for each model
-                #Turn off check explosions
-                #Apply damage
+        for model in self.exploding[:]:
+            # Remove model from list
+            self.exploding.remove(model)
+            if len(self.units[model.unitID].models) == 1:
+                text = f"{self.units[model.unitID].name} explodes!"
+            else:
+                text = f"A model in {self.units[model.unitID].name} explodes!"
+            self.update_event_log(values, text)
+            damagedModels = {}
+            width = self.players[model.ID[0] - 1].playerArmy.codex.models[model.data].size[0]
+            height = self.players[model.ID[0] - 1].playerArmy.codex.models[model.data].size[1]
+            #Calculate range around model
+            for x in range(model.explosionSite[0] - 2, model.explosionSite[0] + width + 2):
+                for y in range(model.explosionSite[1] - 2, model.explosionSite[1] + height + 2):
+                    try:
+                        # Loop through nodes in range and grab models
+                        if self.models[self.nodes[(x, y)].takenBy].unitID in damagedModels:
+                            damagedModels[self.models[self.nodes[(x, y)].takenBy].unitID].add(
+                                self.models[self.nodes[(x, y)].takenBy]
+                            )
+                        else:
+                            damagedModels[self.models[self.nodes[(x, y)].takenBy].unitID] = set(
+                                [self.models[self.nodes[(x, y)].takenBy]]
+                            )
+                    except KeyError:
+                        pass
+
+            #Set up attacks for each model
+            attackList = []
+            for unitID in damagedModels:
+                playerCodex = self.players[unitID[0] - 1].playerArmy.codex
+                attacks = []
+                for model in damagedModels[unitID]:
+                    attacks.append(Attack(99, 4, 1, 0, model, []))
+                attackList.append([playerCodex, attacks])
+
+            #Apply damage
+            for attackRound in attackList:
+                self.apply_damage(values, attackRound[1], attackRound[0], explosion=True)
+
         
     def check_kill_points(self, values, unit):
         
@@ -2111,13 +2174,18 @@ class Battle:
                         self.units[unit].destroyed = True
                         for model in self.units[unit].models:
                             model.dead = True
+
+                        for model in self.units[unit].models:
+                            if 'Explodes' in model.abilities:
+                                self.exploding.append(model)
+                                model.explosionSite = model.topLeftNode
+
                         self.delete_unit_from_field(self.units[unit])
-                        #Report destroyed units
+                        # Report destroyed units
                         text = self.units[unit].name + " crashed and burned!"
                         self.update_event_log(values, text)
-                        self.check_kill_points(values, self.units[unit])  
-                        self.checkingExplosions = True            
-                
+                        self.check_kill_points(values, self.units[unit])
+
             self.phase = 2
             
             self.set_up_header_display(values)
