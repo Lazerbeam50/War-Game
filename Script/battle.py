@@ -508,132 +508,50 @@ class Battle:
         if spell is not None:
             text1 = self.currentUnit.name + " casts " + spell.name + " on " + unit.name + "!"
             text2 = "The spell hits, dealing " + str(damage) + " damage"
-            if len(deaths) > 0:
-                i = 1
-                text3 = " killing "
-                for d in deaths:
-                    #first string
-                    if i == 1:
-                        text3 = text3 + str(deaths[d]) + " " + d + "(s)"
-                    #last string in dict
-                    elif i == len(deaths):
-                        text3 = text3 + " and " + str(deaths[d]) + " " + d + "(s)!"
-                    else:
-                        text3 = text3 + ", " + str(deaths[d]) + " " + d + "(s)"
-                    i += 1
-                    
-                if i == 2:
-                    text3 = text3 + "!"
-            else:
-                text3 = ""
-            if unitAlive:
-                text4 = ""
-            else:
-                text4 = unit.name + " has been destroyed!"
-                for p in self.unitsForMelee:
-                    if unit.ID in p:
-                        p.remove(unit.ID)
-            
-            text = text1 + text2 + text3 + text4
             
         elif melee:
             shootingUnit = self.units[self.attackingModels[0].unitID]
             text1 = (shootingUnit.name + " makes " + str(len(attacks)) + " attacks with their " + 
                      self.currentWeapon.name + "(s) into " + unit.name + "! ")
             text2 = str(hits) + " attacks hit, dealing " + str(damage) + " damage"
-            if len(deaths) > 0:
-                i = 1
-                text3 = " killing "
-                for d in deaths:
-                    #first string
-                    if i == 1:
-                        text3 = text3 + str(deaths[d]) + " " + d + "(s)"
-                    #last string in dict
-                    elif i == len(deaths):
-                        text3 = text3 + " and " + str(deaths[d]) + " " + d + "(s)!"
-                    else:
-                        text3 = text3 + ", " + str(deaths[d]) + " " + d + "(s)"
-                    i += 1
-                    
-                if i == 2:
-                    text3 = text3 + "!"
-            else:
-                text3 = ""
-            if unitAlive:
-                text4 = ""
-            else:
-                text4 = unit.name + " has been destroyed!"
-                for p in self.unitsForMelee:
-                    if unit.ID in p:
-                        p.remove(unit.ID)
-            
-            text = text1 + text2 + text3 + text4
 
         elif explosion:
             text1 = f"{unit.name} is caught in the explosion! {unit.name} takes {str(damage)} damage"
             text2 = ""
-            if len(deaths) > 0:
-                i = 1
-                text3 = " killing "
-                for d in deaths:
-                    # first string
-                    if i == 1:
-                        text3 = text3 + str(deaths[d]) + " " + d + "(s)"
-                    # last string in dict
-                    elif i == len(deaths):
-                        text3 = text3 + " and " + str(deaths[d]) + " " + d + "(s)!"
-                    else:
-                        text3 = text3 + ", " + str(deaths[d]) + " " + d + "(s)"
-                    i += 1
-
-                if i == 2:
-                    text3 = text3 + "!"
-            else:
-                text3 = ""
-            if unitAlive:
-                text4 = ""
-            else:
-                text4 = unit.name + " has been destroyed!"
-                unit.destroyed = True
-                for p in self.unitsForMelee:
-                    if unit.ID in p:
-                        p.remove(unit.ID)
-
-            text = text1 + text2 + text3 + text4
             
         else:
             shootingUnit = self.units[self.attackingModels[0].unitID]
             text1 = (shootingUnit.name + " fire " + str(len(attacks)) + " shots from their " + 
                      self.currentWeapon.name + "(s) into " + unit.name + "! ")
             text2 = str(hits) + " shots hit, dealing " + str(damage) + " damage"
-            if len(deaths) > 0:
-                i = 1
-                text3 = " killing "
-                for d in deaths:
-                    #first string
-                    if i == 1:
-                        text3 = text3 + str(deaths[d]) + " " + d + "(s)"
-                    #last string in dict
-                    elif i == len(deaths):
-                        text3 = text3 + " and " + str(deaths[d]) + " " + d + "(s)!"
-                    else:
-                        text3 = text3 + ", " + str(deaths[d]) + " " + d + "(s)"
-                    i += 1
-                    
-                if i == 2:
-                    text3 = text3 + "!"
-            else:
-                text3 = ""
-            if unitAlive:
-                text4 = ""
-            else:
-                text4 = unit.name + " has been destroyed!"
-                unit.destroyed = True
-                for p in self.unitsForMelee:
-                    if unit.ID in p:
-                        p.remove(unit.ID)
-            
-            text = text1 + text2 + text3 + text4
+        if len(deaths) > 0:
+            i = 1
+            text3 = " killing "
+            for d in deaths:
+                #first string
+                if i == 1:
+                    text3 = text3 + str(deaths[d]) + " " + d + "(s)"
+                #last string in dict
+                elif i == len(deaths):
+                    text3 = text3 + " and " + str(deaths[d]) + " " + d + "(s)!"
+                else:
+                    text3 = text3 + ", " + str(deaths[d]) + " " + d + "(s)"
+                i += 1
+
+            if i == 2:
+                text3 = text3 + "!"
+        else:
+            text3 = ""
+        if unitAlive:
+            text4 = ""
+        else:
+            text4 = unit.name + " has been destroyed!"
+            unit.destroyed = True
+            for p in self.unitsForMelee:
+                if unit.ID in p:
+                    p.remove(unit.ID)
+
+        text = text1 + text2 + text3 + text4
         
         self.update_event_log(values, text)
         self.update_melee_status(values)
