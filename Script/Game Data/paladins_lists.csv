@@ -1,0 +1,5 @@
+id,name,faction,wargear
+"(0, 0)",Pistols,0,"(0, 1, 2)"
+"(0, 1)",Melee Weapons,0,"(3, 4, 5, 6, 7, 8, 9)"
+"(0, 2)",Special Weapons,0,"(10, 11, 12, 13)"
+"(0, 3)",Heavy Weapons,0,"(14, 15, 16, 17, 18, 19, 20)"

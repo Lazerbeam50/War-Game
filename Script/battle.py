@@ -421,11 +421,15 @@ class Battle:
                 
                 #check to-hit
                 if attack.toHit < 99:
-                    roll = self.randomNumbers.pop(0)
-                    if roll > attack.toHit:
-                        print("Failed to-hit. Roll:", roll, "Range Skill:", attack.toHit)
+                    initialRoll = self.randomNumbers.pop(0)
+                    reRoll = self.randomNumbers.pop(0)
+                    initialDC = min(attack.toHit, 5)
+                    reRollDC = attack.toHit - 5
+                    if initialRoll > initialDC and reRoll > reRollDC:
+                        print("Failed to-hit. Rolls:", [initialRoll, reRoll], "Skill:", attack.toHit)
                         success = False
                     else:
+                        print("Successful to-hit. Rolls:", [initialRoll, reRoll], "Skill:", attack.toHit)
                         hits += 1
                   
                 #check strength      

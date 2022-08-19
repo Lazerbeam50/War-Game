@@ -1,0 +1,20 @@
+id,name,abilities,attackSpeed,armour,hp,invul,keywords,will,minMove,maxMove,mSkill,points,portraitPrimary,portraitSprite,rSkill,size,spriteName,spritePrimary,spriteRect,strength,fortitude,wargear
+"(1, 0)",Worg Lord,"('Orcish Pride', 'In the hunt', 'Charge!')",4,4,5,3,"('CHARACTER', 'CAVALRY', 'WORG LORD')",9,0,11,6,85,1,portrait_sprite.png,5,"(2, 2)",placeholder_sprite.png,1,"(32, 32)",4,4,"(0, 1, 2)"
+"(1, 1)",Storm Caller,"('Orcish Pride', 'Novice Storm Caller', 'Adept Storm Caller', 'Master Storm Caller')",3,4,4,0,"('CHARACTER', 'INFANTRY', 'MAGE', 'STORM CALLER')",9,0,6,4,85,1,portrait_sprite.png,3,"(1, 1)",orc_storm_caller_sprite.png,1,"(32, 32)",4,4,"(0, 1, 2)"
+"(1, 2)",Spec Ops Orc,"('Orcish Pride', 'Undercover')",2,4,1,0,"('INFANTRY', 'SPEC OPS SQUAD')",8,0,7,4,13,1,portrait_sprite.png,4,"(1, 1)",orc_spec_ops_orc_sprite.png,1,"(32, 32)",4,4,"(5, 1, 2)"
+"(1, 3)",Spec Ops Leader,"('Orcish Pride', 'Undercover')",3,4,1,0,"('INFANTRY', 'SPEC OPS SQUAD')",9,0,7,4,13,1,portrait_sprite.png,4,"(1, 1)",orc_spec_ops_leader_sprite.png,1,"(32, 32)",4,4,"(5, 1, 2)"
+"(1, 4)",Doom Orc,('Orcish Pride'),4,4,4,2,"('INFANTRY', 'DOOM ORC')",9,0,6,5,65,1,portrait_sprite.png,3,"(2, 2)",placeholder_sprite.png,1,"(32, 32)",5,5,"(0, 1, 2)"
+"(1, 5)",Brawler,('Orcish Pride'),2,4,1,0,"('INFANTRY', 'BRAWLER')",8,0,6,4,15,1,portrait_sprite.png,3,"(1, 1)",placeholder_sprite.png,1,"(32, 32)",4,4,"(0, 1, 2)"
+"(1, 6)",Brawler Leader,('Orcish Pride'),3,4,1,0,"('INFANTRY', 'BRAWLER')",9,0,6,4,15,1,portrait_sprite.png,3,"(1, 1)",placeholder_sprite.png,1,"(32, 32)",4,4,"(0, 1, 2)"
+"(1, 7)",Gunner,('Orcish Pride'),1,4,1,0,"('INFANTRY', 'GUNNER SQUAD')",8,0,6,4,13,1,portrait_sprite.png,4,"(1, 1)",orc_gunner_sprite.png,1,"(32, 32)",4,4,"(5, 1, 2)"
+"(1, 8)",Gunner Leader,('Orcish Pride'),2,4,1,0,"('INFANTRY', 'GUNNER SQUAD')",9,0,6,4,13,1,portrait_sprite.png,4,"(1, 1)",orc_gunner_leader_sprite.png,1,"(32, 32)",4,4,"(5, 1, 2)"
+"(1, 9)",Worg Rider,"('Orcish Pride', 'Charge!', 'Hit and run')",2,4,2,0,"('CAVALRY', 'WORG CAVALRY')",8,0,10,4,35,1,portrait_sprite.png,3,"(2, 2)",placeholder_sprite.png,1,"(32, 32)",4,4,"(0, 1, 2)"
+"(1, 10)",Worg Rider Leader,"('Orcish Pride', 'Charge!', 'Hit and run')",3,4,2,0,"('CAVALRY', 'WORG CAVALRY')",9,0,10,4,35,1,portrait_sprite.png,3,"(2, 2)",placeholder_sprite.png,1,"(32, 32)",4,4,"(0, 1, 2)"
+"(1, 11)",Worg,('Charge!'),2,1,1,0,"('BEAST', 'WORG PACK')",4,0,10,4,7,1,portrait_sprite.png,0,"(1, 1)",orc_worg_sprite.png,1,"(32, 32)",4,3,(20)
+"(1, 12)",Orc Heavy,('Orcish Pride'),2,4,1,0,"('INFANTRY', 'DEMOLITIONS SQUAD')",8,0,6,4,18,1,portrait_sprite.png,3,"(1, 1)",orc_heavy_sprite.png,1,"(32, 32)",4,4,"(21, 0, 2)"
+"(1, 13)",Orc Heavy Leader,('Orcish Pride'),3,4,2,0,"('INFANTRY', 'DEMOLITIONS SQUAD')",9,0,6,4,18,1,portrait_sprite.png,3,"(1, 1)",orc_heavy_leader_sprite.png,1,"(32, 32)",4,4,"(21, 0, 2)"
+"(1, 14)",Turbo-Tank,"('Explodes', 'Degrades', 'Steady')",3,4,14,0,"('VEHICLE', 'TURBO-TANK')",8,0,14,1,140,1,portrait_sprite.png,4,"(5, 5)",placeholder_sprite.png,1,"(32, 32)",7,8,(24)
+"(1, 15)",Speedwagon,"('Explodes', 'Degrades')",3,4,10,0,"('VEHICLE', 'TRANSPORT', 'SPEEDWAGON')",8,0,14,1,55,1,portrait_sprite.png,3,"(4, 4)",placeholder_sprite.png,1,"(32, 32)",6,7,"(5, 5)"
+"(1, 16)",Duster,"('Explodes', 'Degrades', 'Hard to hit')",3,4,8,0,"('VEHICLE', 'FLY', 'AIRBORNE', 'DUSTER')",8,20,50,1,65,1,portrait_sprite.png,4,"(5, 5)",orc_duster_sprite.png,1,"(160, 160)",6,6,"(5, 5)"
+"(1, 17)",Big-Bomber,"('Explodes', 'Degrades', 'Hard to hit', 'Air-to-Air inaccuracy')",3,4,14,0,"('VEHICLE', 'FLY', 'AIRBORNE', 'BIG-BOMBER')",8,15,40,1,100,1,portrait_sprite.png,3,"(7, 7)",placeholder_sprite.png,1,"(32, 32)",6,7,"(29, 28)"
+"(1, 18)",Fortified Guard Tower,"('Immobile', 'Auto-Attack')",0,4,20,0,"('VEHICLE', 'STRUCTURE', 'FORTIFIED GUARD TOWER')",0,0,0,0,170,1,portrait_sprite.png,2,"(6, 6)",placeholder_sprite.png,1,"(32, 32)",0,8,(22)

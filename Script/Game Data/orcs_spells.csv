@@ -1,0 +1,7 @@
+id,name,level,mana,target,range,damage,use1
+"(1, 0)",Surge of the Hurricane,2,4,0,12,0,1
+"(1, 1)",Thunder Torrent,1,2,1,18,3,0
+"(1, 2)",Gathering Storm,3,6,1,18,0,1
+"(1, 3)",Rush!,2,4,0,12,0,1
+"(1, 4)",Stromfury,4,6,1,12,5,0
+"(1, 5)",Frenzy,3,6,0,12,0,1

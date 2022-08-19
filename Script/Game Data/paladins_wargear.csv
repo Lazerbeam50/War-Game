@@ -1,0 +1,40 @@
+id,name,abilities,ap,range,damage,type,points,shots,strength,strengthMultiplier,strengthPlus,uni,userStrength
+"(0, 0)",Standard pistol,(),0,12,1,5,0,1,4,0,0,0,0
+"(0, 1)",Laser pistol,(),3,12,1,5,5,1,7,0,0,0,0
+"(0, 2)",Holy pistol,(),3,12,2,5,8,1,5,0,0,0,0
+"(0, 3)",Steel blade,('+1 AS'),0,0,1,0,0,0,0,0,0,0,1
+"(0, 4)",Holy sword,(),3,0,1,0,4,0,0,0,0,0,1
+"(0, 5)",Holy waraxe,(),2,0,1,0,5,0,0,0,1,0,1
+"(0, 6)",Holy warhammer,(),1,0,2,0,7,0,0,0,2,0,1
+"(0, 7)",Holy lance,(),1,0,1,0,4,0,0,0,2,0,1
+"(0, 8)",Holy gauntlet,('-1 Melee Skill'),3,0,2,0,20,0,0,2,0,0,1
+"(0, 9)",Thor's hammer,('-1 Melee Skill'),3,0,3,0,25,0,0,2,0,0,1
+"(0, 10)",Flamethrower,"('Ray', 'Ground only')",0,8,1,1,9,4,4,0,0,0,0
+"(0, 11)",Laser rifle,(),3,24,1,3,10,1,7,0,0,0,0
+"(0, 12)",Ultragun,(),4,12,5,1,17,1,8,0,0,0,0
+"(0, 13)",Laser carbine,(),3,18,2,3,15,1,5,0,0,0,0
+"(0, 14)",Grenade launcher,('Blast'),0,48,1,2,19,3,4,0,0,0,0
+"(0, 15)",Rocket launcher,('Blast'),2,48,4,2,19,1,8,0,0,0,0
+"(0, 16)",Heavy blaster,(),1,36,1,2,10,3,5,0,0,0,0
+"(0, 17)",Vaporiser,(),4,24,5,2,27,1,8,0,0,0,0
+"(0, 18)",Pyrocannon,('Blast'),3,48,4,2,25,1,9,0,0,0,0
+"(0, 19)",Golden cannon,(),3,24,2,2,28,4,5,0,0,0,0
+"(0, 20)",Laser cannon,(),3,36,1,2,16,2,7,0,0,0,0
+"(0, 21)",Holy rifle,(),1,24,2,3,3,1,4,0,0,0,0
+"(0, 22)",Frag grenade,('Blast'),0,8,1,4,0,1,3,0,0,0,0
+"(0, 23)",Light grenade,(),1,6,2,4,0,1,6,0,0,0,0
+"(0, 24)",Staff of discipline,(),1,0,2,0,14,0,0,0,2,0,1
+"(0, 25)",Burst rifle,(),0,24,1,3,0,1,4,0,0,0,0
+"(0, 26)",Laser scattergun,('Shotgun'),0,12,1,1,0,2,4,0,0,0,0
+"(0, 27)",Sniper rifle,"('Targets characters', 'Sniper')",0,36,1,2,8,1,4,0,0,0,0
+"(0, 28)",Holy grenade,(),4,4,4,4,5,1,8,0,0,0,0
+"(0, 29)",Gatling gun,(),0,24,1,3,2,2,4,0,0,0,0
+"(0, 30)",Pyroblaster,"('Blast', 'Ignores LOS')",0,60,1,2,30,8,5,0,0,0,0
+"(0, 31)",Tank rapidcannon,(),1,48,3,2,49,6,7,0,0,0,0
+"(0, 32)",Heavy-duty Minigun,(),1,24,1,2,35,6,6,0,0,0,0
+"(0, 33)",Skycleanser,"('+1 Range Skill vs FLY', 'Air only')",1,48,2,2,17,3,7,0,0,0,0
+"(0, 34)",Golden Ray,(),2,24,3,1,0,1,7,0,0,0,0
+"(0, 35)",Great Lord's Hammer,(),4,0,4,0,0,0,0,0,2,0,1
+"(0, 36)",Adept's Amulet,(),0,0,0,6,10,0,0,0,0,0,0
+"(0, 37)",Master's Spellbook,(),0,0,0,6,10,0,0,0,0,0,0
+"(0, 38)",Flame Shield,(),0,0,0,7,5,0,4,0,0,0,0

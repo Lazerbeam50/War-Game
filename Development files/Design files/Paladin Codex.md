@@ -6,9 +6,10 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Leader | 1x1 | 75
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Captain | 6 | 5 | 5 | 4 | 4 | 5 | 4 | 9 | 4 Armour, 3 Invul | 0
+|Model name|Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
+|----------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
+|Captain   |6       |6          |5          |4       |4        |5         |4           |9   |4 Armour, 3 Invul|0  |
+
 
 #### Base wargear
 
@@ -30,7 +31,7 @@ Captain | 6 | 5 | 5 | 4 | 4 | 5 | 4 | 9 | 4 Armour, 3 Invul | 0
 
 #### Abilities
 
-- Focus Aura (Friendly units within 6 squares can reroll to-hit rolls)
+- Focus Aura (Friendly units within 6 squares gain +1 Melee skill)
 
 
 #### Keywords
@@ -45,9 +46,9 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Leader | 1x1 | 95
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Invoker | 6 | 4 | 4 | 4 | 4 | 4 | 3 | 9 | 4 Armour | 1
+|Model name|Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
+|----------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
+|Invoker   |6       |4          |4          |4       |4        |4         |3           |9   |4 Armour         |1  |
 
 #### Base wargear
 
@@ -90,10 +91,10 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Elites | 1x1 | 15
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Paladin Veteran | 6 | 4 | 4 | 4 | 4 | 1 | 2 | 8 | 4 Armour | 2
-Veteran Sergeant | 6 | 4 | 4 | 4 | 4 | 1 | 2 | 9 | 4 Armour | 3
+|Model name      |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|----------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Paladin Veteran |6       |4          |4          |4       |4        |1         |2           |8   |4 Armour|2  |
+|Veteran Sergeant|6       |4          |4          |4       |4        |1         |2           |9   |4 Armour|3  |
 
 #### Base wargear
 
@@ -130,9 +131,9 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Elites | 1x1 | 55
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Medicant | 6 | 4 | 4 | 4 | 4 | 4 | 3 | 8 | 4 Armour | 4
+|Model name      |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|----------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Medicant        |6       |4          |4          |4       |4        |4         |3           |8   |4 Armour|4  |
 
 #### Base wargear
 
@@ -166,10 +167,10 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Troops | 1x1 | 13 (Initiates), 20 (Knights)
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Initiate | 6 | 4 | 4 | 4 | 4 | 1 | 1 | 7 | 4 Armour | 5
-Knight | 6 | 4 | 4 | 4 | 4 | 1 | 2 | 8 | 4 Armour | 6
+|Model name      |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|----------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Initiate        |6       |4          |4          |4       |4        |1         |1           |7   |4 Armour|5  |
+|Knight          |6       |4          |4          |4       |4        |1         |2           |8   |4 Armour|6  |
 
 #### Base wargear
 
@@ -209,10 +210,10 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Troops | 1x1 | 12
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Scout | 6 | 4 | 4 | 4 | 4 | 1 | 1 | 7 | 3 Armour | 7
-Scout Leader | 6 | 4 | 4 | 4 | 4 | 1 | 2 | 8 | 3 Armour | 8
+|Model name      |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|----------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Scout           |6       |4          |4          |4       |4        |1         |1           |7   |3 Armour|7  |
+|Scout Leader    |6       |4          |4          |4       |4        |1         |2           |8   |3 Armour|8  |
 
 #### Base wargear
 
@@ -250,10 +251,10 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Fast Attack | 1x1 | 16
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Striker | 7 | 4 | 4 | 4 | 4 | 1 | 1 | 7 | 4 Armour | 9
-Striker Leader | 7 | 4 | 4 | 4 | 4 | 1 | 1 | 8 | 4 Armour | 10
+|Model name      |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|----------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Striker         |12      |4          |4          |4       |4        |1         |1           |7   |4 Armour|9  |
+|Striker Leader  |12      |4          |4          |4       |4        |1         |1           |8   |4 Armour|10 |
 
 #### Base wargear
 
@@ -278,11 +279,11 @@ Striker Leader | 7 | 4 | 4 | 4 | 4 | 1 | 1 | 8 | 4 Armour | 10
 
 #### Abilities
 
-- **Assault!** (Charge range increased to 1d3 + 11)
+- **Jump pack** (When charging, this unit is considered to have the FLY keyword. Charge range increases to 1d3 + 11)
 
 #### Keywords
 
-- INFANTRY, STRIKER SQUAD
+- INFANTRY, JUMP PACK, STRIKER SQUAD
 
 ---
 
@@ -292,10 +293,10 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Fast Attack | 2x2 | 30
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Biker | 14 | 4 | 4 | 4 | 5 | 2 | 1 | 7 | 4 Armour | 11
-Bike Squad Leader | 14 | 4 | 4 | 4 | 5 | 2 | 2 | 8 | 4 Armour | 12
+|Model name       |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|-----------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Biker            |14      |4          |4          |4       |5        |2         |1           |7   |4 Armour|11 |
+|Bike Squad Leader|14      |4          |4          |4       |5        |2         |2           |8   |4 Armour|12 |
 
 #### Base wargear
 
@@ -331,10 +332,10 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Heavy Support | 2x2 (Gun), 1x1 (Gunner) | 46
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Pyro-Tech Gun | 3 | 0 | 4 | 3 | 6 | 4 | 0 | 8 | 4 Armour | 13
-Pyro-Tech Gunner | 6 | 4 | 4 | 4 | 4 | 2 | 1 | 8 | 4 Armour | 14
+|Model name      |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|----------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Pyro-Tech Gun   |3       |0          |4          |3       |6        |4         |0           |8   |4 Armour|13 |
+|Pyro-Tech Gunner|6       |4          |4          |4       |4        |2         |1           |8   |4 Armour|14 |
 
 #### Base wargear
 
@@ -374,9 +375,9 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Heavy Support | 5x5 | 102
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Brotherhood Tank | 12 | 1 | 4 | 6 | 7 | 11 | 3 | 8 | 4 Armour | 15
+|Model name      |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|----------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Brotherhood Tank|12      |1          |4          |6       |7        |11        |3           |8   |4 Armour|15 |
 
 #### Base wargear
 
@@ -410,9 +411,9 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Transport | 4x4 | 70
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Brotherhood APC | 12 | 1 | 4 | 6 | 8 | 10 | 3 | 8 | 4 Armour | 16
+|Model name      |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|----------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Brotherhood APC |12      |1          |4          |6       |8        |10        |3           |8   |4 Armour|16 |
 
 #### Base wargear
 
@@ -443,9 +444,10 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Flyer | 6x6 | 110
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Pyro-Heavy Chopper | 50 | 1 | 4 | 6 | 6 | 10 | 3 | 8 | 4 Armour | 17
+|Model name        |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|------------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Pyro-Heavy Chopper|50      |1          |4          |6       |6        |10        |3           |8   |4 Armour|17 |
+
 
 #### Base wargear
 
@@ -477,9 +479,9 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Flyer | 6x6 | 85
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Pyro-Heavy Interceptor | 20-60 | 1 | 4 | 6 | 6 | 10 | 3 | 8 | 4 Armour | 18
+|Model name            |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|----------------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Pyro-Heavy Interceptor|20-60   |1          |4          |6       |6        |10        |3           |8   |4 Armour|18 |
 
 #### Base wargear
 
@@ -506,15 +508,15 @@ Pyro-Heavy Interceptor | 20-60 | 1 | 4 | 6 | 6 | 10 | 3 | 8 | 4 Armour | 18
 
 ---
 
-## Great Lord Auldoon (13)
+## Great Lord (13)
 
 Battlefield role | Model size | Point cost 
 ---|---|---|
 Ultra | 2x2 | 330
 
-Model name | Movement | Melee Skill | Range Skill | Strength | Fortitude | Hit Points | Attack Speed | Will | Saves | ID
----|---|---|---|---|---|---|---|---|---|---|
-Great Lord Auldoon | 10 | 5 | 5 | 6 | 6 | 9 | 6 | 10 | 5 Armour, 5 Invul | 19
+|Model name        |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
+|------------------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
+|Great Lord        |8       |8          |7          |6       |6        |9         |6           |10  |5 Armour, 4 Invul|19 |
 
 #### Base wargear
 
@@ -522,7 +524,7 @@ Great Lord Auldoon | 10 | 5 | 5 | 6 | 6 | 9 | 6 | 10 | 5 Armour, 5 Invul | 19
 
 #### Models
 
-- 1 Great Lord Auldoon
+- 1 Great Lord
 
 #### Wargear options
 
@@ -531,10 +533,13 @@ Great Lord Auldoon | 10 | 5 | 5 | 6 | 6 | 9 | 6 | 10 | 5 Armour, 5 Invul | 19
 #### Abilities
 
 - **Fearless** (This model can never fail a morale check)
+- **Enhanced Inspiration Aura** (Any friendly model within 12 squares of this model can substitute their own will with this model's will)
+- **Reincarnation** (The first time this model reaches 0 HP, it will be redeployed at the start of the controlling player's next movement 
+phase with 50% of total HP (rounded down). If this unit is your Boss, the death will still count towards the opponent's Kingslayer objective.)
 
 #### Keywords
 
-- CHARACTER, INFANTRY, HERO, UNIQUE, AULDOON
+- CHARACTER, INFANTRY, HERO, UNIQUE, GREAT LORD
 
 ---
 
@@ -552,19 +557,19 @@ Great Lord Auldoon | 10 | 5 | 5 | 6 | 6 | 9 | 6 | 10 | 5 Armour, 5 Invul | 19
 |7  |Holy Lance         |     |Melee     |     |+2      |1              |1     |4     |                                                                                                         |
 |8  |Holy Gauntlet      |     |Melee     |     |x2      |3              |2     |20    |-1 Melee Skill                                                                                           |
 |9  |Thor's Hammer      |     |Melee     |     |x2      |3              |3     |25    |-1 Melee Skill                                                                                           |
-|10 |Flamethrower       |8    |Assault   |3    |4       |0              |1     |9     |Auto-hit, Ground only (Cannot it units with the FLY keyword)                                             |
+|10 |Flamethrower       |8    |Assault   |4    |4       |0              |1     |9     |Ray, Ground only (Cannot it units with the FLY keyword)                                             |
 |11 |Laser Rifle        |24   |Rapid Fire|1    |7       |3              |1     |10    |                                                                                                         |
 |12 |Ultragun           |12   |Assault   |1    |8       |4              |5     |17    |                                                                                                         |
 |13 |Laser Carbine      |18   |Rapid Fire|1    |5       |3              |2     |15    |                                                                                                         |
-|14 |Grenade Launcher   |48   |Heavy     |4    |4       |0              |1     |19    |                                                                                                         |
-|15 |Rocket Launcher    |48   |Heavy     |1    |8       |0              |4     |19    |                                                                                                         |
+|14 |Grenade Launcher   |48   |Heavy     |3    |4       |0              |1     |19    |Blast                                                                                                         |
+|15 |Rocket Launcher    |48   |Heavy     |1    |8       |2              |4     |19    |Blast                                                                                                         |
 |16 |Heavy Blaster      |36   |Heavy     |3    |5       |1              |1     |10    |                                                                                                         |
 |17 |Vaporiser          |24   |Heavy     |1    |8       |4              |5     |27    |                                                                                                         |
-|18 |Pyrocannon         |48   |Heavy     |1    |9       |3              |4     |25    |                                                                                                         |
+|18 |Pyrocannon         |48   |Heavy     |1    |9       |3              |4     |25    |Blast                                                                                                         |
 |19 |Golden Cannon      |24   |Heavy     |4    |5       |3              |2     |28    |                                                                                                         |
 |20 |Laser Cannon       |36   |Heavy     |2    |7       |3              |1     |16    |                                                                                                         |
 |21 |Holy Rifle         |24   |Rapid Fire|1    |4       |1              |2     |3     |                                                                                                         |
-|22 |Frag Grenade       |6    |Grenade   |4    |3       |0              |1     |0     |                                                                                                         |
+|22 |Frag Grenade       |8    |Grenade   |1    |3       |0              |1     |0     |Blast                                                                                                         |
 |23 |Light Grenade      |6    |Grenade   |1    |6       |1              |2     |0     |                                                                                                         |
 |24 |Staff of Discipline|     |Melee     |     |+2      |1              |2     |14    |                                                                                                         |
 |25 |Burst Rifle        |24   |Rapid Fire|1    |4       |0              |1     |0     |                                                                                                         |
@@ -572,8 +577,8 @@ Great Lord Auldoon | 10 | 5 | 5 | 6 | 6 | 9 | 6 | 10 | 5 Armour, 5 Invul | 19
 |27 |Sniper Rifle       |36   |Heavy     |1    |4       |0              |1     |8     |Targets characters, Sniper (Damage increases to 2 against models without the VEHICLE or MONSTER keywords)|
 |28 |Holy Grenade       |4    |Grenade   |1    |8       |4              |4     |5     |                                                                                                         |
 |29 |Gatling Gun        |24   |Rapid Fire|2    |4       |0              |1     |2     |                                                                                                         |
-|30 |Pyroblaster        |60   |Heavy     |8    |5       |0              |1     |30    |Ignores LOS                                                                                              |
-|31 |Tank rapidcannon   |48   |Heavy     |6    |7       |1              |3     |49    |                                                                                                         |
+|30 |Pyroblaster        |60   |Heavy     |8    |5       |0              |1     |30    |Blast, Ignores LOS                                                                                              |
+|31 |Tank rapidcannon   |48   |Heavy     |4    |7       |1              |3     |49    |                                                                                                         |
 |32 |Heavy-duty Minigun |24   |Heavy     |6    |6       |1              |1     |35    |                                                                                                         |
 |33 |Skycleanser        |48   |Heavy     |3    |7       |1              |2     |17    |+1 Range Skill vs FLY units, Air only                                                                    |
 |34 |Golden Ray         |24   |Assault   |1    |7       |2              |3     |0     |                                                                                                         |

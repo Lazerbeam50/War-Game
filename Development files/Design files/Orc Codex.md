@@ -8,7 +8,7 @@ Leader | 2x2 | 85
 
 |Model name|Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
 |----------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
-|Worg Lord |11      |5          |4          |4       |4        |5         |4           |9   |4 Armour, 3 Invul|0  |
+|Worg Lord |11      |6          |5          |4       |4        |5         |4           |9   |4 Armour, 3 Invul|0  |
 
 #### Base wargear
 
@@ -31,7 +31,7 @@ Leader | 2x2 | 85
 
 - **Orcish Pride** (Auto-reroll of morale checks)
 - **In the hunt** (Give +2 movement to friendly WORG CAVALRY and WORG PACK units within 6 squares)
-
+- **Charge!** (Charge range increased to 1d3 + 9)
 
 
 #### Keywords
@@ -46,8 +46,8 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Leader | 1x1 | 85
 
-|Model name|Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
-|----------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
+|Model name  |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
+|------------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
 |Storm Caller|6       |4          |3          |4       |4        |4         |3           |9   |4 Armour         |1  |
 
 #### Base wargear
@@ -91,9 +91,9 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Elites | 1x1 | 13
 
-|Model name|Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
-|----------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
-|Spec Ops Orc|7       |4          |4          |4       |4        |1         |2           |8   |4 Armour         |2  |
+|Model name     |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
+|---------------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
+|Spec Ops Orc   |7       |4          |4          |4       |4        |1         |2           |8   |4 Armour         |2  |
 |Spec Ops Leader|7       |4          |4          |4       |4        |1         |3           |9   |4 Armour         |3  |
 
 #### Base wargear
@@ -118,7 +118,7 @@ Elites | 1x1 | 13
 
 - **Orcish Pride** (Auto-reroll of morale checks)
 
-- **Undercover** (This unit cannot be targeted during the shooting phase unless it is the closest visable unit to the shooting unit)
+- **Undercover** (This unit cannot be targeted during the shooting phase unless it is the closest visible unit to the shooting unit)
 
 #### Keywords
 
@@ -169,9 +169,9 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Troops | 1x1 | 15
 
-|Model name|Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
-|----------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
-|Brawler   |6       |4          |3          |4       |4        |1         |2           |8   |4 Armour         |5  |
+|Model name    |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
+|--------------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
+|Brawler       |6       |4          |3          |4       |4        |1         |2           |8   |4 Armour         |5  |
 |Brawler Leader|6       |4          |3          |4       |4        |1         |3           |9   |4 Armour         |6  |
 
 
@@ -208,9 +208,9 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Troops | 1x1 | 13
 
-|Model name|Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
-|----------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
-|Gunner    |6       |4          |4          |4       |4        |1         |1           |8   |4 Armour         |7  |
+|Model name   |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
+|-------------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
+|Gunner       |6       |4          |4          |4       |4        |1         |1           |8   |4 Armour         |7  |
 |Gunner Leader|6       |4          |4          |4       |4        |1         |2           |9   |4 Armour         |8  |
 
 
@@ -248,9 +248,9 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Fast Attack | 2x2 | 35
 
-|Model name|Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
-|----------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
-|Worg Rider|10      |4          |3          |4       |4        |2         |2           |8   |4 Armour         |9  |
+|Model name       |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves            |ID |
+|-----------------|--------|-----------|-----------|--------|---------|----------|------------|----|-----------------|---|
+|Worg Rider       |10      |4          |3          |4       |4        |2         |2           |8   |4 Armour         |9  |
 |Worg Rider Leader|10      |4          |3          |4       |4        |2         |3           |9   |4 Armour         |10 |
 
 
@@ -274,9 +274,8 @@ Fast Attack | 2x2 | 35
 #### Abilities
 
 - **Orcish Pride** (Auto-reroll of morale checks)
-
 - **Charge!** (Charge range increased to 1d3 + 9)
-
+- **Hit and run** (This model can charge on the same turn that it falls back)
 
 #### Keywords
 
@@ -493,6 +492,7 @@ Flyer | 7x7 | 100
 - **Explodes** (This model explodes upon dropping to 0 HP. All units within 2 squares suffer a Strength 4, Armour Piercing 0, Damage 1 hit.)
 - **Degrades** (When this model is reduced to 40% of its max HP, its movement and strength are reduced to 75% of their maximum (rounded down) and its melee skill, range skill and attack speed are reduced by 1. At 20%, its movement and strength are reduced to 50% of their maximum (rounded down) and its melee skill, range skill and attack speed are reduced by 2.)
 - **Hard to hit** (Units without the FLY keyword have a -1 to hit this model.)
+- **Air-to-Air inaccuracy** (This unit suffers a -1 to-hit when shooting units with the AIRBORNE keyword)
 
 #### Keywords
 
@@ -506,8 +506,8 @@ Battlefield role | Model size | Point cost
 ---|---|---|
 Structure | 6x6 | 170
 
-|Model name      |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
-|----------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
+|Model name           |Movement|Melee Skill|Range Skill|Strength|Fortitude|Hit Points|Attack Speed|Will|Saves   |ID |
+|---------------------|--------|-----------|-----------|--------|---------|----------|------------|----|--------|---|
 |Fortified Guard Tower|0       |0          |2          |0       |8        |20        |0           |0   |4 Armour|18 |
 
 
@@ -543,7 +543,7 @@ Structure | 6x6 | 170
 |---|------------------|-----|----------|-----|--------|---------------|------|------|---------------------------------------------------------------------------------------------------------|
 |0  |Iron Axe          |     |Melee     |     |User    |0              |1     |0     |+1 Attacks                                                                                               |
 |1  |Glock             |12   |Pistol    |1    |4       |0              |1     |0     |                                                                                                         |
-|2  |Pineapples        |6    |Grenade   |5    |3       |0              |1     |0     |                                                                                                         |
+|2  |Pineapples        |8    |Grenade   |1    |4       |0              |1     |0     |Blast                                                                                                    |
 |3  |Steel Axe         |     |Melee     |     |User    |1              |1     |2     |+1 Attacks                                                                                               |
 |4  |Raw Axe           |     |Melee     |     |User    |3              |2     |4     |                                                                                                         |
 |5  |Auto-Rifle        |24   |Rapid Fire|1    |4       |0              |1     |0     |                                                                                                         |
@@ -556,21 +556,21 @@ Structure | 6x6 | 170
 |12 |Power Pistol      |12   |Pistol    |1    |7       |3              |2     |15    |                                                                                                         |
 |13 |Adept Amulet      |     |Other     |     |        |               |      |10    |                                                                                                         |
 |14 |Master's Spellbook|     |Other     |     |        |               |      |10    |                                                                                                         |
-|15 |Flamer            |8    |Assault   |4    |4       |0              |1     |14    |Auto-hit, Ground only (Cannot it units with the FLY keyword)                                             |
+|15 |Flamer            |8    |Assault   |4    |4       |0              |1     |14    |Ray, Ground only (Cannot it units with the FLY keyword)                                                  |
 |16 |Shock shooter     |24   |Rapid Fire|1    |7       |3              |1     |18    |                                                                                                         |
 |17 |Stormer           |12   |Assault   |1    |8       |4              |4     |25    |                                                                                                         |
 |18 |Shock Carbine     |18   |Rapid Fire|1    |5       |3              |2     |22    |                                                                                                         |
-|19 |Sniper Rifle      |36   |Heavy     |1    |4       |0              |1     |10    |Targets characters, Sniper (Damage increases to 2 against models without the VEHICLE or MONSTER keywords)|
+|19 |Sniper Rifle      |36   |Heavy     |1    |4       |0              |1     |10    |Targets characters, Sniper (Damage increases +1 against models without the VEHICLE or MONSTER keywords)  |
 |20 |Bite              |     |Melee     |     |User    |1              |1     |0     |                                                                                                         |
 |21 |RPG               |48   |Heavy     |1    |8       |0              |3     |23    |                                                                                                         |
 |22 |Gattler           |36   |Heavy     |5    |5       |0              |1     |27    |                                                                                                         |
 |23 |Thundergun        |48   |Heavy     |1    |8       |2              |4     |34    |                                                                                                         |
-|24 |Wotan Cannon      |48   |Heavy     |1    |10      |2              |3     |38    |                                                                                                         |
+|24 |Wotan Cannon      |48   |Heavy     |1    |10      |2              |3     |38    |Large blast                                                                                                         |
 |25 |Mini-Turret       |36   |Rapid Fire|3    |5       |0              |1     |13    |                                                                                                         |
 |26 |Side Cannon       |48   |Heavy     |1    |7       |1              |2     |20    |                                                                                                         |
 |27 |Zap Tapper        |36   |Rapid Fire|1    |6       |1              |2     |20    |                                                                                                         |
-|28 |Shock Bombs       |6    |Assault   |8    |5       |0              |1     |38    |                                                                                                         |
-|29 |Volt Strike       |6    |Assault   |1    |9       |0              |5     |30    |                                                                                                         |
+|28 |Shock Bombs       |6    |Assault   |6    |5       |0              |1     |38    |Blast                                                                                                         |
+|29 |Volt Strike       |6    |Assault   |1    |9       |0              |5     |30    |Large Blast                                                                                                         |
 |30 |Skyguard          |36   |Heavy     |4    |7       |2              |3     |42    |Can only hit units with the FLY keyword                                                                  |
 |31 |Thunder Shield    |     |Other     |     |        |               |      |5     |Give 4 invulnerable save                                                                                 |
 
@@ -613,7 +613,7 @@ Structure | 6x6 | 170
 |---|----------------------|-----------|---------|-----|--------------|---------------------------|
 |0  |Surge of the Hurricane|2          |4        |12   |One ally unit |Boosts melee phase priority|
 |1  |Thunder Torrent       |1          |2        |18   |One enemy unit|Deal 3 Direct Damage       |
-|2  |Shield Disrupt        |3          |6        |10   |One enemy unit|Remove cover save          |
-|3  |Rush!                 |2          |4        |12   |One ally unit |Re-roll charges            |
+|2  |Gathering Storm       |3          |6        |18   |One enemy unit|Target cannot use overwatch|
+|3  |Rush!                 |2          |4        |12   |One ally unit |Give +2 charge range       |
 |4  |Stromfury             |4          |6        |12   |One enemy unit|Deal 5 Direct Damage       |
-|5  |Frenzy                |3          |6        |12   |One ally unit |Boosts attack speed        |
+|5  |Frenzy                |3          |6        |12   |One ally unit |Boosts attack speed +1     |
