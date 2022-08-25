@@ -16,7 +16,9 @@
 - Add model abilities.
 - Add weapon abilities.
 - Add transports.
-	- Need to fix bug where transports can move, disembark a unit, and then cancel their move.
+	- ~~Need to fix bug where transports can move, disembark a unit, and then cancel their move.~~
+	- Need to fix bug where unit is embarked onto a transport from the deployment phase, even if the deployment of that unit onto the transport was cancelled
+	- ~~Need to fix a bug where dead models can disembark from transports.
 - ~~Add two weapon attack speed bonus.~~
 
 ## Game Setup/Other

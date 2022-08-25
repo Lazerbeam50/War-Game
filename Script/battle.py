@@ -399,115 +399,128 @@ class Battle:
         unit = self.units[attacks[0].primaryTarget.unitID]
         
         print("======")
-        
-        #Loop through attacks
-        for attack in attacks:
-            #If main target is dead
-            if attack.primaryTarget.dead:
-                #set main target to none
-                attack.primaryTarget = None
-                #keep popping targets until a living one can be found
-                try:
-                    while attack.primaryTarget is None:
-                        attack.primaryTarget = attack.otherTargets.pop(0)
-                        if attack.primaryTarget.dead:
-                            attack.primaryTarget = None
-                except IndexError:
-                    pass
-            #If main target is not none, carry out attack
-            if attack.primaryTarget is not None:
-                
-                success = True
-                
-                #check to-hit
-                if attack.toHit < 99:
-                    initialRoll = self.randomNumbers.pop(0)
-                    reRoll = self.randomNumbers.pop(0)
-                    initialDC = min(attack.toHit, 5)
-                    reRollDC = attack.toHit - 5
-                    if initialRoll > initialDC and reRoll > reRollDC:
-                        print("Failed to-hit. Rolls:", [initialRoll, reRoll], "Skill:", attack.toHit)
-                        success = False
-                    else:
-                        print("Successful to-hit. Rolls:", [initialRoll, reRoll], "Skill:", attack.toHit)
-                        hits += 1
-                  
-                #check strength      
-                if success and attack.strength < 99:
-                    
-                    print("Strength:", attack.strength)
-                    
-                    if attack.strength > attack.primaryTarget.fort:
-                        
-                        if attack.strength >= (attack.primaryTarget.fort * 2):
-                            dc = 5
-                            
-                        else:
-                            dc = 4
-                            
-                    elif attack.strength < attack.primaryTarget.fort:
-                        
-                        if attack.strength <= (attack.primaryTarget.fort/2):
-                            dc = 1
-                            
-                        else:
-                            dc = 2
-                            
-                    else:
-                        dc = 3
-                        
-                    roll = self.randomNumbers.pop(0)
-                    if roll > dc:
-                        print("Failed crit check. roll:", roll, "dc:", dc)
-                        success = False
-                        
-                #check saves
-                if success and attack.ap < 99:
-                    
-                    armour = attack.primaryTarget.armour - attack.ap
-                    if melee:
-                        save = max(armour, attack.primaryTarget.invul)
-                    else:
-                        save = max(armour, attack.primaryTarget.cover, attack.primaryTarget.invul)
-                    
-                    roll = self.randomNumbers.pop(0)
-                    if roll <= save:
-                        print("Successful save!. roll:", roll, "save:", save)
-                        success = False
-                        
-                if success:
-                
-                    #reduce target hp by damage
-                    attack.primaryTarget.currentHP -= attack.damage
-                    damage += attack.damage
-                    #If target is dead, mark it as dead and save deathcount
-                    if attack.primaryTarget.currentHP <= 0:
-                        attack.primaryTarget.dead = True
-                        unit.modelsLost += 1
-                        #Kill sprite and wipe nodes
-                        attack.primaryTarget.sprite.kill()
-                        for n in attack.primaryTarget.nodes[:]:
-                            self.nodes[n].takenBy = None
-                            attack.primaryTarget.nodes.remove(n)
-                            
+        try:
+            #Loop through attacks
+            for attack in attacks:
+                #If main target is dead
+                print("Checking if primary target is dead")
+                if attack.primaryTarget.dead:
+                    print("Primary target dead - looking for new targets")
+                    #set main target to none
+                    attack.primaryTarget = None
+                    #keep popping targets until a living one can be found
+                    try:
+                        while attack.primaryTarget is None:
+                            attack.primaryTarget = attack.otherTargets.pop(0)
+                            if attack.primaryTarget.dead:
+                                attack.primaryTarget = None
+                    except IndexError:
+                        pass
+                #If main target is not none, carry out attack
+                if attack.primaryTarget is not None:
+                    print("Making attack " + str(attacks.index(attack) + 1) + " of " + str(len(attacks)))
 
-                        #Store death info
-                        data = targetCodex.models[attack.primaryTarget.data].name
-                        if data not in deaths:
-                            deaths[data] = 1
+                    success = True
+
+                    #check to-hit
+                    if attack.toHit < 99:
+                        initialRoll = self.randomNumbers.pop(0)
+                        reRoll = self.randomNumbers.pop(0)
+                        initialDC = min(attack.toHit, 5)
+                        reRollDC = attack.toHit - 5
+                        if initialRoll > initialDC and reRoll > reRollDC:
+                            print("Failed to-hit. Rolls:", [initialRoll, reRoll], "Skill:", attack.toHit)
+                            success = False
                         else:
-                            deaths[data] += 1
-                            
-                        if 'Explodes' in attack.primaryTarget.abilities:
-                            self.exploding.append(attack.primaryTarget)
-                            attack.primaryTarget.explosionSite = attack.primaryTarget.topLeftNode
-                        attack.primaryTarget.topLeftNode = None
-                            
-                        #Pass details to is unit still alive
-                        unitAlive = self.is_unit_still_alive(values, unit, targetCodex=targetCodex)
+                            print("Successful to-hit. Rolls:", [initialRoll, reRoll], "Skill:", attack.toHit)
+                            hits += 1
+
+                    #check strength
+                    if success and attack.strength < 99:
+
+                        print("Strength:", attack.strength)
+
+                        if attack.strength > attack.primaryTarget.fort:
+
+                            if attack.strength >= (attack.primaryTarget.fort * 2):
+                                dc = 5
+
+                            else:
+                                dc = 4
+
+                        elif attack.strength < attack.primaryTarget.fort:
+
+                            if attack.strength <= (attack.primaryTarget.fort/2):
+                                dc = 1
+
+                            else:
+                                dc = 2
+
+                        else:
+                            dc = 3
+
+                        roll = self.randomNumbers.pop(0)
+                        if roll > dc:
+                            print("Failed crit check. roll:", roll, "dc:", dc)
+                            success = False
+
+                    #check saves
+                    if success and attack.ap < 99:
+
+                        armour = attack.primaryTarget.armour - attack.ap
+                        if melee:
+                            save = max(armour, attack.primaryTarget.invul)
+                        else:
+                            save = max(armour, attack.primaryTarget.cover, attack.primaryTarget.invul)
+
+                        roll = self.randomNumbers.pop(0)
+                        if roll <= save:
+                            print("Successful save!. roll:", roll, "save:", save)
+                            success = False
+                        else:
+                            print("Save failed!. roll:", roll, "save:", save)
+
+                    if success:
+                        print("Attack successful")
+
+                        #reduce target hp by damage
+                        attack.primaryTarget.currentHP -= attack.damage
+                        damage += attack.damage
+                        #If target is dead, mark it as dead and save deathcount
+                        if attack.primaryTarget.currentHP <= 0:
+                            attack.primaryTarget.dead = True
+                            unit.modelsLost += 1
+                            #Kill sprite and wipe nodes
+                            attack.primaryTarget.sprite.kill()
+                            for n in attack.primaryTarget.nodes[:]:
+                                self.nodes[n].takenBy = None
+                                attack.primaryTarget.nodes.remove(n)
+
+
+                            #Store death info
+                            data = targetCodex.models[attack.primaryTarget.data].name
+                            if data not in deaths:
+                                deaths[data] = 1
+                            else:
+                                deaths[data] += 1
+
+                            if 'Explodes' in attack.primaryTarget.abilities:
+                                self.exploding.append(attack.primaryTarget)
+                                attack.primaryTarget.explosionSite = attack.primaryTarget.topLeftNode
+                            attack.primaryTarget.topLeftNode = None
+
+                            #Pass details to is unit still alive
+                            print("Checking if unit is still alive")
+                            unitAlive = self.is_unit_still_alive(values, unit, targetCodex=targetCodex)
+                            print("Done checking if unit is still alive")
+
+        except Exception:
+            print("Something is wrong here!")
                 
         #Report deaths
+        print("Updating control points")
         self.update_control_point_status(values)
+        print("Done reporting deaths")
         
         if spell is not None:
             text1 = self.currentUnit.name + " casts " + spell.name + " on " + unit.name + "!"
@@ -555,7 +568,9 @@ class Battle:
                 if unit.ID in p:
                     p.remove(unit.ID)
 
+        print("Setting up reporting text")
         text = text1 + text2 + text3 + text4
+        print("Combat reporting text done")
         
         self.update_event_log(values, text)
         self.update_melee_status(values)
@@ -651,6 +666,7 @@ class Battle:
         
     def check_explosions(self, values):
         for model in self.exploding[:]:
+            print("Checking explosions for " + str(model.ID))
             # Remove model from list
             self.exploding.remove(model)
             if len(self.units[model.unitID].models) == 1:
@@ -661,6 +677,7 @@ class Battle:
             damagedModels = {}
             width = self.players[model.ID[0] - 1].playerArmy.codex.models[model.data].size[0]
             height = self.players[model.ID[0] - 1].playerArmy.codex.models[model.data].size[1]
+            print("Range around model calculated")
             #Calculate range around model
             for x in range(model.explosionSite[0] - 2, model.explosionSite[0] + width + 2):
                 for y in range(model.explosionSite[1] - 2, model.explosionSite[1] + height + 2):
@@ -678,19 +695,35 @@ class Battle:
                         pass
 
             #Set up attacks for each model
+            print("Setting up attack list")
             attackList = []
             for unitID in damagedModels:
                 playerCodex = self.players[unitID[0] - 1].playerArmy.codex
                 attacks = []
-                for model in damagedModels[unitID]:
-                    attacks.append(Attack(99, 4, 1, 0, model, []))
+                for damagedModel in damagedModels[unitID]:
+                    attacks.append(Attack(99, 4, 1, 0, damagedModel, []))
                 attackList.append([playerCodex, attacks])
 
+            print("Checking onboard models for " + self.units[model.unitID].name)
+            #If the exploding unit had other units on board, set up attacks for them
+            for unitID in self.units[model.unitID].onboard:
+                playerCodex = self.players[unitID[0] - 1].playerArmy.codex
+                attacks = []
+                for onBoardModel in self.units[unitID].models:
+                    if not onBoardModel.dead and not onBoardModel.fled:
+                        attacks.append(Attack(99, 5, 2, 1, onBoardModel, []))
+                attackList.append([playerCodex, attacks])
+
+                #Add unit to emergency disembark list
+
+            print("Applying damage")
             #Apply damage
             for attackRound in attackList:
                 self.apply_damage(values, attackRound[1], attackRound[0], explosion=True)
 
-        
+            print("Checking the next model")
+
+        print("====== Done checking explosions =======")
     def check_kill_points(self, values, unit):
         
         #If this is the first unit to die, award First Blood
@@ -823,8 +856,9 @@ class Battle:
             nodes.sort(key=operator.attrgetter("H"))
             
             images = {}
-            
-            for model in unit.models:
+            modelList = [model for model in unit.models if not model.dead and not model.fled]
+
+            for model in modelList:
                 #Loop through size and check that nodes are available
                 size = playerCodex.models[model.data].size
                 running2 = True
@@ -878,7 +912,7 @@ class Battle:
             
             
             #Clean up failures
-            if successes < len(unit.models):
+            if successes < len(modelList):
                 print("ULTIMATE FAILURE")
                 #kill models sprites
                 self.delete_unit_from_field(unit)
@@ -942,6 +976,14 @@ class Battle:
         self.currentTransport = None
         
         return text
+
+    def emergency_disembark(self):
+        #Get list of available nodes
+        #Get list of models to disembark
+        #Sort list of models in priority order
+        #Attempt to deploy models
+        #If deployment fails, kill the model at the end of the list and try again
+        pass
             
     def get_closest_visible_unit(self):
         #Get closest visible unit
@@ -2089,7 +2131,7 @@ class Battle:
             for unit in self.currentTurn.units:
                 #If not moved
                 if (not self.units[unit].moved and not self.units[unit].advanced and 
-                    not self.units[unit].fellBack):
+                    not self.units[unit].fellBack and not self.units[unit].destroyed):
                     #If unit has a minimum movement characteristic
                     if self.units[unit].models[0].minMove > 0:
                         #destroy unit
@@ -4210,7 +4252,7 @@ class Battle:
             commands = ["Yes", "No"]
             self.get_command_list(values, commands, actionList=[76, 77])
             
-            text = "Are you sure you want to embark onto " + self.currentUnit.name + "?"
+            text = "Are you sure you want to embark onto " + self.currentTransport.name + "?"
             self.update_main_message(values, text)
             self.awaitingEvent = True
             
@@ -5411,7 +5453,9 @@ class Battle:
                         unitInRange = True
                         #Is every model in the current unit within 3 squares of the transport?
                         #Loop through models
-                        for model in self.currentUnit.models:
+                        for model in [
+                            model for model in self.currentUnit.models if (not model.dead and not model.fled)
+                        ]:
                             #Loop through model's nodes
                             modelInRange = False
                             for node1 in model.nodes:
