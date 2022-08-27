@@ -1929,6 +1929,7 @@ class Battle:
             else:
                 self.delete_unit_from_field(self.currentUnit)
                 self.currentUnit = None
+                self.currentTransport = None
                 #Update message
                 text = self.currentTurn.name + " is deploying a unit"
                 self.update_main_message(values, text)
