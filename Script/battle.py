@@ -73,6 +73,7 @@ class Battle:
         self.eventLogSurface = pygame.Surface((420, 200))
         self.eventLogText = []
         self.exploding = []
+        self.explodingTransports = []
         self.firstBloodAwarded = False
         self.flagsGroup = pygame.sprite.Group()
         self.headerGroup = pygame.sprite.Group()
@@ -350,6 +351,10 @@ class Battle:
         elif self.exploding:
             print("Checking explosions!")
             self.check_explosions(values)
+
+        elif self.explodingTransports:
+            print("Emergency disembark!")
+            self.emergency_disembark(values)
         
         else:
             
@@ -491,7 +496,8 @@ class Battle:
                             attack.primaryTarget.dead = True
                             unit.modelsLost += 1
                             #Kill sprite and wipe nodes
-                            attack.primaryTarget.sprite.kill()
+                            if attack.primaryTarget.sprite is not None:
+                                attack.primaryTarget.sprite.kill()
                             for n in attack.primaryTarget.nodes[:]:
                                 self.nodes[n].takenBy = None
                                 attack.primaryTarget.nodes.remove(n)
@@ -514,8 +520,9 @@ class Battle:
                             unitAlive = self.is_unit_still_alive(values, unit, targetCodex=targetCodex)
                             print("Done checking if unit is still alive")
 
-        except Exception:
+        except Exception as e:
             print("Something is wrong here!")
+            print(e)
                 
         #Report deaths
         print("Updating control points")
@@ -574,6 +581,23 @@ class Battle:
         
         self.update_event_log(values, text)
         self.update_melee_status(values)
+
+    def are_enemies_adjacent_to_node(self, node, enemyPlayerModels):
+        adjacentNodes = []
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                try:
+                    adjacentNodes.append(self.nodes[(node.x + x, node.y + y)])
+                except KeyError:
+                    pass
+        enemyAdjacent = False
+        for n in adjacentNodes:
+            if n.takenBy is not None and n.takenBy in enemyPlayerModels:
+                print("Enemy at " + str(n.coordinates))
+                enemyAdjacent = True
+                break
+
+        return enemyAdjacent
         
     def attack_charge_target(self, values):
         if len(self.selectedModels) > 0:
@@ -679,8 +703,8 @@ class Battle:
             height = self.players[model.ID[0] - 1].playerArmy.codex.models[model.data].size[1]
             print("Range around model calculated")
             #Calculate range around model
-            for x in range(model.explosionSite[0] - 2, model.explosionSite[0] + width + 2):
-                for y in range(model.explosionSite[1] - 2, model.explosionSite[1] + height + 2):
+            for x in range(model.explosionSite[0] - 2, model.explosionSite[0] + width + 3):
+                for y in range(model.explosionSite[1] - 2, model.explosionSite[1] + height + 3):
                     try:
                         # Loop through nodes in range and grab models
                         if self.models[self.nodes[(x, y)].takenBy].unitID in damagedModels:
@@ -714,7 +738,9 @@ class Battle:
                         attacks.append(Attack(99, 5, 2, 1, onBoardModel, []))
                 attackList.append([playerCodex, attacks])
 
-                #Add unit to emergency disembark list
+            #If model had units onboard, add it to the exploding transports list
+            if self.units[model.unitID].onboard:
+                self.explodingTransports.append(model)
 
             print("Applying damage")
             #Apply damage
@@ -815,7 +841,7 @@ class Battle:
                 
             model.topLeftNode = None
             
-    def deploy_unit(self, values, selectedNode, nodeList, unit, playerCodex, deployment):
+    def deploy_unit(self, values, selectedNode, nodeList, unit, playerCodex, deployment, emergencyDisembark=False):
         """
         selectedNode - Node Object where the deployment is to take place
         nodeList - tuple of all deployable Node coordinates
@@ -916,10 +942,13 @@ class Battle:
                 print("ULTIMATE FAILURE")
                 #kill models sprites
                 self.delete_unit_from_field(unit)
+                #If we fail an emergency disembark, we must return that failure
+                if emergencyDisembark:
+                    return False
                 
             #If successful and disembarking
             elif not deployment:
-                if self.check_unit_coherency(unit):
+                if self.check_unit_coherency(unit) and not emergencyDisembark:
                     text = "{0} has disembarked.".format(self.currentUnit.name)
                     self.update_event_log(values, text)
                     self.update_control_point_status(values)
@@ -937,6 +966,9 @@ class Battle:
                     self.squaresGroup.empty()
                     self.state = 9
                     self.awaitingEvent = False
+                #If emergency disembarking, just let method know that the attempt as successful
+                elif emergencyDisembark:
+                    return True
                 else:
                     text = "Unable to deploy - units cannot be deployed in coherency"
                     self.update_main_message(values, text)
@@ -977,14 +1009,136 @@ class Battle:
         
         return text
 
-    def emergency_disembark(self):
+    def emergency_disembark(self, values):
+        #Pop transport from list
+        transport = self.explodingTransports.pop()
+        targetCodex = self.players[transport.ID[0] - 1].playerArmy.codex
+
         #Get list of available nodes
+        width = targetCodex.models[transport.data].size[0]
+        height = targetCodex.models[transport.data].size[1]
+        centreNode = self.nodes[(transport.explosionSite[0] + math.ceil(width/2),
+                      transport.explosionSite[1] + math.ceil(height/2))]
+        availableNodes = self.get_nodes_around_model(transport, 3)
+        if transport.ID[0] == 1:
+            enemyPlayerModels = self.players[1].models
+        else:
+            enemyPlayerModels = self.players[0].models
+        availableNodes = [
+            node.coordinates for node in availableNodes if
+            (not self.are_enemies_adjacent_to_node(node, enemyPlayerModels)
+             and node.takenBy is None) #Node must be away from enemies and not taken
+        ]
+
         #Get list of models to disembark
+        models = []
+        modelsKilled = []
+        unitsKilled = []
+        for unitID in self.units[transport.unitID].onboard:
+            for model in self.units[unitID].models:
+                if not model.dead and not model.fled:
+                    model.hpPercentage = model.currentHP/model.maxHP
+                    models.append(model)
+
         #Sort list of models in priority order
-        #Attempt to deploy models
-        #If deployment fails, kill the model at the end of the list and try again
-        pass
-            
+        models.sort(key=operator.attrgetter("totalPoints", "hpPercentage"), reverse=True)
+
+        #While list of models is not empty
+        while models:
+            #Attempt to deploy models by units
+            for unitID in self.units[transport.unitID].onboard[:]:
+                success = self.deploy_unit(values, centreNode, availableNodes, self.units[unitID],
+                                 targetCodex, False, emergencyDisembark=True)
+                # If deployment fails, kill the model at the end of the list and add it to the killed list
+                if not success:
+
+                    deadModel = models.pop(-1)
+                    deadModel.dead = True
+                    modelsKilled.append(deadModel)
+                    self.units[unitID].modelsLost += 1
+                    #Check if unit is still alive
+                    unitAlive = self.is_unit_still_alive(values, self.units[unitID],
+                                                         targetCodex=targetCodex)
+                    if not unitAlive:
+                        self.units[transport.unitID].onboard.remove(unitID)
+                        unitsKilled.append(unitID)
+                    break
+                else:
+                    # Flag unit as having disembarked
+                    self.units[unitID].disembarked = True
+
+            # If deployment is successful, break out of loop
+            if success:
+                self.update_control_point_status(values)
+                break
+            else:
+                #Delete units that did succeed
+                for unitID in self.units[transport.unitID].onboard:
+                    self.delete_unit_from_field(self.units[unitID])
+
+        #If model list is not empty, report on which models died
+        textReports = []
+        if models:
+            #If not all models were killed, report deaths accordingly
+            if modelsKilled:
+                allUnits = self.units[transport.unitID].onboard + unitsKilled
+                for unitID in allUnits:
+                    #If unit was killed
+                    if unitID in unitsKilled:
+                        text = (self.units[unitID].name + " is unable to escape the burning wreckage of "
+                                + self.units[transport.unitID].name + "! " + self.units[
+                                    unitID].name + " was destroyed!")
+                    #If none of the models in the unit were killed, report that the unit survived
+                    elif len(set(self.units[unitID].models) - set(modelsKilled)) == len(self.units[unitID].models):
+                        text = (self.units[unitID].name + " escapes the burning wreckage of " +
+                                self.units[transport.unitID].name + "!")
+                    #If some models died, report them
+                    else:
+                        modelList = [model for model in modelsKilled if model.unitID == unitID]
+                        deaths = {}
+                        for model in modelList:
+                            data = targetCodex.models[model.data].name
+                            if data not in deaths:
+                                deaths[data] = 1
+                            else:
+                                deaths[data] += 1
+                        text1 = self.units[unitID].name + " escapes the burning wreckage, but "
+                        text2 = ""
+                        i = 1
+                        for d in deaths:
+                            # first string
+                            if i == 1:
+                                text2 = text2 + str(deaths[d]) + " " + d + "(s)"
+                            # last string in dict
+                            elif i == len(deaths):
+                                text2 = text2 + " and " + str(deaths[d]) + " " + d + "(s) "
+                            else:
+                                text2 = text2 + ", " + str(deaths[d]) + " " + d + "(s)"
+                            i += 1
+
+                        #If only one model died
+                        if len(deaths) == 1 and list(deaths.values())[0] == 1:
+                           text3 = " dies in the blaze!"
+                        else:
+                            text3 = " die in the blaze!"
+
+                        text = text1 + text2 + text3
+
+                    textReports.append(text)
+            else:
+                text = " escapes the burning wreckage of " + self.units[transport.unitID].name + "!"
+                textReports = [self.units[unitID].name + text for unitID in self.units[transport.unitID].onboard]
+        #Else, report that all units were killed
+        else:
+            for unitID in unitsKilled:
+                text = (self.units[unitID].name + " is unable to escape the burning wreckage of "
+                        + self.units[transport.unitID].name + "! " + self.units[unitID].name + " was destroyed!")
+
+                textReports.append(text)
+
+        for text in textReports:
+            self.update_event_log(values, text)
+
     def get_closest_visible_unit(self):
         #Get closest visible unit
         if self.currentTurn == self.players[0]:
@@ -1368,6 +1522,19 @@ class Battle:
         #Else, return true
         else:
             return True
+
+    def get_nodes_around_model(self, model, r):
+        nodes = []
+        width = self.players[model.ID[0] - 1].playerArmy.codex.models[model.data].size[0]
+        height = self.players[model.ID[0] - 1].playerArmy.codex.models[model.data].size[1]
+        for x in range(model.explosionSite[0] - r, model.explosionSite[0] + width + r):
+            for y in range(model.explosionSite[1] - r, model.explosionSite[1] + height + r):
+                try:
+                    nodes.append(self.nodes[(x, y)])
+                except KeyError:
+                    pass
+
+        return nodes
     
     def get_nodes_in_range(self, model, target, attackRange):
         result = []

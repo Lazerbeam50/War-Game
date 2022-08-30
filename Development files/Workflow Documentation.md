@@ -15,11 +15,14 @@
 - Set up all spells for Paladins and Orcs.
 - Add model abilities.
 - Add weapon abilities.
-- Add transports.
+- ~~Add transports~~.
 	- ~~Need to fix bug where transports can move, disembark a unit, and then cancel their move.~~
 	- ~~Need to fix bug where unit is embarked onto a transport from the deployment phase, even if the deployment of that unit onto the transport was cancelled~~
 	- ~~Need to fix a bug where dead models can disembark from transports.
 - ~~Add two weapon attack speed bonus.~~
+- Amend get_disembark_nodes and check_explosions methods to cut down on duplicate code
+- Double check morale phase code
+- Remove references to checking if a model is dead and/fled as only dead needs to be checked
 
 ## Game Setup/Other
 
