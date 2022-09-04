@@ -703,6 +703,7 @@ class Battle:
             height = self.players[model.ID[0] - 1].playerArmy.codex.models[model.data].size[1]
             print("Range around model calculated")
             #Calculate range around model
+            """
             for x in range(model.explosionSite[0] - 2, model.explosionSite[0] + width + 3):
                 for y in range(model.explosionSite[1] - 2, model.explosionSite[1] + height + 3):
                     try:
@@ -717,6 +718,20 @@ class Battle:
                             )
                     except KeyError:
                         pass
+            """
+            explosionNodes = self.get_nodes_around_model(model, model.explosionSite, 2)
+            for node in explosionNodes:
+                try:
+                    if self.models[node.takenBy].unitID in damagedModels:
+                        damagedModels[self.models[node.takenBy].unitID].add(
+                            self.models[node.takenBy]
+                        )
+                    else:
+                        damagedModels[self.models[node.takenBy].unitID] = set(
+                            [self.models[node.takenBy]]
+                        )
+                except KeyError:
+                    pass
 
             #Set up attacks for each model
             print("Setting up attack list")
@@ -1013,7 +1028,7 @@ class Battle:
         #Pop transport from list
         transport = self.explodingTransports.pop()
         targetCodex = self.players[transport.ID[0] - 1].playerArmy.codex
-
+        """
         #Get list of available nodes
         width = targetCodex.models[transport.data].size[0]
         height = targetCodex.models[transport.data].size[1]
@@ -1029,6 +1044,12 @@ class Battle:
             (not self.are_enemies_adjacent_to_node(node, enemyPlayerModels)
              and node.takenBy is None) #Node must be away from enemies and not taken
         ]
+        """
+        width = targetCodex.models[transport.data].size[0]
+        height = targetCodex.models[transport.data].size[1]
+        availableNodes = self.get_disembark_nodes(transport, targetCodex, True)
+        centreNode = self.nodes[(transport.explosionSite[0] + math.ceil(width / 2),
+                                 transport.explosionSite[1] + math.ceil(height / 2))]
 
         #Get list of models to disembark
         models = []
@@ -1300,23 +1321,24 @@ class Battle:
                 break
     
     def get_disembark_nodes(self, transport, playerCodex, emergency):
-        
+
+        """
         #Get enemy model IDs
         if transport.ID in self.players[0].units:
             enemy = self.players[1]
         else:
             enemy = self.players[0]
-            
+
         #Get top left and bottom right vectors
         x_min = transport.models[0].topLeftNode[0]
         y_min = transport.models[0].topLeftNode[1]
         size = playerCodex.models[transport.models[0].data].size
         x_max = transport.models[0].topLeftNode[0] + size[0]
         y_max = transport.models[0].topLeftNode[1] + size[1]
-        
+
         #Set up list for available nodes
         availableNodes = []
-        
+
         #Loop through x and y nodes
         for x in range(x_min - 3, x_max + 3):
             for y in range(y_min - 3, y_max + 3):
@@ -1339,11 +1361,34 @@ class Battle:
                                         if self.nodes[(x2, y2)].takenBy in enemy.models:
                                             close = True
                                             break
-                        
+
                         #If all checks are passed, add node to available
                         if not close:
                             availableNodes.append((x, y))
-                            
+
+        return availableNodes
+
+        """
+        # Get list of available nodes
+        width = playerCodex.models[transport.data].size[0]
+        height = playerCodex.models[transport.data].size[1]
+        if emergency:
+            availableNodes = self.get_nodes_around_model(transport, transport.explosionSite, 3)
+        else:
+            availableNodes = self.get_nodes_around_model(transport, transport.topLeftNode, 3)
+        #If not an emergency, get drop nodes from within the transport
+        if not emergency:
+            availableNodes = [node for node in availableNodes if node not in transport.nodes]
+        if transport.ID[0] == 1:
+            enemyPlayerModels = self.players[1].models
+        else:
+            enemyPlayerModels = self.players[0].models
+        availableNodes = [
+            node.coordinates for node in availableNodes if
+            (not self.are_enemies_adjacent_to_node(node, enemyPlayerModels)
+             and node.takenBy is None)  # Node must be away from enemies and not taken
+        ]
+        
         return availableNodes
             
     def get_distance_between_nodes(self, node1, node2):
@@ -1523,12 +1568,12 @@ class Battle:
         else:
             return True
 
-    def get_nodes_around_model(self, model, r):
+    def get_nodes_around_model(self, model, topLeft, r):
         nodes = []
         width = self.players[model.ID[0] - 1].playerArmy.codex.models[model.data].size[0]
         height = self.players[model.ID[0] - 1].playerArmy.codex.models[model.data].size[1]
-        for x in range(model.explosionSite[0] - r, model.explosionSite[0] + width + r):
-            for y in range(model.explosionSite[1] - r, model.explosionSite[1] + height + r):
+        for x in range(topLeft[0] - r, topLeft[0] + width + r):
+            for y in range(topLeft[1] - r, topLeft[1] + height + r):
                 try:
                     nodes.append(self.nodes[(x, y)])
                 except KeyError:
@@ -4439,7 +4484,9 @@ class Battle:
             self.get_command_list(values, ["Cancel"], actionList=[81])
             
             #Create list of nodes for disembarking
-            self.disembarkNodes = self.get_disembark_nodes(self.currentTransport, self.currentTurn.playerArmy.codex, False)
+            self.disembarkNodes = self.get_disembark_nodes(self.currentTransport.models[0],
+                                                           self.currentTurn.playerArmy.codex,
+                                                           False)
             
             #Highlight list like a movement range
             image = resources.load_primary_sprite("highlight_lime_green.png")
