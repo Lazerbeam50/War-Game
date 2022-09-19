@@ -4022,15 +4022,20 @@ class Battle:
                     unitAlive = True
                     fled = {}
                     #Get highest will
+                    """
                     will = 0
                     for model in currentUnit.models:
                         if not model.dead:
                             will = max(model.will, will)
+                    """
+                    will = max([model.will for model in currentUnit.models if not model.dead])
                     #Roll for deserters
                     print("Roll:", self.randomNumbers[0], "Will:", will, "Unit lost:", currentUnit.modelsLost)
                     deserters = (self.randomNumbers.pop(0) + currentUnit.modelsLost) - will
                     #If deserters is above 0, split models in lists based on will
+                    currentModels = []
                     if deserters > 0:
+                        """
                         modelDict = {}
                         for model in currentUnit.models:
                             if not model.dead:
@@ -4041,63 +4046,107 @@ class Battle:
                         #Sort lists by total points
                         for l in modelDict:
                             modelDict[l].sort(key=operator.attrgetter("totalPoints"))
-                        #While there are still deserters
-                        removed = 0
-                        while removed < deserters:
-                            breakLoop = True
-                            #Grab lowest will list
-                            for i in range(0, 20):
-                                if i in modelDict:
-                                    l = modelDict[i]
-                                    currentModels = []
-                                    points = 9999
-                                    #Grab models with lowest point values and add them to new list
-                                    for model in l[:]:
-                                        if model.totalPoints <= points:
-                                            currentModels.append(model)
-                                            l.remove(model)
-                                            points = model.totalPoints
-                                            model.hpPercentage = model.currentHP/model.maxHP
-                                    #Sort new list by HP percentage
-                                    currentModels.sort(key=operator.attrgetter("hpPercentage"))
-                                    #Remove as necessary, track removals
-                                    while (removed < deserters) and (len(currentModels) > 0):
-                                        breakLoop = False
-                                        currentModels[0].dead = True
-                                        currentModels[0].fled = True
-                                        #Kill sprite and wipe nodes
-                                        currentModels[0].sprite.kill()
-                                        for n in currentModels[0].nodes[:]:
-                                            self.nodes[n].takenBy = None
-                                            currentModels[0].nodes.remove(n)
-                                            
-                                        currentModels[0].topLeftNode = None
-                                        #Store fled info
-                                        if currentModels[0].ID in self.currentTurn.models:
-                                            playerCodex = self.currentTurn.playerArmy.codex
-                                        else:
-                                            playerCodex = self.otherTurn.playerArmy.codex
-                                        data = playerCodex.models[currentModels[0].data].name
-                                        if data not in fled:
-                                            fled[data] = 1
-                                        else:
-                                            fled[data] += 1
-                                            
-                                        currentModels.pop(0)
-                            
-                                        #Pass details to is unit still alive
-                                        unitAlive = self.is_unit_still_alive(values, self.units[unit])
+                        """
+                        #Create a list of living models
+                        for model in currentUnit.models:
+                            if not model.dead:
+                                #Calculate hp percentage
+                                model.hpPercentage = model.currentHP / model.maxHP
+                                currentModels.append(model)
+
+                        #Sort list by will, total points and hp percentage
+                        currentModels.sort(key=operator.attrgetter("will", "totalPoints", "hpPercentage"),
+                                           reverse=True)
+                    #While there are still deserters
+                    removed = 0
+                    """
+                    while removed < deserters:
+                        breakLoop = True
+                        #Grab lowest will list
+                        for i in range(0, 20):
+                            if i in modelDict:
+                                l = modelDict[i]
+                                currentModels = []
+                                points = 9999
+                                #Grab models with lowest point values and add them to new list
+                                for model in l[:]:
+                                    if model.totalPoints <= points:
+                                        currentModels.append(model)
+                                        l.remove(model)
+                                        points = model.totalPoints
+                                        model.hpPercentage = model.currentHP/model.maxHP
+                                #Sort new list by HP percentage
+                                currentModels.sort(key=operator.attrgetter("hpPercentage"))
+                                #Remove as necessary, track removals
+                                while (removed < deserters) and (len(currentModels) > 0):
+                                    breakLoop = False
+                                    currentModels[0].dead = True
+                                    currentModels[0].fled = True
+                                    #Kill sprite and wipe nodes
+                                    currentModels[0].sprite.kill()
+                                    for n in currentModels[0].nodes[:]:
+                                        self.nodes[n].takenBy = None
+                                        currentModels[0].nodes.remove(n)
                                         
-                                        #Reduce deserters
-                                        removed += 1
+                                    currentModels[0].topLeftNode = None
+                                    #Store fled info
+                                    if currentModels[0].ID in self.currentTurn.models:
+                                        playerCodex = self.currentTurn.playerArmy.codex
+                                    else:
+                                        playerCodex = self.otherTurn.playerArmy.codex
+                                    data = playerCodex.models[currentModels[0].data].name
+                                    if data not in fled:
+                                        fled[data] = 1
+                                    else:
+                                        fled[data] += 1
                                         
-                            if breakLoop:
-                                break
-            
-                        #Report results
+                                    currentModels.pop(0)
                         
+                                    #Pass details to is unit still alive
+                                    unitAlive = self.is_unit_still_alive(values, self.units[unit])
+                                    
+                                    #Reduce deserters
+                                    removed += 1
+                                    
+                        if breakLoop:
+                            break
+                    """
+                    while (removed < deserters) and currentModels:
+
+                        currentModels[-1].dead = True
+                        currentModels[-1].fled = True
+                        # Kill sprite and wipe nodes
+                        currentModels[-1].sprite.kill()
+                        for n in currentModels[-1].nodes[:]:
+                            self.nodes[n].takenBy = None
+                            currentModels[-1].nodes.remove(n)
+
+                        currentModels[-1].topLeftNode = None
+                        # Store fled info
+                        if currentModels[-1].ID in self.currentTurn.models:
+                            playerCodex = self.currentTurn.playerArmy.codex
+                        else:
+                            playerCodex = self.otherTurn.playerArmy.codex
+                        data = playerCodex.models[currentModels[-1].data].name
+                        if data not in fled:
+                            fled[data] = 1
+                        else:
+                            fled[data] += 1
+
+                        del currentModels[-1]
+
+                        # Pass details to is unit still alive
+                        unitAlive = self.is_unit_still_alive(values, self.units[unit])
+
+                        # Reduce deserters
+                        removed += 1
+            
+                    #Report results
+
+                    if deserters > 0:
+
                         for modelType in fled:
-                            text = (str(fled[modelType]) + " " + modelType + "(s) flee from " + currentUnit.name + 
+                            text = (str(fled[modelType]) + " " + modelType + "(s) flee from " + currentUnit.name +
                                     "!")
                             self.update_event_log(values, text)
                         if not unitAlive:
