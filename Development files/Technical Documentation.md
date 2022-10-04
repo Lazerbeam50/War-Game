@@ -14,6 +14,7 @@
 
 ## Part II: Wargaming
 
+1. Buffs and Debuffs
 1. Deployment
 2. Charge Phase
 3. Magic Phase
@@ -202,6 +203,17 @@ check_unit_coherency (Method):
 - Grab all nodes within 2 squares.
 - Loop through each node and see if a friendly model has taken it. If so, mark the friendly model as in range.
 - If the model has at least one friendly model in range of it, mark it as in range. Otherwise, break out of the loop and return false.
+
+## Buffs and debuffs
+
+- **Stage 2** - Create an Effect object with the following attributes:
+
+- Effect applied (String)
+- Duration (Tuple containing round, turn and phase as integers)
+- Stackable (bool)
+
+Whenever a new effect is applied, an expired effect is removed, or an effect is updated in some way, the unit re-runs its "apply_effect" method. This method resets 
+each models stats back to its default using its codex data, and applies each buff in turn.
 
 ## Unit/Model deaths
 

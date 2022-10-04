@@ -15,6 +15,7 @@
 
 ## Part II: Wargaming
 
+1. Buffs and Debuffs
 1. Deployment
 2. Charge Phase
 3. Magic Phase
@@ -123,6 +124,10 @@
 **Stage 2+** All available for each faction.
 
 # Part II: Wargaming
+
+## Buffs and debuffs
+
+**Stage 2** - Any buff/debuff applied to a unit must record when it runs out (as in the exact round, turn and phase) and if it is stackable.
 
 ## Deployment
 

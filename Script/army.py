@@ -2152,6 +2152,7 @@ class Unit:
         self.chargeRange = 0
         self.destroyed = False
         self.disembarked = False #Set to true when a unit leaves a transport during the movement phase
+        self.effects = []
         self.endPhase = False
         self.fellBack = False
         self.flags = []

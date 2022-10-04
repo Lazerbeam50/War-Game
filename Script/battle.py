@@ -7,6 +7,7 @@ import pygame
 import pygame.locals as pyLocals
 
 import copy
+import itertools
 import math
 import operator
 import random
@@ -394,6 +395,28 @@ class Battle:
                 
             elif self.state in [54, 55, 56]:
                 self.handle_endgame(values)
+
+    def add_unit_to_melee_list(self, unit):
+        # Assign to list based on priority and charge target
+        highPriority = bool([effect for effect in self.units[unit].effects if effect.name in ["Holy Wrath"]])
+        lowPriority = False #False for now
+
+        if self.units[unit].chargedUnit is None:
+            if highPriority:
+                i = 1
+            elif lowPriority:
+                i = 5
+            else:
+                i = 3
+        else:
+            if highPriority:
+                i = 0
+            elif lowPriority:
+                i = 4
+            else:
+                i = 2
+
+        self.unitsForMelee[i].append(unit)
 
     def apply_damage(self, values, attacks, targetCodex, spell=None, melee=False, explosion=False):
         
@@ -1159,6 +1182,13 @@ class Battle:
 
         for text in textReports:
             self.update_event_log(values, text)
+
+    def expire_effects(self, unit):
+        #Iterate over effect list
+        for effect in unit.effects.copy():
+            #Remove expired effects
+            if effect.ends[0] <= self.turn[0] and effect.ends[1] <= self.turn[1] and effect.ends[2] <= self.phase:
+                unit.effects.remove(effect)
 
     def get_closest_visible_unit(self):
         #Get closest visible unit
@@ -2381,10 +2411,19 @@ class Battle:
         elif button.use == 20:
             if button.storage.use1 == 0:
                 #User must select a target
-                self.selectedModels = []
+                self.selectedModels = [model for model in self.currentUnit.models]
+                """
                 for model in self.currentUnit.models:
                     self.selectedModels.append(model)
+                """
+
                 self.get_closest_visible_unit()
+                self.currentSpell = button.storage
+                self.state = 18
+                self.awaitingEvent = False
+
+            elif button.storage.use1 == 1:
+                #Set current spell and move to next state
                 self.currentSpell = button.storage
                 self.state = 18
                 self.awaitingEvent = False
@@ -3544,6 +3583,10 @@ class Battle:
             
             #Loop through all units
             for unit in self.units:
+
+                #Remove expired effects
+                self.expire_effects(self.units[unit])
+
                 #Flag non-mages as having completed the phase
                 if self.units[unit].currentMana is None:
                     self.units[unit].endPhase = True
@@ -3736,12 +3779,27 @@ class Battle:
                 targetCodex = otherTurn.playerArmy.codex
                 #Apply damage
                 self.apply_damage(values, attacks, targetCodex, self.currentSpell)
-                #Add spell to used list
-                self.currentTurn.spellsUsed.append(self.currentSpell.ID)
-                
-                self.state = 17
-                self.currentSpell = None
-                self.currentUnit.spellTargets = []
+
+
+            #If spell has an effect, apply it
+            elif self.currentSpell.use1 == 1:
+                #Boost melee phase priority
+                if self.currentSpell.name in ["Holy Wrath"]:
+                    self.currentUnit.targetUnit.effects.append(
+                        Effect(self.currentSpell.name, (self.turn[0] + 1, self.turn[1] + 1, self.phase), False)
+                    )
+
+            # Add spell to used list
+            self.currentTurn.spellsUsed.append(self.currentSpell.ID)
+
+            # Update log
+            text = (self.currentUnit.name + " casts " + self.currentSpell.name + " on "
+                    + self.currentUnit.targetUnit.name + ".")
+            self.update_event_log(values, text)
+
+            self.state = 17
+            self.currentSpell = None
+            self.currentUnit.spellTargets = []
                 
         #Pressing the end phase button
         elif self.state == 23:
@@ -3765,12 +3823,14 @@ class Battle:
                 self.units[unit].endPhase = False
                 #If unit is in melee, add it to melee lists
                 if self.units[unit].inMelee:
-                    
+                    """
                     #Assign to list based on priority and charge target
                     if self.units[unit].chargedUnit is None:
                         self.unitsForMelee[3].append(unit)
                     else:
                         self.unitsForMelee[2].append(unit)
+                    """
+                    self.add_unit_to_melee_list(unit)
                 
                 #Loop through models and set melee used flag to false
                 for model in self.units[unit].models:
@@ -5343,56 +5403,112 @@ class Battle:
                     
         #Selecting a target for a spell
         elif self.state == 18:
-            #Does the clicked node contain a unit?
-            if self.currentNode.takenBy is not None:
-                #If spell is a damaging spell....
-                if self.currentSpell.use1 == 0:
-                    #Make sure target is an enemy
+            #Does the clicked node contain a unit and is spell is a damaging spell?
+            if self.currentNode.takenBy is not None and self.currentSpell.use1 == 0:
+                #Make sure target is an enemy
+                if self.players[0] == self.currentTurn:
+                    enemy = self.players[1]
+                else:
+                    enemy = self.players[0]
+                #If target is CHARACTER and has <10 HP, ignore unless they are closest visible enemy
+                ignore = False
+                if ('CHARACTER' in self.models[self.currentNode.takenBy].keywords and
+                        self.models[self.currentNode.takenBy].maxHP < 10):
+                    if not self.models[self.currentNode.takenBy].unitID in self.currentUnit.closestVisible:
+                        ignore = True
+                if self.currentNode.takenBy in enemy.models and not ignore:
+                    for model in self.currentUnit.models:
+                        if not model.dead:
+                            #Get list of in range nodes
+                            model.attackTargets = self.get_nodes_in_range(model,
+                                                                          self.units[
+                                                                              self.models[
+                                                                                  self.currentNode.takenBy
+                                                                              ].unitID
+                                                                          ],
+                                                              self.currentSpell.targetRange)
+                            #Check LOS on in range nodes
+                            newNodes = []
+                            if self.players[0] == self.currentTurn:
+                                enemy = self.players[1]
+                            else:
+                                enemy = self.players[0]
+                            for target in model.attackTargets:
+                                for node in model.nodes:
+                                    if node not in newNodes:
+                                        success = self.is_node_in_line_of_sight(node, target, enemy)
+                                        if success:
+                                            newNodes.append(target)
+                                            break
+                            model.attackTargets = newNodes
+
+                            #Add nodes to unit's spell targets list
+                            for node in model.attackTargets:
+                                if node not in self.currentUnit.spellTargets:
+                                    self.currentUnit.spellTargets.append(node)
+
+                            model.attackTargets = []
+
+                    #If target has in range, visible nodes, then set state to 19
+                    if len(self.currentUnit.spellTargets) > 0:
+                        self.currentUnit.targetUnit = self.units[self.models[self.currentNode.takenBy].unitID]
+                        self.state = 19
+                        self.awaitingEvent = False
+                    else:
+                        print("No targets...")
+
+            #Does clicked node contain a model and is the spell non-standard?
+            elif self.currentNode.takenBy is not None and self.currentSpell.use1 == 1:
+                appropriateTarget = False
+                selfTarget = False
+                active = False
+                targetGood = False
+
+                #Check that selected target is appropriate
+                if self.currentNode.takenBy in self.currentTurn.models and self.currentSpell.target == 0:
+                    appropriateTarget = True
+
+                # If spell target is the user, they are always in range
+                if appropriateTarget:
+                    if self.models[self.currentNode.takenBy].unitID == self.currentUnit.ID:
+                        selfTarget = True
+
+                if appropriateTarget:
+                    #If spell is a buff, check that the buff is not already active on the target
+                    effects = self.units[self.models[self.currentNode.takenBy].unitID].effects
+                    active = bool([buff for buff in effects if buff.name == self.currentSpell.name])
+
+                #Otherwise, check that target is in range and caster has LOS
+                if appropriateTarget and not selfTarget and not active:
                     if self.players[0] == self.currentTurn:
                         enemy = self.players[1]
                     else:
                         enemy = self.players[0]
-                    #If target is CHARACTER and has <10 HP, ignore unless they are closest visible enemy
-                    ignore = False
-                    if 'CHARACTER' in self.models[self.currentNode.takenBy].keywords and self.models[self.currentNode.takenBy].maxHP < 10:
-                        if not self.models[self.currentNode.takenBy].unitID in self.currentUnit.closestVisible:
-                            ignore = True
-                    if self.currentNode.takenBy in enemy.models and not ignore:
-                        for model in self.currentUnit.models:
-                            if not model.dead:
-                                #Get list of in range nodes
-                                model.attackTargets = self.get_nodes_in_range(model, 
-                                                                              self.units[self.models[self.currentNode.takenBy].unitID], 
-                                                                  self.currentSpell.targetRange)
-                                #Check LOS on in range nodes
-                                newNodes = []
-                                if self.players[0] == self.currentTurn:
-                                    enemy = self.players[1]
-                                else:
-                                    enemy = self.players[0]
-                                for target in model.attackTargets:
-                                    for node in model.nodes:
-                                        if node not in newNodes:
-                                            success = self.is_node_in_line_of_sight(node, target, enemy)
-                                            if success:
-                                                newNodes.append(target)
-                                                break
-                                model.attackTargets = newNodes
-                                
-                                #Add nodes to unit's spell targets list
-                                for node in model.attackTargets:
-                                    if node not in self.currentUnit.spellTargets:
-                                        self.currentUnit.spellTargets.append(node)
-                                        
-                                model.attackTargets = []
-                            
-                        #If target has in range, visible nodes, then set state to 19
-                        if len(self.currentUnit.spellTargets) > 0:
-                            self.currentUnit.targetUnit = self.units[self.models[self.currentNode.takenBy].unitID]
-                            self.state = 19
-                            self.awaitingEvent = False
-                        else:
-                            print("No targets...")
+                    livingModels = [model for model in self.currentUnit.models if not model.dead]
+                    for model in livingModels:
+                        # Get list of in range nodes
+                        model.attackTargets = self.get_nodes_in_range(model,
+                                                                      self.units[
+                                                                          self.models[self.currentNode.takenBy].unitID
+                                                                      ],
+                                                                      self.currentSpell.targetRange)
+
+
+                        for node, target in itertools.product(model.nodes, model.attackTargets):
+                            if self.is_node_in_line_of_sight(node, target, enemy):
+                                targetGood = True
+                                break
+
+                        if targetGood:
+                            break
+
+                #If all checks passed, set current target and advance state
+                if appropriateTarget and not active and (targetGood or selfTarget):
+                    self.currentUnit.targetUnit = self.units[self.models[self.currentNode.takenBy].unitID]
+                    self.state = 19
+                    self.awaitingEvent = False
+                else:
+                    print("No targets...")
                 
         #Other player selecting a mage to dispel with                    
         elif self.state == 21:
@@ -6229,7 +6345,10 @@ class Battle:
                 
                 #In the melee phase, add newly engaged units to the melee list
                 if self.phase == 6 and not self.units[unit].endPhase:
+                    """
                     self.unitsForMelee[3].append(unit)
+                    """
+                    self.add_unit_to_melee_list(unit)
                 
             elif not inMelee and self.units[unit].inMelee:
                 text = self.units[unit].name + " is no longer in melee."
@@ -6242,6 +6361,12 @@ class Battle:
                             p.remove(unit)
                 
             self.units[unit].inMelee = inMelee
+
+class Effect:
+    def __init__(self, name, ends, stackable):
+        self.name = name
+        self.ends = ends
+        self.stackable = stackable
         
 class LogButton:
     def __init__(self, use, image, rect):
