@@ -1184,11 +1184,20 @@ class Battle:
             self.update_event_log(values, text)
 
     def expire_effects(self, unit):
+        effectsRemoved = False
         #Iterate over effect list
         for effect in unit.effects.copy():
             #Remove expired effects
             if effect.ends[0] <= self.turn[0] and effect.ends[1] <= self.turn[1] and effect.ends[2] <= self.phase:
                 unit.effects.remove(effect)
+                effectsRemoved = True
+
+        if effectsRemoved:
+            if unit.ID in self.currentTurn.units:
+                playerCodex = self.currentTurn.playerArmy.codex
+            else:
+                playerCodex = self.otherTurn.playerArmy.codex
+            unit.apply_effects(playerCodex)
 
     def get_closest_visible_unit(self):
         #Get closest visible unit
@@ -3783,11 +3792,16 @@ class Battle:
 
             #If spell has an effect, apply it
             elif self.currentSpell.use1 == 1:
-                #Boost melee phase priority
-                if self.currentSpell.name in ["Holy Wrath"]:
+                #Add buff
+                if self.currentSpell.name in ["Holy Wrath", "Power boost", "Defensive Blessing"]:
                     self.currentUnit.targetUnit.effects.append(
                         Effect(self.currentSpell.name, (self.turn[0] + 1, self.turn[1] + 1, self.phase), False)
                     )
+                    self.currentUnit.targetUnit.apply_effects(self.currentTurn.playerArmy.codex)
+                elif self.currentSpell.name == "God's Light":
+                    for model in self.currentUnit.targetUnit.models:
+                        model.currentHP = min(model.currentHP + 3, model.maxHP)
+
 
             # Add spell to used list
             self.currentTurn.spellsUsed.append(self.currentSpell.ID)
@@ -5468,15 +5482,24 @@ class Battle:
                 if self.currentNode.takenBy in self.currentTurn.models and self.currentSpell.target == 0:
                     appropriateTarget = True
 
+                elif (self.currentNode.takenBy in self.currentTurn.models and self.currentSpell.target == 2
+                        and 'CHARACTER' in self.models[self.currentNode.takenBy].keywords):
+                    appropriateTarget = True
+
                 # If spell target is the user, they are always in range
                 if appropriateTarget:
                     if self.models[self.currentNode.takenBy].unitID == self.currentUnit.ID:
                         selfTarget = True
 
                 if appropriateTarget:
-                    #If spell is a buff, check that the buff is not already active on the target
-                    effects = self.units[self.models[self.currentNode.takenBy].unitID].effects
-                    active = bool([buff for buff in effects if buff.name == self.currentSpell.name])
+                    #If target is at max HP, healing should be considered 'active'
+                    if (self.currentSpell.name == "God's Light" and
+                            self.models[self.currentNode.takenBy].currentHP == self.models[self.currentNode.takenBy].maxHP):
+                        active = True
+                    else:
+                        #If spell is a buff, check that the buff is not already active on the target
+                        effects = self.units[self.models[self.currentNode.takenBy].unitID].effects
+                        active = bool([buff for buff in effects if buff.name == self.currentSpell.name])
 
                 #Otherwise, check that target is in range and caster has LOS
                 if appropriateTarget and not selfTarget and not active:

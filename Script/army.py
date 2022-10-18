@@ -8,6 +8,7 @@ import pygame.locals as pyLocals
 
 import copy
 import eztext # @UnresolvedImport
+import itertools
 import sqlite3
 
 import codex # @UnresolvedImport
@@ -2095,7 +2096,7 @@ class Model:
         if newModel:
             self.set_up(factionCodex)
         
-    def set_up(self, factionCodex):
+    def set_up(self, factionCodex, applyingEffect=False):
         
         data = factionCodex.models[self.data]
 
@@ -2107,14 +2108,15 @@ class Model:
         self.will = data.will
         self.minMove = data.minMove
         self.maxMove = data.maxMove
-        self.currentHP = self.maxHP = data.hp
         self.mSkill = data.mSkill
         self.rSkill = data.rSkill
         self.strength = data.strength
         self.fort = data.fort
         self.wargear = copy.copy(data.wargear)
-        
-        self.reset_points(factionCodex)
+
+        if not applyingEffect:
+            self.currentHP = self.maxHP = data.hp
+            self.reset_points(factionCodex)
         
     def reset_points(self, factionCodex):
         
@@ -2168,6 +2170,17 @@ class Unit:
         
         if newUnit:
             self.set_up(factionCodex, mageProfiles)
+
+    def apply_effects(self, factionCodex):
+        for model in self.models:
+            model.set_up(factionCodex, applyingEffect=True)
+            for effect in self.effects:
+                if effect.name == 'Power boost':
+                    model.strength += 1
+                    model.attackSpeed += 1
+                    model.will += 1
+                elif effect.name == 'Defensive Blessing':
+                    model.invul = max(model.invul, 3)
         
     def set_up(self, factionCodex, mageProfiles):
             
