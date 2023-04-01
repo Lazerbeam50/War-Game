@@ -9,7 +9,7 @@ import os
 
 #Load primary background function
 def load_primary_background(name):
-    fullname = os.path.join('Resources\Backgrounds\Primary', name)
+    fullname = os.path.join('Resources/Backgrounds/Primary', name)
     try:
         image = pygame.image.load(fullname).convert_alpha()
     except pygame.error:
@@ -21,7 +21,7 @@ def load_primary_background(name):
 
 #Load secondary background function
 def load_secondary_background(name):
-    fullname = os.path.join('Resources\Backgrounds\Secondary', name)
+    fullname = os.path.join('Resources/Backgrounds/Secondary', name)
     try:
         image = pygame.image.load(fullname).convert_alpha()
     except pygame.error:
@@ -33,7 +33,7 @@ def load_secondary_background(name):
 
 #Load secondary music function
 def load_secondary_music(name):
-    fullname = os.path.join('Resources\Music\Secondary', name)
+    fullname = os.path.join('Resources/Music/Secondary', name)
     try:
         music = pygame.mixer.music.load(fullname)
     except pygame.error:
@@ -43,7 +43,7 @@ def load_secondary_music(name):
 
 #Load secondary sound function
 def load_secondary_sound(name):
-    fullname = os.path.join('Resources\Sounds\Secondary', name)
+    fullname = os.path.join('Resources/Sounds/Secondary', name)
     try:
         sound = pygame.mixer.Sound(fullname)
     except pygame.error:
@@ -55,7 +55,7 @@ def load_secondary_sound(name):
 
 #Load primary sprite function
 def load_primary_sprite(name):
-    fullname = os.path.join('Resources\Sprites\Primary', name)
+    fullname = os.path.join('Resources/Sprites/Primary', name)
     try:
         image = pygame.image.load(fullname).convert_alpha()
     except pygame.error:
@@ -66,7 +66,7 @@ def load_primary_sprite(name):
 
 #Load secondary sprite function
 def load_secondary_sprite(name):
-    fullname = os.path.join('Resources\Sprites\Secondary', name)
+    fullname = os.path.join('Resources/Sprites/Secondary', name)
     try:
         image = pygame.image.load(fullname).convert_alpha()
     except pygame.error:
@@ -77,7 +77,7 @@ def load_secondary_sprite(name):
 
 def load_text_file(name):
     a = os.path.dirname(__file__)
-    filename = os.path.join(a, 'Resources\\Text\\', name)
+    filename = os.path.join(a, 'Resources//Text//', name)
     try:
         text = open(filename)
     except PermissionError:

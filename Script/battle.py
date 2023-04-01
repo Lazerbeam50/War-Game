@@ -398,7 +398,10 @@ class Battle:
 
     def add_unit_to_melee_list(self, unit):
         # Assign to list based on priority and charge target
-        highPriority = bool([effect for effect in self.units[unit].effects if effect.name in ["Holy Wrath"]])
+        highPriority = bool([effect for effect in self.units[unit].effects if effect.name in ["Holy Wrath",
+                                                                                              "Surge of the Hurricane"]
+                             ]
+                            )
         lowPriority = False #False for now
 
         if self.units[unit].chargedUnit is None:
@@ -3793,7 +3796,8 @@ class Battle:
             #If spell has an effect, apply it
             elif self.currentSpell.use1 == 1:
                 #Add buff
-                if self.currentSpell.name in ["Holy Wrath", "Power boost", "Defensive Blessing"]:
+                if self.currentSpell.name in ["Holy Wrath", "Power boost", "Defensive Blessing",
+                                              "Surge of the Hurricane"]:
                     self.currentUnit.targetUnit.effects.append(
                         Effect(self.currentSpell.name, (self.turn[0] + 1, self.turn[1] + 1, self.phase), False)
                     )
