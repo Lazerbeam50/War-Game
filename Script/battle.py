@@ -3797,7 +3797,7 @@ class Battle:
             elif self.currentSpell.use1 == 1:
                 #Add buff
                 if self.currentSpell.name in ["Holy Wrath", "Power boost", "Defensive Blessing",
-                                              "Surge of the Hurricane"]:
+                                              "Surge of the Hurricane", "Frenzy"]:
                     self.currentUnit.targetUnit.effects.append(
                         Effect(self.currentSpell.name, (self.turn[0] + 1, self.turn[1] + 1, self.phase), False)
                     )

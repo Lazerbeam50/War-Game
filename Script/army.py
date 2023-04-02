@@ -2181,6 +2181,8 @@ class Unit:
                     model.will += 1
                 elif effect.name == 'Defensive Blessing':
                     model.invul = max(model.invul, 3)
+                elif effect.name == "Frenzy":
+                    model.attackSpeed += 1
         
     def set_up(self, factionCodex, mageProfiles):
             
